@@ -59,10 +59,7 @@ export interface AchievementMessage {
 /**
  * Generate an achievement notification for a level-up event.
  */
-export function getAchievementMessage(
-  systemName: string,
-  newLevel: number,
-): AchievementMessage {
+export function getAchievementMessage(systemName: string, newLevel: number): AchievementMessage {
   return {
     title: 'Новый уровень!',
     body: `${systemName}: уровень ${newLevel} достигнут. Отличная работа!`,
@@ -92,6 +89,27 @@ export function getStreakMilestoneMessage(streakDays: number): AchievementMessag
     body: `Вы великолепны! ${streakDays} дней без перерыва — это дисциплина и преданность.`,
   };
 }
+
+// ---------------------------------------------------------------------------
+// User-created reminder messages
+// ---------------------------------------------------------------------------
+
+const USER_REMINDER_TITLES: readonly string[] = [
+  'Время для практики',
+  'Ваша медитация ждёт',
+  'Момент спокойствия',
+  'Практика дня',
+  'Сфокусируйтесь',
+];
+
+const USER_REMINDER_BODIES_GENERIC: readonly string[] = [
+  'Уделите 10 минут внутреннему спокойствию.',
+  'Регулярность важнее длительности. Зайдите на минутку.',
+  'Просто закройте глаза и вдохните.',
+  'Ваш мозг заслуживает перезагрузки.',
+  'Маленький шаг сегодня — большая трансформация завтра.',
+  'Вернитесь к себе — хотя бы на несколько минут.',
+];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -133,4 +151,21 @@ export function getStreakWarningMessage(streakDays: number): {
     title: pickRandom(STREAK_WARNING_TITLES),
     body,
   };
+}
+
+/**
+ * Generate a user-created reminder notification payload.
+ *
+ * If the reminder has a custom label, it's used as the title.
+ * Otherwise, a random generic title is picked.
+ */
+export function getReminderMessage(reminderLabel: string): {
+  title: string;
+  body: string;
+} {
+  const title = reminderLabel.trim() ? reminderLabel : pickRandom(USER_REMINDER_TITLES);
+
+  const body = pickRandom(USER_REMINDER_BODIES_GENERIC);
+
+  return { title, body };
 }

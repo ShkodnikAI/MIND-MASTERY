@@ -141,3 +141,18 @@ export interface SettingRecord {
   value_json: string;
   updated_at: number;
 }
+
+/** Row type for the `reminders` table */
+export interface ReminderRecord {
+  id: string;
+  label: string;
+  hour: number;
+  minute: number;
+  days_json: string;
+  enabled: number; // 0 or 1
+  sound: number; // 0 or 1
+  linked_type: string;
+  linked_id: string | null;
+  created_at: string;
+  updated_at: string;
+}

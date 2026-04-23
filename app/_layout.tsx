@@ -14,9 +14,14 @@ import { useFonts } from 'expo-font';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet } from 'react-native';
 import { useContentStore } from '@/store/contentStore';
+import { useReminderStore } from '@/store/reminderStore';
 import { loadAllTexts } from '@/services/content/textLoader';
 import { initializeDatabase, registerAppStateListener } from '@/db/lifecycle';
-import { setupNotificationChannels, registerNotificationHandlers } from '@/services/notifications';
+import {
+  setupNotificationChannels,
+  registerNotificationHandlers,
+  rescheduleAllNotifications,
+} from '@/services/notifications';
 import { colors } from '@/ui/theme';
 import { logger } from '@/utils/logger';
 
@@ -35,6 +40,7 @@ const styles = StyleSheet.create({
 export default function RootLayout() {
   const loadPractices = useContentStore((s) => s.loadPractices);
   const loadTexts = useContentStore((s) => s.loadTexts);
+  const loadReminders = useReminderStore((s) => s.loadReminders);
 
   // ── Font loading ───────────────────────────────────────────────
   const [fontsLoaded, fontError] = useFonts({
@@ -70,6 +76,11 @@ export default function RootLayout() {
         // 5. Set up notification channels (Android)
         await setupNotificationChannels();
         logger.info('[root]', 'Notification channels configured');
+
+        // 6. Hydrate reminders from SQLite and reschedule all notifications
+        await loadReminders();
+        await rescheduleAllNotifications();
+        logger.info('[root]', 'Reminders loaded and notifications rescheduled');
       } catch (error) {
         logger.error('[root]', 'Initialization failed', error);
       }
@@ -80,7 +91,7 @@ export default function RootLayout() {
     return () => {
       unsubscribe?.();
     };
-  }, [loadPractices]);
+  }, [loadPractices, loadReminders]);
 
   // ── Notification handler registration (runs once) ──────────────
   useEffect(() => {

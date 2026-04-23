@@ -19,21 +19,8 @@
  * INV-A3: All styles via StyleSheet.create.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  BackHandler,
-} from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, BackHandler } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -44,6 +31,7 @@ import { useContentStore } from '@/store/contentStore';
 import { useAudioStateStore } from '@/store/audioStateStore';
 import { useAudioEngine } from '@/hooks/useAudioEngine';
 import { useProgressStore } from '@/store/progressStore';
+import { notifyAchievement } from '@/services/notifications';
 
 import { colors, typography, spacing, radii } from '@/ui/theme';
 import { getSystemTheme } from '@/ui/theme/systemThemes';
@@ -401,8 +389,7 @@ export default function PlayerScreen() {
   const loaded = useContentStore((s) => s.loaded);
 
   // ── Audio engine controls (INV-2: single owner) ───────────────
-  const { startSession, pause, resume, stop, isActive, isPlaying } =
-    useAudioEngine();
+  const { startSession, pause, resume, stop, isActive, isPlaying } = useAudioEngine();
 
   // ── Real-time audio state (INV-3: memory-only reads) ──────────
   const engineState = useAudioStateStore((s) => s.engineState);
@@ -432,15 +419,13 @@ export default function PlayerScreen() {
 
   // ── Session ID (stable across renders) ────────────────────────
   const sessionId = useMemo(
-    () =>
-      `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+    () => `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
     [],
   );
 
   // ── Derived state ─────────────────────────────────────────────
   const progress = totalDurationMs > 0 ? elapsedMs / totalDurationMs : 0;
-  const isPreparing =
-    engineState === 'preparing' || engineState === 'idle';
+  const isPreparing = engineState === 'preparing' || engineState === 'idle';
   const isFinished = engineState === 'finished';
   const isActiveSession = isActive || isPreparing;
 
@@ -460,18 +445,13 @@ export default function PlayerScreen() {
     const segments = getSegmentsForLength(practice, sessionLength);
     const totalMs = computeTotalDurationMs(segments);
 
-    startSession(
-      practice.id,
-      practice.systemId,
-      sessionId,
-      segments,
-      sessionLength,
-      totalMs,
-    ).catch(() => {
-      Alert.alert('Ошибка', 'Не удалось запустить сессию.', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
-    });
+    startSession(practice.id, practice.systemId, sessionId, segments, sessionLength, totalMs).catch(
+      () => {
+        Alert.alert('Ошибка', 'Не удалось запустить сессию.', [
+          { text: 'OK', onPress: () => router.back() },
+        ]);
+      },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [practice, loaded]);
 
@@ -493,10 +473,7 @@ export default function PlayerScreen() {
       return false;
     };
 
-    const subscription = BackHandler.addEventListener(
-      'hardwareBackPress',
-      handleBack,
-    );
+    const subscription = BackHandler.addEventListener('hardwareBackPress', handleBack);
     return () => subscription.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isActiveSession, showCompletion]);
@@ -504,21 +481,17 @@ export default function PlayerScreen() {
   // ── Callbacks ─────────────────────────────────────────────────
 
   const showStopConfirm = useCallback(() => {
-    Alert.alert(
-      'Завершить сессию?',
-      'Ваш прогресс не будет сохранён.',
-      [
-        { text: 'Продолжить', style: 'cancel' },
-        {
-          text: 'Завершить',
-          style: 'destructive',
-          onPress: () => {
-            stop();
-            router.back();
-          },
+    Alert.alert('Завершить сессию?', 'Ваш прогресс не будет сохранён.', [
+      { text: 'Продолжить', style: 'cancel' },
+      {
+        text: 'Завершить',
+        style: 'destructive',
+        onPress: () => {
+          stop();
+          router.back();
         },
-      ],
-    );
+      },
+    ]);
   }, [stop, router]);
 
   const handlePlayPause = useCallback(() => {
@@ -548,6 +521,18 @@ export default function PlayerScreen() {
     if (!practice) return;
     const durationMin = msToMinutes(elapsedMs);
     useProgressStore.getState().incrementCompleted(practice.id, durationMin);
+
+    // Check if a level-up occurred and fire achievement notification
+    const progress = useProgressStore.getState().getPracticeProgress(practice.id);
+    if (progress) {
+      const systemInfo = useContentStore.getState().systems[practice.systemId];
+      if (systemInfo) {
+        notifyAchievement(systemInfo.name, progress.currentLevel, practice.systemId).catch(() => {
+          // Best-effort — don't block the save flow
+        });
+      }
+    }
+
     useAudioStateStore.getState().reset();
     router.back();
   }, [practice, elapsedMs, router]);
@@ -569,9 +554,7 @@ export default function PlayerScreen() {
         <SafeAreaView style={styles.safeArea} edges={['top']}>
           <View style={styles.loadingContainer}>
             <Ionicons name="fitness" size={48} color={colors.text.tertiary} />
-            <Text style={styles.loadingText}>
-              {loaded ? 'Практика не найдена' : 'Загрузка...'}
-            </Text>
+            <Text style={styles.loadingText}>{loaded ? 'Практика не найдена' : 'Загрузка...'}</Text>
             {loaded && (
               <TouchableOpacity onPress={() => router.back()}>
                 <Text style={styles.loadingSubtext}>Вернуться назад</Text>
@@ -615,38 +598,18 @@ export default function PlayerScreen() {
 
           {/* ── Phase badge ──────────────────────────────────── */}
           <View style={styles.phaseContainer}>
-            <View
-              style={[
-                styles.phaseBadge,
-                { backgroundColor: `${systemColor}22` },
-              ]}
-            >
-              <Ionicons
-                name={PHASE_ICONS[phase] as any}
-                size={18}
-                color={systemColor}
-              />
-              <Text style={[styles.phaseText, { color: systemColor }]}>
-                {PHASE_LABELS[phase]}
-              </Text>
+            <View style={[styles.phaseBadge, { backgroundColor: `${systemColor}22` }]}>
+              <Ionicons name={PHASE_ICONS[phase] as any} size={18} color={systemColor} />
+              <Text style={[styles.phaseText, { color: systemColor }]}>{PHASE_LABELS[phase]}</Text>
             </View>
           </View>
 
           {/* ── Progress ring ────────────────────────────────── */}
           <View style={styles.ringSection}>
-            <ProgressRing
-              progress={progress}
-              size={220}
-              strokeWidth={6}
-              color={systemColor}
-            >
+            <ProgressRing progress={progress} size={220} strokeWidth={6} color={systemColor}>
               <View style={{ alignItems: 'center' }}>
-                <Text style={styles.timerText}>
-                  {formatDuration(elapsedMs)}
-                </Text>
-                <Text style={styles.timerSubtext}>
-                  из {formatDuration(totalDurationMs)}
-                </Text>
+                <Text style={styles.timerText}>{formatDuration(elapsedMs)}</Text>
+                <Text style={styles.timerSubtext}>из {formatDuration(totalDurationMs)}</Text>
               </View>
             </ProgressRing>
           </View>
@@ -722,11 +685,7 @@ export default function PlayerScreen() {
           {/* ── Player controls ──────────────────────────────── */}
           {isPreparing ? (
             <View style={styles.loadingContainer}>
-              <Ionicons
-                name="hourglass-outline"
-                size={32}
-                color={systemColor}
-              />
+              <Ionicons name="hourglass-outline" size={32} color={systemColor} />
               <Text style={styles.loadingText}>Подготовка сессии...</Text>
             </View>
           ) : (
@@ -736,9 +695,7 @@ export default function PlayerScreen() {
                 style={[
                   styles.playPauseButton,
                   {
-                    backgroundColor: isPlaying
-                      ? colors.background.tertiary
-                      : systemColor,
+                    backgroundColor: isPlaying ? colors.background.tertiary : systemColor,
                   },
                 ]}
                 onPress={handlePlayPause}
@@ -800,11 +757,7 @@ export default function PlayerScreen() {
                     <Ionicons
                       name={star <= rating ? 'star' : 'star-outline'}
                       size={28}
-                      color={
-                        star <= rating
-                          ? colors.accent.warning
-                          : colors.text.tertiary
-                      }
+                      color={star <= rating ? colors.accent.warning : colors.text.tertiary}
                     />
                   </TouchableOpacity>
                 ))}
@@ -825,9 +778,7 @@ export default function PlayerScreen() {
                           borderColor: systemColor,
                         },
                       ]}
-                      onPress={() =>
-                        setSelectedMood(isSelected ? null : mood.key)
-                      }
+                      onPress={() => setSelectedMood(isSelected ? null : mood.key)}
                       accessibilityLabel={mood.label}
                       accessibilityRole="button"
                     >
@@ -837,12 +788,7 @@ export default function PlayerScreen() {
                         color={isSelected ? systemColor : colors.text.tertiary}
                         style={{ marginRight: spacing.xs }}
                       />
-                      <Text
-                        style={[
-                          styles.moodButtonText,
-                          isSelected && { color: systemColor },
-                        ]}
-                      >
+                      <Text style={[styles.moodButtonText, isSelected && { color: systemColor }]}>
                         {mood.label}
                       </Text>
                     </TouchableOpacity>
@@ -866,9 +812,7 @@ export default function PlayerScreen() {
                 accessibilityLabel="Закрыть без сохранения"
                 accessibilityRole="button"
               >
-                <Text style={styles.skipButtonText}>
-                  Закрыть без сохранения
-                </Text>
+                <Text style={styles.skipButtonText}>Закрыть без сохранения</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -9,6 +9,7 @@ import { logger } from '@/utils/logger';
 /** Ordered list of migration SQL strings, keyed by version number. */
 const MIGRATIONS: Record<number, string> = {
   1: require('./v1.sql'),
+  2: require('./v2.sql'),
 };
 
 /** Latest schema version known to this build of the app. */

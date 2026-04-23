@@ -85,3 +85,17 @@ export type {
   NotificationSettings,
 } from './settings';
 export { DAY_OF_WEEK_LABELS, DAY_OF_WEEK_FULL_LABELS } from './settings';
+
+// Reminders
+export type {
+  Reminder,
+  ReminderLinkedType,
+  CreateReminderInput,
+  UpdateReminderInput,
+} from './reminder';
+export {
+  MAX_REMINDERS,
+  DEFAULT_REMINDER,
+  REMINDER_HOUR_OPTIONS,
+  REMINDER_MINUTE_OPTIONS,
+} from './reminder';

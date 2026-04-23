@@ -48,9 +48,7 @@ export type NotificationTapHandler = (data: Record<string, string>) => void;
  * @param onTap - Optional callback for notification taps (e.g. deep linking).
  * @returns Cleanup function that removes all listeners.
  */
-export function registerNotificationHandlers(
-  onTap?: NotificationTapHandler,
-): () => void {
+export function registerNotificationHandlers(onTap?: NotificationTapHandler): () => void {
   // Listener 1: Notification received while app is in foreground
   const receivedSub = Notifications.addNotificationReceivedListener((notification) => {
     logger.info('[notifications]', 'Foreground notification received', {
@@ -59,27 +57,25 @@ export function registerNotificationHandlers(
   });
 
   // Listener 2: User taps on a notification
-  const responseSub = Notifications.addNotificationResponseReceivedListener(
-    (response) => {
-      const data = (response.notification.request.content.data ?? {}) as Record<string, string>;
-      const identifier = response.notification.request.identifier;
-      const title = response.notification.request.content.title;
+  const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+    const data = (response.notification.request.content.data ?? {}) as Record<string, string>;
+    const identifier = response.notification.request.identifier;
+    const title = response.notification.request.content.title;
 
-      logger.info('[notifications]', 'Notification tapped', {
-        identifier,
-        title,
-        data,
-      });
+    logger.info('[notifications]', 'Notification tapped', {
+      identifier,
+      title,
+      data,
+    });
 
-      // Execute custom tap handler if provided
-      if (onTap) {
-        onTap(data);
-      }
+    // Execute custom tap handler if provided
+    if (onTap) {
+      onTap(data);
+    }
 
-      // Default deep-link behaviour based on notification ID prefix
-      handleDeepLink(identifier, data);
-    },
-  );
+    // Default deep-link behaviour based on notification ID prefix and data
+    handleDeepLink(identifier, data);
+  });
 
   // Return cleanup function
   return () => {
@@ -93,31 +89,68 @@ export function registerNotificationHandlers(
 // Deep-link routing
 // ---------------------------------------------------------------------------
 
+/** Valid system IDs for deep linking. */
+const VALID_SYSTEM_IDS = ['transurfing', 'silva', 'dispenza', 'feldenkrais', 'breath'] as const;
+
 /**
  * Route notification taps to the appropriate screen.
  *
  * Deep-link routes:
- *  - Daily reminder → navigate to home tab
- *  - Streak warning → navigate to home tab
- *  - Achievement → navigate to the relevant system tab
+ *  - User reminder (uremind_) → navigate to linked practice/system/home
+ *  - Legacy daily reminder (legacy_remind_) → navigate to home tab
+ *  - Streak warning (streak_) → navigate to home tab
+ *  - Achievement (achieve_) → navigate to the relevant system tab
+ *  - Default → navigate to home
  */
 function handleDeepLink(identifier: string, data: Record<string, string>): void {
   try {
-    if (identifier.startsWith('remind_') || identifier.startsWith('streak_')) {
-      // Navigate to home
+    // ── User-created reminder ──────────────────────────────────
+    if (identifier.startsWith('uremind_')) {
+      const linkedType = data.linkedType; // 'none' | 'system' | 'practice'
+      const linkedId = data.linkedId;
+
+      if (linkedType === 'practice' && linkedId) {
+        // Navigate to the practice detail screen
+        router.replace(`/practice/${linkedId}`);
+      } else if (
+        linkedType === 'system' &&
+        linkedId &&
+        VALID_SYSTEM_IDS.includes(linkedId as (typeof VALID_SYSTEM_IDS)[number])
+      ) {
+        // Navigate to the system tab
+        router.replace(`/(tabs)/${linkedId}`);
+      } else {
+        // No link or generic → navigate to home
+        router.replace('/(tabs)');
+      }
+      return;
+    }
+
+    // ── Legacy daily reminder ──────────────────────────────────
+    if (identifier.startsWith('legacy_remind_')) {
       router.replace('/(tabs)');
-    } else if (identifier.startsWith('achieve_')) {
-      // Navigate to the specific system tab if systemId is in data
+      return;
+    }
+
+    // ── Streak warning ─────────────────────────────────────────
+    if (identifier.startsWith('streak_')) {
+      router.replace('/(tabs)');
+      return;
+    }
+
+    // ── Achievement ────────────────────────────────────────────
+    if (identifier.startsWith('achieve_')) {
       const systemId = data.systemId;
-      if (systemId && ['transurfing', 'silva', 'dispenza', 'feldenkrais', 'breath'].includes(systemId)) {
+      if (systemId && VALID_SYSTEM_IDS.includes(systemId as (typeof VALID_SYSTEM_IDS)[number])) {
         router.replace(`/(tabs)/${systemId}`);
       } else {
         router.replace('/(tabs)');
       }
-    } else {
-      // Default: navigate to home
-      router.replace('/(tabs)');
+      return;
     }
+
+    // ── Default ────────────────────────────────────────────────
+    router.replace('/(tabs)');
   } catch (err) {
     logger.warn('[notifications]', 'Deep-link navigation failed', err);
   }

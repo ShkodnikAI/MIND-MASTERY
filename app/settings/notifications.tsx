@@ -28,6 +28,7 @@ import { Stack, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useReminderStore } from '@/store/reminderStore';
 import { SettingsToggle } from '@/ui/components/SettingsToggle';
 import {
   requestNotificationPermission,
@@ -228,6 +229,37 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeights.sm,
     color: colors.text.secondary,
   },
+
+  // ── My Reminders card ──────────────────────────────────────
+  myRemindersCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.tertiary,
+    borderRadius: radii.md,
+    padding: spacing.md,
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  myRemindersIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: radii.sm,
+    backgroundColor: colors.background.elevated,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  myRemindersLabel: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.sizes.md,
+    lineHeight: typography.lineHeights.md,
+    color: colors.text.primary,
+  },
+  myRemindersDesc: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.xs,
+    lineHeight: typography.lineHeights.xs,
+    color: colors.text.tertiary,
+  },
 });
 
 // ─── Component ───────────────────────────────────────────────────
@@ -236,11 +268,16 @@ export default function NotificationSettingsScreen() {
   const router = useRouter();
   const notifications = useSettingsStore((s) => s.notifications);
   const updateNotifications = useSettingsStore((s) => s.updateNotifications);
+  const reminders = useReminderStore((s) => s.reminders);
 
   // ── Derived state ──────────────────────────────────────────────
   const hasPermission = notifications.permissionGranted;
-  const reminderTimeStr = formatTime(notifications.dailyReminderHour, notifications.dailyReminderMinute);
+  const reminderTimeStr = formatTime(
+    notifications.dailyReminderHour,
+    notifications.dailyReminderMinute,
+  );
   const streakTimeStr = formatTime(notifications.streakReminderHour, 0);
+  const reminderCount = reminders?.filter((r) => r.enabled).length ?? 0;
 
   // ── Permission request ─────────────────────────────────────────
 
@@ -317,9 +354,7 @@ export default function NotificationSettingsScreen() {
   const handleMinuteChange = useCallback(
     (direction: 'up' | 'down') => {
       const current = notifications.dailyReminderMinute;
-      const next = direction === 'up'
-        ? current === 0 ? 1 : 0
-        : current === 30 ? 0 : 1;
+      const next = direction === 'up' ? (current === 0 ? 1 : 0) : current === 30 ? 0 : 1;
       const newMin: 0 | 30 = next === 0 ? 0 : 30;
 
       updateNotifications({ dailyReminderMinute: newMin });
@@ -334,9 +369,7 @@ export default function NotificationSettingsScreen() {
     (day: DayOfWeek) => {
       const current = notifications.dailyReminderDays;
       const isSelected = current.includes(day);
-      const newDays = isSelected
-        ? current.filter((d) => d !== day)
-        : [...current, day].sort();
+      const newDays = isSelected ? current.filter((d) => d !== day) : [...current, day].sort();
 
       if (newDays.length === 0) {
         Alert.alert('Нельзя отключить все дни', 'Выберите хотя бы один день для напоминания.');
@@ -374,9 +407,7 @@ export default function NotificationSettingsScreen() {
   const handleStreakHourChange = useCallback(
     (direction: 'up' | 'down') => {
       const current = notifications.streakReminderHour;
-      const newHour = direction === 'up'
-        ? Math.min(22, current + 1)
-        : Math.max(7, current - 1);
+      const newHour = direction === 'up' ? Math.min(22, current + 1) : Math.max(7, current - 1);
 
       updateNotifications({ streakReminderHour: newHour });
       scheduleStreakWarning().catch(() => {});
@@ -433,18 +464,33 @@ export default function NotificationSettingsScreen() {
             </View>
           ) : null}
 
+          {/* ── My Reminders Link ────────────────────────────── */}
+          <TouchableOpacity
+            style={styles.myRemindersCard}
+            onPress={() => router.push('/reminders')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.myRemindersIcon}>
+              <Ionicons name="alarm-outline" size={22} color={colors.accent.primary} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.myRemindersLabel}>Мои напоминания</Text>
+              <Text style={styles.myRemindersDesc}>{reminderCount} активных</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+          </TouchableOpacity>
+
           {/* ── Daily Reminder Section ────────────────────────── */}
           <Text style={styles.sectionTitle}>Ежедневное напоминание</Text>
           <Text style={styles.sectionDescription}>
-            Получайте напоминание о практике в выбранное время. Выберите дни и время, которые вам подходят.
+            Получайте напоминание о практике в выбранное время. Выберите дни и время, которые вам
+            подходят.
           </Text>
 
           <SettingsToggle
             label="Напоминание о практике"
             description={
-              notifications.dailyReminderEnabled
-                ? `Каждый день в ${reminderTimeStr}`
-                : 'Отключено'
+              notifications.dailyReminderEnabled ? `Каждый день в ${reminderTimeStr}` : 'Отключено'
             }
             value={notifications.dailyReminderEnabled}
             onValueChange={handleDailyToggle}
@@ -502,19 +548,13 @@ export default function NotificationSettingsScreen() {
                   return (
                     <TouchableOpacity
                       key={day}
-                      style={[
-                        styles.dayButton,
-                        isSelected && styles.dayButtonSelected,
-                      ]}
+                      style={[styles.dayButton, isSelected && styles.dayButtonSelected]}
                       onPress={() => handleDayToggle(day)}
                       accessibilityLabel={DAY_OF_WEEK_LABELS[day]}
                       accessibilityRole="button"
                     >
                       <Text
-                        style={[
-                          styles.dayButtonText,
-                          isSelected && styles.dayButtonTextSelected,
-                        ]}
+                        style={[styles.dayButtonText, isSelected && styles.dayButtonTextSelected]}
                       >
                         {DAY_OF_WEEK_LABELS[day]}
                       </Text>
@@ -528,15 +568,14 @@ export default function NotificationSettingsScreen() {
           {/* ── Streak Warning Section ─────────────────────────── */}
           <Text style={styles.sectionTitle}>Предупреждение о серии</Text>
           <Text style={styles.sectionDescription}>
-            Если вы practice каждый день, приложение напомнит вечером, если вы ещё не успели позаниматься.
+            Если вы practice каждый день, приложение напомнит вечером, если вы ещё не успели
+            позаниматься.
           </Text>
 
           <SettingsToggle
             label="Защита серии"
             description={
-              notifications.streakReminderEnabled
-                ? `Проверка в ${streakTimeStr}`
-                : 'Отключено'
+              notifications.streakReminderEnabled ? `Проверка в ${streakTimeStr}` : 'Отключено'
             }
             value={notifications.streakReminderEnabled}
             onValueChange={handleStreakToggle}
@@ -580,7 +619,8 @@ export default function NotificationSettingsScreen() {
           {/* ── Info card ───────────────────────────────────────── */}
           <View style={styles.infoCard}>
             <Text style={styles.infoText}>
-              Уведомления обрабатываются локально и не требуют подключения к интернету. Вы можете в любой момент отключить их в системных настройках устройства.
+              Уведомления обрабатываются локально и не требуют подключения к интернету. Вы можете в
+              любой момент отключить их в системных настройках устройства.
             </Text>
           </View>
         </ScrollView>

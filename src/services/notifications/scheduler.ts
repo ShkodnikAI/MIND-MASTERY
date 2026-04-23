@@ -1,10 +1,11 @@
 /**
  * @file Notification scheduler — schedules and cancels expo-notifications.
  *
- * Manages three categories of notifications:
- *  1. Daily practice reminders (user-chosen time, selected days).
- *  2. Streak-break warnings (evening check if no practice today).
- *  3. Achievement / level-up notifications (fired on demand).
+ * Manages four categories of notifications:
+ *  1. User-created practice reminders (multiple, with per-reminder config).
+ *  2. Daily practice reminders (legacy single-reminder from settings).
+ *  3. Streak-break warnings (evening check if no practice today).
+ *  4. Achievement / level-up notifications (fired on demand).
  *
  * This module is the ONLY place that calls expo-notifications scheduling
  * APIs. All scheduling flows through here.
@@ -13,23 +14,29 @@
  * It is called imperatively from event handlers and effects.
  */
 
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { logger } from '@/utils/logger';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useProgressStore } from '@/store/progressStore';
+import type { Reminder } from '@/types/reminder';
 import {
   getDailyReminderMessage,
   getStreakWarningMessage,
   getAchievementMessage,
   getStreakMilestoneMessage,
+  getReminderMessage,
 } from './messages';
 
 // ---------------------------------------------------------------------------
 // Notification ID constants
 // ---------------------------------------------------------------------------
 
-/** Prefix for daily-reminder notification IDs. Format: `remind_{dow}_{hour}_{min}` */
-const REMIND_PREFIX = 'remind_';
+/** Prefix for legacy daily-reminder notification IDs. Format: `remind_{dow}_{hour}_{min}` */
+const LEGACY_REMIND_PREFIX = 'legacy_remind_';
+
+/** Prefix for user-created reminder notification IDs. Format: `uremind_{reminderId}_{dow}` */
+const USER_REMIND_PREFIX = 'uremind_';
 
 /** Notification ID for the streak-warning check. */
 const STREAK_WARN_ID = 'streak_warn';
@@ -50,8 +57,7 @@ const ACHIEVE_PREFIX = 'achieve_';
  */
 export async function requestNotificationPermission(): Promise<boolean> {
   try {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
 
     if (existingStatus === 'granted') {
       useSettingsStore.getState().setNotificationPermission(true);
@@ -83,33 +89,42 @@ export async function requestNotificationPermission(): Promise<boolean> {
  * Must be called at app startup (from _layout.tsx).
  *
  * Channels:
- *  - `default` — daily reminders
+ *  - `default` — daily reminders (legacy)
+ *  - `reminder` — user-created practice reminders
  *  - `streak` — streak warnings
  *  - `achievement` — level-up / milestones
  */
 export async function setupNotificationChannels(): Promise<void> {
   try {
-    const { default: setChannel } = await import(
-      'expo-notifications/build/setNotificationChannelAsync'
-    );
+    if (Platform.OS !== 'android') {
+      logger.debug('[notifications]', 'Notification channels skipped (not Android)');
+      return;
+    }
 
-    await setChannel('default', {
+    await Notifications.setNotificationChannelAsync('default', {
       name: 'Напоминания о практике',
-      importance: 4, // IMPORTANCE_DEFAULT
+      importance: Notifications.AndroidImportance.DEFAULT,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#6C5CE7',
     });
 
-    await setChannel('streak', {
+    await Notifications.setNotificationChannelAsync('reminder', {
+      name: 'Мои напоминания',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#6C5CE7',
+    });
+
+    await Notifications.setNotificationChannelAsync('streak', {
       name: 'Предупреждения о серии',
-      importance: 5, // IMPORTANCE_HIGH
+      importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 100, 200, 300],
       lightColor: '#FDCB6E',
     });
 
-    await setChannel('achievement', {
+    await Notifications.setNotificationChannelAsync('achievement', {
       name: 'Достижения',
-      importance: 5, // IMPORTANCE_HIGH
+      importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 100, 250, 100, 250],
       lightColor: '#00B894',
     });
@@ -121,7 +136,160 @@ export async function setupNotificationChannels(): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Daily reminders
+// User-created reminders (multiple)
+// ---------------------------------------------------------------------------
+
+/**
+ * Schedule a single user-created reminder.
+ * Creates one scheduled notification per selected day of the week.
+ *
+ * Each notification ID follows the format: `uremind_{reminderId}_{dow}`
+ * so we can cancel all notifications for a specific reminder.
+ */
+export async function scheduleUserReminder(reminder: Reminder): Promise<number> {
+  if (!reminder.enabled || reminder.days.length === 0) {
+    return 0;
+  }
+
+  // Check permission
+  const hasPermission = useSettingsStore.getState().notifications.permissionGranted;
+  if (!hasPermission) {
+    return 0;
+  }
+
+  const { title, body } = getReminderMessage(reminder.label);
+  let scheduledCount = 0;
+
+  // Build notification data for deep linking
+  const notificationData: Record<string, string> = {
+    reminderId: reminder.id,
+    linkedType: reminder.linkedType,
+  };
+  if (reminder.linkedId) {
+    notificationData.linkedId = reminder.linkedId;
+  }
+
+  for (const day of reminder.days) {
+    const notificationId = `${USER_REMIND_PREFIX}${reminder.id}_${day}`;
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          sound: reminder.sound,
+          priority: Notifications.AndroidNotificationPriority.DEFAULT,
+          autoDismiss: true,
+          data: notificationData,
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
+          weekday: day,
+          hour: reminder.hour,
+          minute: reminder.minute,
+          channelId: 'reminder',
+        },
+        identifier: notificationId,
+      });
+
+      scheduledCount++;
+    } catch (err) {
+      logger.warn(
+        '[notifications]',
+        `Failed to schedule reminder ${reminder.id} for day ${day}`,
+        err,
+      );
+    }
+  }
+
+  if (scheduledCount > 0) {
+    logger.info(
+      '[notifications]',
+      `Scheduled reminder ${reminder.id}: ${scheduledCount} weekly notifications`,
+    );
+  }
+
+  return scheduledCount;
+}
+
+/**
+ * Cancel all scheduled notifications for a specific user-created reminder.
+ */
+export async function cancelUserReminder(reminderId: string): Promise<void> {
+  try {
+    const prefix = `${USER_REMIND_PREFIX}${reminderId}_`;
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const ids = scheduled.map((n) => n.identifier).filter((id) => id.startsWith(prefix));
+
+    for (const id of ids) {
+      await Notifications.cancelScheduledNotificationAsync(id);
+    }
+
+    if (ids.length > 0) {
+      logger.info(
+        '[notifications]',
+        `Cancelled ${ids.length} notifications for reminder ${reminderId}`,
+      );
+    }
+  } catch (err) {
+    logger.warn('[notifications]', `Failed to cancel reminder ${reminderId}`, err);
+  }
+}
+
+/**
+ * Schedule all user-created reminders from the store.
+ * Cancels all existing user-reminder notifications first.
+ */
+export async function scheduleAllUserReminders(): Promise<void> {
+  try {
+    // Import dynamically to avoid circular deps
+    const { useReminderStore } = await import('@/store/reminderStore');
+    const reminders = useReminderStore.getState().reminders;
+
+    if (!reminders || reminders.length === 0) {
+      return;
+    }
+
+    // Cancel all existing user reminders first
+    await cancelAllUserReminders();
+
+    let totalScheduled = 0;
+    for (const reminder of reminders) {
+      if (reminder.enabled) {
+        totalScheduled += await scheduleUserReminder(reminder);
+      }
+    }
+
+    logger.info('[notifications]', `Scheduled ${totalScheduled} total user-reminder notifications`);
+  } catch (err) {
+    logger.warn('[notifications]', 'Failed to schedule all user reminders', err);
+  }
+}
+
+/**
+ * Cancel ALL user-created reminder notifications.
+ */
+export async function cancelAllUserReminders(): Promise<void> {
+  try {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const ids = scheduled
+      .map((n) => n.identifier)
+      .filter((id) => id.startsWith(USER_REMIND_PREFIX));
+
+    for (const id of ids) {
+      await Notifications.cancelScheduledNotificationAsync(id);
+    }
+
+    if (ids.length > 0) {
+      logger.info('[notifications]', `Cancelled ${ids.length} user-reminder notifications`);
+    }
+  } catch (err) {
+    logger.warn('[notifications]', 'Failed to cancel all user reminders', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Legacy daily reminders (single reminder from settings)
 // ---------------------------------------------------------------------------
 
 /**
@@ -147,7 +315,7 @@ export async function scheduleDailyReminders(): Promise<void> {
   let scheduledCount = 0;
 
   for (const day of dailyReminderDays) {
-    const notificationId = `${REMIND_PREFIX}${day}_${dailyReminderHour}_${dailyReminderMinute}`;
+    const notificationId = `${LEGACY_REMIND_PREFIX}${day}_${dailyReminderHour}_${dailyReminderMinute}`;
 
     try {
       await Notifications.scheduleNotificationAsync({
@@ -174,25 +342,25 @@ export async function scheduleDailyReminders(): Promise<void> {
     }
   }
 
-  logger.info('[notifications]', `Scheduled ${scheduledCount} daily reminders`);
+  logger.info('[notifications]', `Scheduled ${scheduledCount} legacy daily reminders`);
 }
 
 /**
- * Cancel all previously scheduled daily reminders.
+ * Cancel all previously scheduled legacy daily reminders.
  */
 export async function cancelAllDailyReminders(): Promise<void> {
   try {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
     const dailyIds = scheduled
       .map((n) => n.identifier)
-      .filter((id) => id.startsWith(REMIND_PREFIX));
+      .filter((id) => id.startsWith(LEGACY_REMIND_PREFIX));
 
     for (const id of dailyIds) {
       await Notifications.cancelScheduledNotificationAsync(id);
     }
 
     if (dailyIds.length > 0) {
-      logger.info('[notifications]', `Cancelled ${dailyIds.length} daily reminders`);
+      logger.info('[notifications]', `Cancelled ${dailyIds.length} legacy daily reminders`);
     }
   } catch (err) {
     logger.warn('[notifications]', 'Failed to cancel daily reminders', err);
@@ -257,7 +425,10 @@ export async function scheduleStreakWarning(): Promise<void> {
       identifier: notificationId,
     });
 
-    logger.info('[notifications]', `Streak warning scheduled for ${settings.streakReminderHour}:00`);
+    logger.info(
+      '[notifications]',
+      `Streak warning scheduled for ${settings.streakReminderHour}:00`,
+    );
   } catch (err) {
     logger.warn('[notifications]', 'Failed to schedule streak warning', err);
   }
@@ -291,6 +462,7 @@ export async function cancelStreakWarnings(): Promise<void> {
 export async function notifyAchievement(
   systemName: string,
   newLevel: number,
+  systemId?: string,
 ): Promise<void> {
   const settings = useSettingsStore.getState().notifications;
 
@@ -301,6 +473,11 @@ export async function notifyAchievement(
   const { title, body } = getAchievementMessage(systemName, newLevel);
   const notificationId = `${ACHIEVE_PREFIX}${systemName}_level${newLevel}_${Date.now()}`;
 
+  const data: Record<string, string> = {};
+  if (systemId) {
+    data.systemId = systemId;
+  }
+
   try {
     await Notifications.scheduleNotificationAsync({
       content: {
@@ -309,6 +486,7 @@ export async function notifyAchievement(
         sound: true,
         priority: Notifications.AndroidNotificationPriority.HIGH,
         autoDismiss: true,
+        data,
       },
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DATE,
@@ -361,12 +539,17 @@ export async function notifyStreakMilestone(streakDays: number): Promise<void> {
 // ---------------------------------------------------------------------------
 
 /**
- * Cancel all app notifications and reschedule based on current settings.
- * Call this when any notification setting changes.
+ * Cancel ALL app notifications and reschedule based on current state.
+ * Call this when notification settings change or app starts after boot.
  */
 export async function rescheduleAllNotifications(): Promise<void> {
+  // Cancel everything
+  await cancelAllUserReminders();
   await cancelAllDailyReminders();
   await cancelStreakWarnings();
+
+  // Reschedule everything
+  await scheduleAllUserReminders();
   await scheduleDailyReminders();
   await scheduleStreakWarning();
 
@@ -398,9 +581,12 @@ function computeTriggerDate(hour: number): Date {
  * Check if the user has completed any session today.
  */
 function checkIfPracticedToday(progressState: {
-  practices: Record<string, {
-    lastCompletedAt: string | null;
-  }>;
+  practices: Record<
+    string,
+    {
+      lastCompletedAt: string | null;
+    }
+  >;
 }): boolean {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
@@ -417,10 +603,13 @@ function checkIfPracticedToday(progressState: {
  * Compute the longest active streak across all systems.
  */
 function computeOverallStreak(progressState: {
-  practices: Record<string, {
-    lastCompletedAt: string | null;
-    completedCount: number;
-  }>;
+  practices: Record<
+    string,
+    {
+      lastCompletedAt: string | null;
+      completedCount: number;
+    }
+  >;
 }): number {
   let maxStreak = 0;
 
