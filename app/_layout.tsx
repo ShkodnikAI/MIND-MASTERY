@@ -14,7 +14,7 @@ import { useFonts } from 'expo-font';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet } from 'react-native';
 import { useContentStore } from '@/store/contentStore';
-import { registerAllSystems, getTotalPracticeCount } from '@/content/registry';
+import { loadAllTexts } from '@/services/content/textLoader';
 import { initializeDatabase, registerAppStateListener } from '@/db/lifecycle';
 import { colors } from '@/ui/theme';
 import { logger } from '@/utils/logger';
@@ -33,6 +33,7 @@ const styles = StyleSheet.create({
 
 export default function RootLayout() {
   const loadPractices = useContentStore((s) => s.loadPractices);
+  const loadTexts = useContentStore((s) => s.loadTexts);
 
   // ── Font loading ───────────────────────────────────────────────
   const [fontsLoaded, fontError] = useFonts({
@@ -56,13 +57,14 @@ export default function RootLayout() {
         unsubscribe = registerAppStateListener();
         logger.info('[root]', 'App-state listener registered');
 
-        // 3. Register all 5 practice systems in content registry
-        registerAllSystems();
-        logger.info('[root]', `Registered ${getTotalPracticeCount()} practices across 5 systems`);
-
-        // 4. Hydrate content store (INV-3)
+        // 3. Hydrate content store — registers systems + practices (INV-3)
         await loadPractices();
-        logger.info('[root]', 'Content store hydrated');
+        logger.info('[root]', 'Practices loaded');
+
+        // 4. Load text content from bundled JSON files (INV-3)
+        const texts = loadAllTexts('ru');
+        loadTexts(texts);
+        logger.info('[root]', `Loaded ${texts.length} practice texts`);
       } catch (error) {
         logger.error('[root]', 'Initialization failed', error);
       }

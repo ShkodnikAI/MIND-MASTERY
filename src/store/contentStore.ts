@@ -4,19 +4,25 @@
  * Level 1 (memory): Zustand store — all UI reads go here (no SQL in render path).
  * Level 2 (disk):   SQLite — hydrated at app startup via loadPractices + loadTexts.
  *
- * Practices are registered from TypeScript definitions (Stage 2b/2c).
- * Texts are loaded from JSON files in content/texts/ (Stage 2b/2c).
+ * Practices are registered from the content registry (src/content/registry.ts).
+ * Texts are loaded from JSON files in content/texts/ via textLoader.
  */
 
 import { create } from 'zustand';
 import type { Practice } from '@/types';
 import type { PracticeTextSchema } from '@content/schema';
 import type { LoadedText } from '@/services/content/textLoader';
+import {
+  registerAllSystems,
+  getAllSystems,
+  getTotalPracticeCount,
+} from '@/content/registry';
+import { logger } from '@/utils/logger';
 
 // ─── State Interface ────────────────────────────────────────────
 
 interface ContentState {
-  // Practices registry (loaded from TypeScript definitions in Stage 2b/2c)
+  // Practices registry (loaded from content registry at startup)
   practices: Record<string, Practice>;
   systems: Record<string, { id: string; name: string; icon: string; color: string }>;
 
@@ -41,7 +47,7 @@ interface ContentState {
   getAllTexts: () => Record<string, PracticeTextSchema>;
 
   // Bulk operations
-  loadPractices: () => Promise<void>; // Will be implemented in Stage 2b/2c
+  loadPractices: () => Promise<void>;
 
   // Reset
   reset: () => void;
@@ -109,10 +115,42 @@ export const useContentStore = create<ContentState>((set, get) => ({
   // ── Bulk operations ───────────────────────────────────────────
 
   loadPractices: async () => {
-    // Will be populated in Stage 2b/2c when practice definitions are created
-    // For now, mark as loaded
+    // Ensure all 5 systems are registered in the content registry
+    registerAllSystems();
+
+    // Collect all practices and systems from the registry
+    const allSystems = getAllSystems();
+    const practicesMap: Record<string, Practice> = {};
+    const systemsMap: Record<string, { id: string; name: string; icon: string; color: string }> = {};
+
+    for (const system of allSystems) {
+      // Register the system metadata
+      systemsMap[system.id] = {
+        id: system.id,
+        name: system.name,
+        icon: system.icon,
+        color: system.color,
+      };
+
+      // Register all practices from this system
+      for (const practice of system.practices) {
+        practicesMap[practice.id] = practice;
+      }
+    }
+
+    const totalPractices = getTotalPracticeCount();
+    logger.info(
+      '[contentStore]',
+      `Loaded ${totalPractices} practices across ${allSystems.length} systems`,
+    );
+
     const textsLoaded = get().textsLoaded;
-    set({ practicesLoaded: true });
+    set({
+      practices: practicesMap,
+      systems: systemsMap,
+      practicesLoaded: true,
+      loaded: textsLoaded,
+    });
     if (textsLoaded) {
       set({ loaded: true });
     }

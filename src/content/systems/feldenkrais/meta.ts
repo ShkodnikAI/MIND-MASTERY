@@ -1,19 +1,6 @@
-import type { SystemId, DifficultyLevel } from '@/types';
+import type { SystemMeta } from '@/content/types';
 
-export interface SystemMeta {
-  readonly id: SystemId;
-  readonly name: string;
-  readonly tagline: string;
-  readonly description: string;
-  readonly icon: string;
-  readonly color: string;
-  readonly accentColor: string;
-  readonly maxLevel: number;
-  readonly totalPractices: number;
-  readonly difficulty: DifficultyLevel;
-  readonly estimatedTotalMin: number;
-  readonly contraindications: string;
-}
+export type { SystemMeta } from '@/content/types';
 
 export const feldenkraisMeta: SystemMeta = {
   id: 'feldenkrais',
