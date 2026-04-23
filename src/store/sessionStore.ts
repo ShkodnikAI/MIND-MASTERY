@@ -23,8 +23,7 @@ export const useSessionStore = create<SessionState>()((set) => ({
   session: null,
   error: null,
 
-  startSession: (session: ActiveSession) =>
-    set({ session, error: null }),
+  startSession: (session: ActiveSession) => set({ session, error: null }),
 
   updateStatus: (status: SessionStatus) =>
     set((state) => {

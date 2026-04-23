@@ -27,16 +27,9 @@ export async function runMigrations(): Promise<void> {
     return;
   }
 
-  logger.info(
-    '[db:migrate]',
-    `Migrating from v${currentVersion} → v${LATEST_VERSION}`,
-  );
+  logger.info('[db:migrate]', `Migrating from v${currentVersion} → v${LATEST_VERSION}`);
 
-  for (
-    let version = currentVersion + 1;
-    version <= LATEST_VERSION;
-    version++
-  ) {
+  for (let version = currentVersion + 1; version <= LATEST_VERSION; version++) {
     const sql = MIGRATIONS[version];
     if (!sql) {
       logger.error('[db:migrate]', `Missing migration SQL for v${version}`);

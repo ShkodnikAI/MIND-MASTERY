@@ -76,10 +76,7 @@ export function getAllSystems(): System[] {
  * Retrieve a specific practice within a system.
  * Returns `undefined` if the system or practice is not found.
  */
-export function getPractice(
-  systemId: string,
-  practiceId: string,
-): Practice | undefined {
+export function getPractice(systemId: string, practiceId: string): Practice | undefined {
   return systems.get(systemId)?.practices.find((p) => p.id === practiceId);
 }
 

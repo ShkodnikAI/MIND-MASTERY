@@ -73,15 +73,7 @@ export type {
 } from './progression';
 
 // Moment of Stillness
-export type {
-  MomentSettings,
-  MomentRecord,
-  MomentDay,
-} from './moment';
+export type { MomentSettings, MomentRecord, MomentDay } from './moment';
 
 // Settings & safety
-export type {
-  ThemeMode,
-  AppSettings,
-  SafetyState,
-} from './settings';
+export type { ThemeMode, AppSettings, SafetyState } from './settings';

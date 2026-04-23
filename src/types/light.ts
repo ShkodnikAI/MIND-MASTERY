@@ -31,13 +31,7 @@ export type LightThemeId =
  * - `entrainment` — frequency-synced flicker for brainwave entrainment.
  * - `chakra-flow` — sequential colour cycling through chakra spectrum.
  */
-export type LightEffect =
-  | 'glow'
-  | 'pulse'
-  | 'breathe'
-  | 'entrainment'
-  | 'chakra-flow'
-  | 'off';
+export type LightEffect = 'glow' | 'pulse' | 'breathe' | 'entrainment' | 'chakra-flow' | 'off';
 
 // ---------------------------------------------------------------------------
 // Light configuration

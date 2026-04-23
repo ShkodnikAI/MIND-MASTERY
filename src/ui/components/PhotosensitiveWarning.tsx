@@ -8,13 +8,7 @@
  */
 
 import { useCallback } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { colors, typography, spacing, radii } from '@/ui/theme';
 
 interface PhotosensitiveWarningProps {
@@ -85,21 +79,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export function PhotosensitiveWarning({
-  visible,
-  onAcknowledge,
-}: PhotosensitiveWarningProps) {
+export function PhotosensitiveWarning({ visible, onAcknowledge }: PhotosensitiveWarningProps) {
   const handleAcknowledge = useCallback(() => {
     onAcknowledge();
   }, [onAcknowledge]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-    >
+    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
           <Text style={styles.titleText}>⚠️ Предупреждение</Text>

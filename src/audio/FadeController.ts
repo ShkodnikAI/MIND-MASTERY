@@ -55,14 +55,7 @@ const STEPS = 20;
  * @returns A `FadeHandle` whose `cancel()` aborts the fade.
  */
 export function startFade(options: FadeOptions): FadeHandle {
-  const {
-    fromVolume,
-    toVolume,
-    durationMs,
-    curve,
-    onVolumeChange,
-    onComplete,
-  } = options;
+  const { fromVolume, toVolume, durationMs, curve, onVolumeChange, onComplete } = options;
 
   // Instant apply for zero/negative duration
   if (durationMs <= 0) {
@@ -114,12 +107,7 @@ export function startFade(options: FadeOptions): FadeHandle {
  * - **exponential**: `from * (to / from) ^ t` -- mimics human loudness
  *   perception; smoother to the ear.
  */
-export function interpolate(
-  from: number,
-  to: number,
-  t: number,
-  curve: FadeCurve,
-): number {
+export function interpolate(from: number, to: number, t: number, curve: FadeCurve): number {
   switch (curve) {
     case 'linear':
       return from + (to - from) * t;
@@ -135,9 +123,6 @@ export function interpolate(
  * Compute the effective per-layer volume: `master * perLayer`.
  * Result is clamped to [0, 1].
  */
-export function effectiveVolume(
-  master: number,
-  perLayer: number,
-): number {
+export function effectiveVolume(master: number, perLayer: number): number {
   return Math.max(0, Math.min(1, master * perLayer));
 }

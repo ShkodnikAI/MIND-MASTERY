@@ -21,13 +21,7 @@
 // Stage 2b: import breath from './breath';
 
 /** Ordered list of all practice system identifiers. */
-export const SYSTEM_IDS = [
-  'transurfing',
-  'silva',
-  'dispenza',
-  'feldenkrais',
-  'breath',
-] as const;
+export const SYSTEM_IDS = ['transurfing', 'silva', 'dispenza', 'feldenkrais', 'breath'] as const;
 
 /** Union type of all valid system identifiers. */
 export type SystemId = (typeof SYSTEM_IDS)[number];

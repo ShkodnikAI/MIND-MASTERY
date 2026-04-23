@@ -94,8 +94,7 @@ export const useSettingsStore = create<SettingsState>()(
 
       setTheme: (theme: 'dark' | 'light' | 'system') => set({ theme }),
 
-      setHapticsEnabled: (enabled: boolean) =>
-        set({ hapticsEnabled: enabled }),
+      setHapticsEnabled: (enabled: boolean) => set({ hapticsEnabled: enabled }),
 
       acceptDisclaimer: (version: string) =>
         set((state) => ({

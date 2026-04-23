@@ -38,10 +38,7 @@ export function computeSegmentDurationMs(segment: Segment): number {
  * milliseconds of sequential (voice + silence) content.
  */
 export function computeTotalDurationMs(segments: readonly Segment[]): number {
-  return segments.reduce(
-    (total, seg) => total + computeSegmentDurationMs(seg),
-    0,
-  );
+  return segments.reduce((total, seg) => total + computeSegmentDurationMs(seg), 0);
 }
 
 /**
@@ -60,10 +57,7 @@ export function computeSessionDurationMin(segments: readonly Segment[]): number 
  * Future versions may gate optional deepening or extended segments
  * behind specific length presets.
  */
-export function shouldIncludeInSession(
-  _segment: Segment,
-  length: SessionLength,
-): boolean {
+export function shouldIncludeInSession(_segment: Segment, length: SessionLength): boolean {
   // All segments are included in 'full' sessions
   if (length === 'full') return true;
   // For short/medium, filtering is handled at the Practice level,

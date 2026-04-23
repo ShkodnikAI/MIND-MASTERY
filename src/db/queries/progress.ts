@@ -3,16 +3,11 @@
  */
 
 import { getDatabase } from '@/db/index';
-import {
-  PracticeProgress,
-  UpdateProgressInput,
-} from '@/db/types';
+import { PracticeProgress, UpdateProgressInput } from '@/db/types';
 import { logger } from '@/utils/logger';
 
 /** Fetch progress for a single practice. */
-export async function getProgress(
-  practiceId: string,
-): Promise<PracticeProgress | null> {
+export async function getProgress(practiceId: string): Promise<PracticeProgress | null> {
   const db = await getDatabase();
   return (
     db.getFirstAsync<PracticeProgress>(
@@ -60,19 +55,13 @@ export async function updateProgress(
   }
 
   if (fields.length === 0) {
-    logger.warn(
-      '[db:progress]',
-      `updateProgress called with no fields for ${practiceId}`,
-    );
+    logger.warn('[db:progress]', `updateProgress called with no fields for ${practiceId}`);
     return;
   }
 
   values.push(practiceId);
 
-  await db.runAsync(
-    `UPDATE progress SET ${fields.join(', ')} WHERE practice_id = ?`,
-    ...values,
-  );
+  await db.runAsync(`UPDATE progress SET ${fields.join(', ')} WHERE practice_id = ?`, ...values);
 
   logger.debug('[db:progress]', `Updated progress for ${practiceId}`);
 }
@@ -81,10 +70,7 @@ export async function updateProgress(
  * Atomically increment completed count and accumulate duration.
  * Uses UPSERT so a missing row is created with defaults.
  */
-export async function incrementCompleted(
-  practiceId: string,
-  durationMin: number,
-): Promise<void> {
+export async function incrementCompleted(practiceId: string, durationMin: number): Promise<void> {
   const db = await getDatabase();
   const now = Date.now();
 
@@ -103,19 +89,11 @@ export async function incrementCompleted(
     now,
   );
 
-  logger.debug(
-    '[db:progress]',
-    `Incremented ${practiceId} by ${durationMin}min`,
-  );
+  logger.debug('[db:progress]', `Incremented ${practiceId} by ${durationMin}min`);
 }
 
 /** Fetch all progress rows for a given system_id. */
-export async function getSystemProgress(
-  systemId: string,
-): Promise<PracticeProgress[]> {
+export async function getSystemProgress(systemId: string): Promise<PracticeProgress[]> {
   const db = await getDatabase();
-  return db.getAllAsync<PracticeProgress>(
-    'SELECT * FROM progress WHERE system_id = ?',
-    systemId,
-  );
+  return db.getAllAsync<PracticeProgress>('SELECT * FROM progress WHERE system_id = ?', systemId);
 }

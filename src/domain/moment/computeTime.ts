@@ -6,14 +6,8 @@
  * pseudo-random trigger times within a configurable daily window.
  */
 
-import {
-  computeKnuthHash,
-  hashToMinuteOfDay,
-} from '@/core/hash/knuth';
-import {
-  DEFAULT_MOMENT_WINDOW_START,
-  DEFAULT_MOMENT_WINDOW_END,
-} from '@/core/constants';
+import { computeKnuthHash, hashToMinuteOfDay } from '@/core/hash/knuth';
+import { DEFAULT_MOMENT_WINDOW_START, DEFAULT_MOMENT_WINDOW_END } from '@/core/constants';
 
 // ---------------------------------------------------------------------------
 // Core computation
@@ -41,12 +35,7 @@ export function computeMomentTime(
   windowStartMin: number = DEFAULT_MOMENT_WINDOW_START,
   windowEndMin: number = DEFAULT_MOMENT_WINDOW_END,
 ): { hour: number; minute: number } {
-  const hash = computeKnuthHash(
-    date.getFullYear(),
-    date.getMonth() + 1,
-    date.getDate(),
-    userSeed,
-  );
+  const hash = computeKnuthHash(date.getFullYear(), date.getMonth() + 1, date.getDate(), userSeed);
   const totalMin = hashToMinuteOfDay(hash, windowStartMin, windowEndMin);
   return {
     hour: Math.floor(totalMin / 60),

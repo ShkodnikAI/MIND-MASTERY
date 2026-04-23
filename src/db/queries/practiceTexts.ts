@@ -4,16 +4,11 @@
  */
 
 import { getDatabase } from '@/db/index';
-import {
-  PracticeText,
-  UpsertPracticeTextInput,
-} from '@/db/types';
+import { PracticeText, UpsertPracticeTextInput } from '@/db/types';
 import { logger } from '@/utils/logger';
 
 /** Upsert a practice text (insert or replace). */
-export async function upsertPracticeText(
-  input: UpsertPracticeTextInput,
-): Promise<void> {
+export async function upsertPracticeText(input: UpsertPracticeTextInput): Promise<void> {
   const db = await getDatabase();
   const now = Date.now();
 
@@ -34,16 +29,11 @@ export async function upsertPracticeText(
     now,
   );
 
-  logger.debug(
-    '[db:practice-texts]',
-    `Upserted text for ${input.practice_id}`,
-  );
+  logger.debug('[db:practice-texts]', `Upserted text for ${input.practice_id}`);
 }
 
 /** Fetch a practice text by practice_id. */
-export async function getPracticeText(
-  practiceId: string,
-): Promise<PracticeText | null> {
+export async function getPracticeText(practiceId: string): Promise<PracticeText | null> {
   const db = await getDatabase();
   return (
     db.getFirstAsync<PracticeText>(
@@ -67,24 +57,14 @@ export async function getPracticeTextsBySystem(
 }
 
 /** Fetch all practice texts for a given locale. */
-export async function getPracticeTextsByLocale(
-  locale: string,
-): Promise<PracticeText[]> {
+export async function getPracticeTextsByLocale(locale: string): Promise<PracticeText[]> {
   const db = await getDatabase();
-  return db.getAllAsync<PracticeText>(
-    'SELECT * FROM practice_texts WHERE locale = ?',
-    locale,
-  );
+  return db.getAllAsync<PracticeText>('SELECT * FROM practice_texts WHERE locale = ?', locale);
 }
 
 /** Delete a practice text by practice_id. */
-export async function deletePracticeText(
-  practiceId: string,
-): Promise<void> {
+export async function deletePracticeText(practiceId: string): Promise<void> {
   const db = await getDatabase();
-  await db.runAsync(
-    'DELETE FROM practice_texts WHERE practice_id = ?',
-    practiceId,
-  );
+  await db.runAsync('DELETE FROM practice_texts WHERE practice_id = ?', practiceId);
   logger.debug('[db:practice-texts]', `Deleted text for ${practiceId}`);
 }

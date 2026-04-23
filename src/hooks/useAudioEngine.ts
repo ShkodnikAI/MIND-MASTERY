@@ -154,10 +154,7 @@ export function useAudioEngine(): AudioEngineControls {
           setEngineState(event.state);
 
           // Sync to sessionStore
-          const statusMap: Record<
-            string,
-            'idle' | 'playing' | 'paused' | 'finished' | 'error'
-          > = {
+          const statusMap: Record<string, 'idle' | 'playing' | 'paused' | 'finished' | 'error'> = {
             idle: 'idle',
             preparing: 'playing',
             playing: 'playing',
@@ -207,19 +204,13 @@ export function useAudioEngine(): AudioEngineControls {
         case 'playVoice': {
           const text = resolveText(event.textKey);
           if (!text) {
-            logger.warn(
-              '[useAudioEngine]',
-              `Cannot resolve text for "${event.textKey}"`,
-            );
+            logger.warn('[useAudioEngine]', `Cannot resolve text for "${event.textKey}"`);
             break;
           }
 
           setLayerState('voice', { status: 'playing' });
 
-          const voiceVol = effectiveVolume(
-            audio.masterVolume,
-            audio.voiceVolume,
-          );
+          const voiceVol = effectiveVolume(audio.masterVolume, audio.voiceVolume);
           setLayerVolume('voice', voiceVol);
 
           Speech.speak(text, {
@@ -231,9 +222,7 @@ export function useAudioEngine(): AudioEngineControls {
             },
             onError: () => {
               setLayerState('voice', { status: 'error' });
-              engineRef.current?.reportError(
-                `TTS error for "${event.textKey}"`,
-              );
+              engineRef.current?.reportError(`TTS error for "${event.textKey}"`);
             },
           });
           break;
@@ -247,10 +236,7 @@ export function useAudioEngine(): AudioEngineControls {
 
         case 'startMusic': {
           try {
-            const musicVol = effectiveVolume(
-              audio.masterVolume,
-              audio.musicVolume,
-            );
+            const musicVol = effectiveVolume(audio.masterVolume, audio.musicVolume);
             const targetVol = musicVol * event.volume;
 
             setLayerState('music', {
@@ -295,10 +281,7 @@ export function useAudioEngine(): AudioEngineControls {
           musicFadeRef.current?.cancel();
 
           if (event.fadeOutMs > 0) {
-            const currentVol = effectiveVolume(
-              audio.masterVolume,
-              audio.musicVolume,
-            );
+            const currentVol = effectiveVolume(audio.masterVolume, audio.musicVolume);
             musicFadeRef.current = startFade({
               fromVolume: currentVol,
               toVolume: 0,
@@ -322,10 +305,7 @@ export function useAudioEngine(): AudioEngineControls {
 
         case 'startBinaural': {
           try {
-            const binVol = effectiveVolume(
-              audio.masterVolume,
-              audio.binauralVolume,
-            );
+            const binVol = effectiveVolume(audio.masterVolume, audio.binauralVolume);
             const targetVol = binVol * event.volume;
 
             setLayerState('binaural', {
@@ -370,10 +350,7 @@ export function useAudioEngine(): AudioEngineControls {
           binauralFadeRef.current?.cancel();
 
           if (event.fadeOutMs > 0) {
-            const currentVol = effectiveVolume(
-              audio.masterVolume,
-              audio.binauralVolume,
-            );
+            const currentVol = effectiveVolume(audio.masterVolume, audio.binauralVolume);
             binauralFadeRef.current = startFade({
               fromVolume: currentVol,
               toVolume: 0,
@@ -535,9 +512,7 @@ export function useAudioEngine(): AudioEngineControls {
       resume,
       stop,
       isActive:
-        engineState === 'playing' ||
-        engineState === 'preparing' ||
-        engineState === 'paused',
+        engineState === 'playing' || engineState === 'preparing' || engineState === 'paused',
       isPlaying: engineState === 'playing',
     }),
     [startSession, pause, resume, stop, engineState],

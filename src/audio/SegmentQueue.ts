@@ -37,9 +37,7 @@ import type { TimelineEntry, BackgroundLayer, SessionPlan } from './types';
  * @param segments - Ordered array of practice segments.
  * @returns A `SessionPlan` ready for the AudioEngine to consume.
  */
-export function buildSessionPlan(
-  segments: readonly Segment[],
-): SessionPlan {
+export function buildSessionPlan(segments: readonly Segment[]): SessionPlan {
   const timeline: TimelineEntry[] = [];
   const layers: BackgroundLayer[] = [];
   let runningTimeMs = 0;

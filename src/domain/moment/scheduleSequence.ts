@@ -52,10 +52,7 @@ export function scheduleSequence(
   const windowEnd = settings.windowEndHour * 60;
   const existingSet = new Set(existingScheduledDates);
   const scheduled: ScheduledMoment[] = [];
-  const maxNew = Math.min(
-    daysToSchedule,
-    MAX_NOTIFICATIONS - existingScheduledDates.length,
-  );
+  const maxNew = Math.min(daysToSchedule, MAX_NOTIFICATIONS - existingScheduledDates.length);
 
   let dayOffset = 0;
   while (scheduled.length < maxNew) {
@@ -103,9 +100,7 @@ export interface SchedulingLimitResult {
  *
  * @param scheduledCount - Current number of pending notifications.
  */
-export function validateSchedulingLimits(
-  scheduledCount: number,
-): SchedulingLimitResult {
+export function validateSchedulingLimits(scheduledCount: number): SchedulingLimitResult {
   const remaining = MAX_NOTIFICATIONS - scheduledCount;
 
   if (remaining <= 0) {

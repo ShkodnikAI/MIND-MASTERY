@@ -3,17 +3,11 @@
  */
 
 import { getDatabase } from '@/db/index';
-import {
-  JournalEntry,
-  CreateJournalInput,
-  UpdateJournalInput,
-} from '@/db/types';
+import { JournalEntry, CreateJournalInput, UpdateJournalInput } from '@/db/types';
 import { logger } from '@/utils/logger';
 
 /** Insert a new journal entry and return its id. */
-export async function createEntry(
-  entry: CreateJournalInput,
-): Promise<string> {
+export async function createEntry(entry: CreateJournalInput): Promise<string> {
   const db = await getDatabase();
   const now = Date.now();
 
@@ -38,10 +32,7 @@ export async function createEntry(
 }
 
 /** Update mutable fields on an existing journal entry. */
-export async function updateEntry(
-  id: string,
-  updates: UpdateJournalInput,
-): Promise<void> {
+export async function updateEntry(id: string, updates: UpdateJournalInput): Promise<void> {
   const db = await getDatabase();
 
   const fields: string[] = ['updated_at = ?'];
@@ -78,31 +69,19 @@ export async function updateEntry(
 
   values.push(id);
 
-  await db.runAsync(
-    `UPDATE journal SET ${fields.join(', ')} WHERE id = ?`,
-    ...values,
-  );
+  await db.runAsync(`UPDATE journal SET ${fields.join(', ')} WHERE id = ?`, ...values);
 
   logger.debug('[db:journal]', `Updated entry ${id}`);
 }
 
 /** Fetch a single journal entry by id. */
-export async function getEntry(
-  id: string,
-): Promise<JournalEntry | null> {
+export async function getEntry(id: string): Promise<JournalEntry | null> {
   const db = await getDatabase();
-  return (
-    db.getFirstAsync<JournalEntry>(
-      'SELECT * FROM journal WHERE id = ?',
-      id,
-    ) ?? null
-  );
+  return db.getFirstAsync<JournalEntry>('SELECT * FROM journal WHERE id = ?', id) ?? null;
 }
 
 /** Fetch the most recent journal entries, ordered by created_at descending. */
-export async function getRecentEntries(
-  limit: number,
-): Promise<JournalEntry[]> {
+export async function getRecentEntries(limit: number): Promise<JournalEntry[]> {
   const db = await getDatabase();
   return db.getAllAsync<JournalEntry>(
     'SELECT * FROM journal ORDER BY created_at DESC LIMIT ?',
@@ -111,10 +90,7 @@ export async function getRecentEntries(
 }
 
 /** Fetch journal entries within a date range (inclusive). Dates are YYYY-MM-DD strings. */
-export async function getEntriesByDateRange(
-  start: string,
-  end: string,
-): Promise<JournalEntry[]> {
+export async function getEntriesByDateRange(start: string, end: string): Promise<JournalEntry[]> {
   const db = await getDatabase();
   return db.getAllAsync<JournalEntry>(
     `SELECT * FROM journal

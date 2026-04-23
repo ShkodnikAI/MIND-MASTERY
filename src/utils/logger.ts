@@ -37,12 +37,7 @@ class Logger {
     this.log('error', tag, message, error);
   }
 
-  private log(
-    level: LogLevel,
-    tag: string,
-    message: string,
-    data?: unknown,
-  ): void {
+  private log(level: LogLevel, tag: string, message: string, data?: unknown): void {
     if (!this.shouldLog(level)) return;
 
     const formatted = this.format(tag, level, message);

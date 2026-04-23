@@ -104,13 +104,7 @@ export default function TabsLayout() {
             const tab = TABS.find((t) => t.name === route.name);
             const iconName = tab?.icon ?? 'ellipse-outline';
 
-            return (
-              <Ionicons
-                name={iconName}
-                size={focused ? size + 2 : size}
-                color={color}
-              />
-            );
+            return <Ionicons name={iconName} size={focused ? size + 2 : size} color={color} />;
           },
           sceneStyle: {
             backgroundColor: colors.background.primary,
@@ -119,11 +113,7 @@ export default function TabsLayout() {
       }}
     >
       {TABS.map((tab) => (
-        <Tabs.Screen
-          key={tab.name}
-          name={tab.name}
-          options={{ title: tab.title }}
-        />
+        <Tabs.Screen key={tab.name} name={tab.name} options={{ title: tab.title }} />
       ))}
     </Tabs>
   );

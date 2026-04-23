@@ -93,8 +93,7 @@ export default function FinishScreen() {
           <Text style={styles.titleText}>Готово!</Text>
 
           <Text style={styles.subtitleText}>
-            Вы готовы начать свой путь к осознанности.
-            Выберите систему и начните первую практику.
+            Вы готовы начать свой путь к осознанности. Выберите систему и начните первую практику.
           </Text>
 
           <TouchableOpacity

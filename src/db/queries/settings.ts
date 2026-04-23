@@ -7,10 +7,7 @@ import { getDatabase } from '@/db/index';
 import { logger } from '@/utils/logger';
 
 /** Get a setting value, parsed from JSON. Returns defaultValue if not found. */
-export async function getSetting<T>(
-  key: string,
-  defaultValue: T,
-): Promise<T> {
+export async function getSetting<T>(key: string, defaultValue: T): Promise<T> {
   const db = await getDatabase();
   const row = await db.getFirstAsync<{ value_json: string }>(
     'SELECT value_json FROM settings WHERE key = ?',

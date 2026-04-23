@@ -23,12 +23,7 @@ export type SessionPhase =
   | 'reorientation';
 
 /** Runtime status of an active or completed session. */
-export type SessionStatus =
-  | 'idle'
-  | 'playing'
-  | 'paused'
-  | 'finished'
-  | 'error';
+export type SessionStatus = 'idle' | 'playing' | 'paused' | 'finished' | 'error';
 
 // ---------------------------------------------------------------------------
 // Active session

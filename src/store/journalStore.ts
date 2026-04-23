@@ -20,9 +20,7 @@ interface JournalState {
 
 /** Sort entries newest-first by date (SessionRecord). */
 function sortByDateNewestFirst(entries: JournalEntry[]): JournalEntry[] {
-  return [...entries].sort(
-    (a, b) => b.date.getTime() - a.date.getTime(),
-  );
+  return [...entries].sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
 // ─── Store ──────────────────────────────────────────────────────
@@ -31,8 +29,7 @@ export const useJournalStore = create<JournalState>()((set) => ({
   entries: [],
   isLoading: false,
 
-  setEntries: (entries: JournalEntry[]) =>
-    set({ entries: sortByDateNewestFirst(entries) }),
+  setEntries: (entries: JournalEntry[]) => set({ entries: sortByDateNewestFirst(entries) }),
 
   addEntry: (entry: JournalEntry) =>
     set((state) => ({

@@ -21,13 +21,7 @@
  * The engine is a **singleton** -- only one session can be active at a time.
  */
 
-import type {
-  EngineState,
-  EngineEvent,
-  SessionConfig,
-  SessionPlan,
-  TimelineEntry,
-} from './types';
+import type { EngineState, EngineEvent, SessionConfig, SessionPlan, TimelineEntry } from './types';
 import type { PlaybackAction } from '@/domain/session/playSegment';
 import { buildSessionPlan } from './SegmentQueue';
 import { getPlaybackActions } from '@/domain/session/playSegment';
@@ -121,11 +115,7 @@ export class AudioEngine {
   }
 
   isActive(): boolean {
-    return (
-      this.state === 'playing' ||
-      this.state === 'preparing' ||
-      this.state === 'paused'
-    );
+    return this.state === 'playing' || this.state === 'preparing' || this.state === 'paused';
   }
 
   getElapsedMs(): number {
@@ -159,11 +149,9 @@ export class AudioEngine {
    */
   async startSession(config: SessionConfig): Promise<void> {
     if (this.isActive()) {
-      logger.warn(
-        '[AudioEngine]',
-        'startSession called while active -- ignoring',
-        { state: this.state },
-      );
+      logger.warn('[AudioEngine]', 'startSession called while active -- ignoring', {
+        state: this.state,
+      });
       return;
     }
 
@@ -469,9 +457,7 @@ export class AudioEngine {
    * Emit start commands for all background layers (music, binaural).
    * The hook layer will create/start the appropriate audio players.
    */
-  private emitBackgroundStartCommands(
-    layers: readonly import('./types').BackgroundLayer[],
-  ): void {
+  private emitBackgroundStartCommands(layers: readonly import('./types').BackgroundLayer[]): void {
     for (const layer of layers) {
       if (layer.kind === 'music') {
         this.emit({
@@ -496,9 +482,7 @@ export class AudioEngine {
    * Emit stop commands for all background layers.
    * Includes fade-out durations so the hook can fade smoothly.
    */
-  private emitBackgroundStopCommands(
-    layers: readonly import('./types').BackgroundLayer[],
-  ): void {
+  private emitBackgroundStopCommands(layers: readonly import('./types').BackgroundLayer[]): void {
     for (const layer of layers) {
       if (layer.kind === 'music') {
         this.emit({ type: 'stopMusic', fadeOutMs: layer.fadeOutMs });

@@ -36,9 +36,7 @@ export async function hapticHeavy(): Promise<void> {
 /** Notification haptic — suitable for success/completion */
 export async function hapticNotification(): Promise<void> {
   try {
-    await Haptics.notificationAsync(
-      Haptics.NotificationFeedbackType.Success,
-    );
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   } catch (error) {
     logger.warn('[haptics]', 'Notification haptic failed', error);
   }

@@ -155,10 +155,7 @@ export function getPlaybackActions(segment: Segment): PlaybackAction[] {
       actions.push({ type: 'phaseChange', phase: voiceSegment.phase });
 
       // Haptic feedback on key transitions
-      if (
-        voiceSegment.phase === 'work' ||
-        voiceSegment.phase === 'reorientation'
-      ) {
+      if (voiceSegment.phase === 'work' || voiceSegment.phase === 'reorientation') {
         actions.push({ type: 'haptic', pattern: 'medium' });
       }
     }

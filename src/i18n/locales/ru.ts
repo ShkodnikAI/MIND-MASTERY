@@ -59,8 +59,7 @@ export default {
   'practice.difficulty': 'Сложность',
   'practice.level': 'Уровень',
   'practice.locked': 'Заблокировано',
-  'practice.locked.description':
-    'Пройдите предыдущие практики, чтобы разблокировать',
+  'practice.locked.description': 'Пройдите предыдущие практики, чтобы разблокировать',
   'practice.contraindications': 'Противопоказания',
   'practice.tags': 'Теги',
 
@@ -94,8 +93,7 @@ export default {
   'settings.backup': 'Резервное копирование',
   'settings.backup.description': 'Импорт и экспорт данных',
   'settings.accessibility': 'Доступность',
-  'settings.accessibility.description':
-    'VoiceOver, TalkBack, размер текста',
+  'settings.accessibility.description': 'VoiceOver, TalkBack, размер текста',
   'settings.about': 'О приложении',
   'settings.about.description': 'Версия, лицензии, информация',
   'settings.theme': 'Тема оформления',
@@ -144,8 +142,7 @@ export default {
 
   // ── Onboarding ──────────────────────────────────────────────────────
   'onboarding.welcome': 'Добро пожаловать',
-  'onboarding.welcome.subtitle':
-    'Mind Mastery — пространство для глубокой работы с сознанием',
+  'onboarding.welcome.subtitle': 'Mind Mastery — пространство для глубокой работы с сознанием',
   'onboarding.disclaimer': 'Медицинский дисклеймер',
   'onboarding.disclaimer.text':
     'Это приложение не является медицинской заменой. Практики направлены на саморазвитие и осознанность. Если у вас есть неврологические или психические заболевания, проконсультируйтесь с врачом перед использованием.',

@@ -13,13 +13,10 @@ export function computeKnuthHash(
   year: number,
   month: number,
   day: number,
-  userSeed: number
+  userSeed: number,
 ): number {
   let x =
-    (year * 2654435761) ^
-    (month * 2246822519) ^
-    (day * 3266489917) ^
-    ((userSeed | 0) * 668265263);
+    (year * 2654435761) ^ (month * 2246822519) ^ (day * 3266489917) ^ ((userSeed | 0) * 668265263);
 
   x = Math.imul(x >>> 16, 0x45d9f3b);
   x = Math.imul(x ^ (x >>> 16), 0x45d9f3b);
@@ -31,7 +28,7 @@ export function computeKnuthHash(
 export function hashToMinuteOfDay(
   hash: number,
   windowStartMin: number,
-  windowEndMin: number
+  windowEndMin: number,
 ): number {
   const range = windowEndMin - windowStartMin;
   return windowStartMin + (hash % range);

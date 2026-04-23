@@ -57,10 +57,7 @@ export function computeSystemLevel(
   let achievedLevel = 1;
 
   for (const rule of rules) {
-    if (
-      completedSessions >= rule.minCompletedSessions &&
-      totalMinutes >= rule.minTotalMinutes
-    ) {
+    if (completedSessions >= rule.minCompletedSessions && totalMinutes >= rule.minTotalMinutes) {
       achievedLevel = rule.levelRequired;
     }
   }
@@ -143,8 +140,7 @@ export function shouldLevelUp(
   if (!nextRule) return false;
 
   return (
-    completedSessions >= nextRule.minCompletedSessions &&
-    totalMinutes >= nextRule.minTotalMinutes
+    completedSessions >= nextRule.minCompletedSessions && totalMinutes >= nextRule.minTotalMinutes
   );
 }
 
@@ -205,9 +201,7 @@ export function getNextLevelProgress(
       : 1;
 
   const minutesFraction =
-    nextRule.minTotalMinutes > 0
-      ? Math.min(totalMinutes / nextRule.minTotalMinutes, 1)
-      : 1;
+    nextRule.minTotalMinutes > 0 ? Math.min(totalMinutes / nextRule.minTotalMinutes, 1) : 1;
 
   // Both conditions must be met — use the minimum of the two fractions
   return Math.min(sessionFraction, minutesFraction);

@@ -26,12 +26,12 @@ export const colors = {
 
   // Semantic accent colours
   accent: {
-    primary: '#6C5CE7',   // Main brand accent (indigo)
+    primary: '#6C5CE7', // Main brand accent (indigo)
     secondary: '#A29BFE', // Lighter indigo
-    success: '#00B894',   // Emerald green
-    warning: '#FDCB6E',   // Amber
-    error: '#E17055',     // Coral red
-    info: '#74B9FF',      // Sky blue
+    success: '#00B894', // Emerald green
+    warning: '#FDCB6E', // Amber
+    error: '#E17055', // Coral red
+    info: '#74B9FF', // Sky blue
   },
 
   // System-specific brand colours

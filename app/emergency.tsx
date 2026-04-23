@@ -92,8 +92,8 @@ export default function EmergencyScreen() {
 
           <Text style={styles.titleText}>Спокойствие за 60 секунд</Text>
           <Text style={styles.subtitleText}>
-            Быстрая практика для восстановления спокойствия. Найдите удобное
-            положение и следуйте инструкциям.
+            Быстрая практика для восстановления спокойствия. Найдите удобное положение и следуйте
+            инструкциям.
           </Text>
 
           {CALMING_STEPS.map((step) => (

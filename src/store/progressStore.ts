@@ -24,9 +24,7 @@ function toStored(p: PracticeProgress): StoredPracticeProgress {
     practiceId: p.practiceId,
     completedCount: p.completedCount,
     totalDurationMin: p.totalDurationMin,
-    lastCompletedAt: p.lastCompletedAt
-      ? p.lastCompletedAt.toISOString()
-      : null,
+    lastCompletedAt: p.lastCompletedAt ? p.lastCompletedAt.toISOString() : null,
     currentLevel: p.currentLevel,
     isUnlocked: p.isUnlocked,
   };
@@ -141,14 +139,8 @@ export const useProgressStore = create<ProgressState>()(
           .filter((p): p is StoredPracticeProgress => p !== undefined);
 
         const unlockedPractices = practices.filter((p) => p.isUnlocked).length;
-        const currentMaxLevel = practices.reduce(
-          (max, p) => Math.max(max, p.currentLevel),
-          0,
-        );
-        const totalSessionMin = practices.reduce(
-          (sum, p) => sum + p.totalDurationMin,
-          0,
-        );
+        const currentMaxLevel = practices.reduce((max, p) => Math.max(max, p.currentLevel), 0);
+        const totalSessionMin = practices.reduce((sum, p) => sum + p.totalDurationMin, 0);
 
         const dates = practices
           .map((p) => p.lastCompletedAt)
@@ -156,9 +148,7 @@ export const useProgressStore = create<ProgressState>()(
           .sort()
           .reverse();
 
-        const lastSessionDate: Date | null = dates.length > 0
-          ? new Date(dates[0])
-          : null;
+        const lastSessionDate: Date | null = dates.length > 0 ? new Date(dates[0]) : null;
 
         // Streak calculation
         let streakDays = 0;
@@ -191,9 +181,7 @@ export const useProgressStore = create<ProgressState>()(
       getAllUnlocked: (systemId: string): string[] => {
         const state = get();
         const practiceIds = state.systemIndex[systemId] ?? [];
-        return practiceIds.filter(
-          (id) => state.practices[id]?.isUnlocked === true,
-        );
+        return practiceIds.filter((id) => state.practices[id]?.isUnlocked === true);
       },
 
       reset: () =>

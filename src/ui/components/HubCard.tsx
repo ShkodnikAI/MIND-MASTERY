@@ -8,13 +8,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  type GestureResponderEvent,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, type GestureResponderEvent } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, radii } from '@/ui/theme';
@@ -127,7 +121,11 @@ export function HubCard({
       >
         <View style={styles.topRow}>
           <View style={styles.iconContainer}>
-            <Ionicons name={icon as React.ComponentProps<typeof Ionicons>['name']} size={22} color={colors.text.primary} />
+            <Ionicons
+              name={icon as React.ComponentProps<typeof Ionicons>['name']}
+              size={22}
+              color={colors.text.primary}
+            />
           </View>
         </View>
 
@@ -138,15 +136,11 @@ export function HubCard({
 
         <View style={styles.footerRow}>
           <Text style={styles.practiceCountText}>
-            {practiceCount} {practiceCount === 1 ? 'практика' : practiceCount < 5 ? 'практики' : 'практик'}
+            {practiceCount}{' '}
+            {practiceCount === 1 ? 'практика' : practiceCount < 5 ? 'практики' : 'практик'}
           </Text>
           <View style={styles.progressBarBackground}>
-            <View
-              style={[
-                styles.progressBarFill,
-                { width: `${Math.round(progress * 100)}%` },
-              ]}
-            />
+            <View style={[styles.progressBarFill, { width: `${Math.round(progress * 100)}%` }]} />
           </View>
         </View>
       </LinearGradient>

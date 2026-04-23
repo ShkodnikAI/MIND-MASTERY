@@ -1,124 +1,17 @@
 /**
- * @file Дыхательные практики — Breath Tab screen (placeholder).
+ * @file Дыхательные практики — Breath Tab screen.
  *
+ * Delegates to shared SystemTabContent component.
  * INV-A3: All styles via StyleSheet.create.
  */
 
-import { useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import { SystemBackground } from '@/ui/components/SystemBackground';
-import { colors, typography, spacing, radii } from '@/ui/theme';
-
-// ─── Placeholder data ───────────────────────────────────────────
-
-const PLACEHOLDER_PRACTICES = [
-  { id: 'b1', title: 'Квадратное дыхание' },
-  { id: 'b2', title: 'Дыхание 4-7-8' },
-  { id: 'b3', title: 'Дыхание Вима Хофа' },
-  { id: 'b4', title: 'Диафрагмальное дыхание' },
-  { id: 'b5', title: 'Альтернативное дыхание' },
-];
-
-// ─── Styles ─────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: radii.md,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  titleText: {
-    fontFamily: typography.fontFamily.bold,
-    fontSize: typography.sizes.xxl,
-    lineHeight: typography.lineHeights.xxl,
-    color: colors.text.primary,
-    flex: 1,
-  },
-  listContainer: {
-    gap: spacing.md,
-  },
-  practiceCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: radii.md,
-    padding: spacing.md,
-  },
-  practiceTitle: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.sizes.md,
-    lineHeight: typography.lineHeights.md,
-    color: colors.text.primary,
-  },
-  practicePlaceholder: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm,
-    color: 'rgba(255, 255, 255, 0.6)',
-    marginTop: spacing.xs,
-  },
-});
-
-// ─── Placeholder item ───────────────────────────────────────────
-
-function PlaceholderItem({ title }: { readonly title: string }) {
-  return (
-    <TouchableOpacity style={styles.practiceCard} activeOpacity={0.7}>
-      <Text style={styles.practiceTitle}>{title}</Text>
-      <Text style={styles.practicePlaceholder}>
-        Практика будет доступна на Stage 2
-      </Text>
-    </TouchableOpacity>
-  );
-}
-
-// ─── Screen ─────────────────────────────────────────────────────
+import { SystemTabContent } from '@/ui/components/SystemTabContent';
 
 export default function BreathScreen() {
-  const renderItem = useCallback(
-    ({ item }: { readonly item: (typeof PLACEHOLDER_PRACTICES)[number] }) => (
-      <PlaceholderItem title={item.title} />
-    ),
-    [],
-  );
-
   return (
     <SystemBackground systemId="breath">
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
-        <View style={styles.content}>
-          <View style={styles.headerContainer}>
-            <View style={styles.iconContainer}>
-              <Ionicons name="fitness-outline" size={24} color={colors.text.primary} />
-            </View>
-            <Text style={styles.titleText}>Дыхательные практики</Text>
-          </View>
-
-          <FlatList
-            data={PLACEHOLDER_PRACTICES}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listContainer}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
-      </SafeAreaView>
+      <SystemTabContent systemId="breath" title="Дыхательные практики" icon="fitness-outline" />
     </SystemBackground>
   );
 }

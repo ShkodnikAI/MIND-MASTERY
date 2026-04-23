@@ -3,16 +3,11 @@
  */
 
 import { getDatabase } from '@/db/index';
-import {
-  UserPractice,
-  CreateUserPracticeInput,
-} from '@/db/types';
+import { UserPractice, CreateUserPracticeInput } from '@/db/types';
 import { logger } from '@/utils/logger';
 
 /** Insert a new user-created practice and return its id. */
-export async function createUserPractice(
-  input: CreateUserPracticeInput,
-): Promise<string> {
+export async function createUserPractice(input: CreateUserPracticeInput): Promise<string> {
   const db = await getDatabase();
   const now = Date.now();
 
@@ -33,22 +28,13 @@ export async function createUserPractice(
 /** Fetch all user-created practices, ordered by creation date descending. */
 export async function getAllUserPractices(): Promise<UserPractice[]> {
   const db = await getDatabase();
-  return db.getAllAsync<UserPractice>(
-    'SELECT * FROM user_practices ORDER BY created_at DESC',
-  );
+  return db.getAllAsync<UserPractice>('SELECT * FROM user_practices ORDER BY created_at DESC');
 }
 
 /** Fetch a single user practice by id. */
-export async function getUserPractice(
-  id: string,
-): Promise<UserPractice | null> {
+export async function getUserPractice(id: string): Promise<UserPractice | null> {
   const db = await getDatabase();
-  return (
-    db.getFirstAsync<UserPractice>(
-      'SELECT * FROM user_practices WHERE id = ?',
-      id,
-    ) ?? null
-  );
+  return db.getFirstAsync<UserPractice>('SELECT * FROM user_practices WHERE id = ?', id) ?? null;
 }
 
 /** Update a user practice's mutable fields. */
@@ -75,19 +61,13 @@ export async function updateUserPractice(
   }
 
   if (fields.length === 0) {
-    logger.warn(
-      '[db:user-practices]',
-      `updateUserPractice called with no fields for ${id}`,
-    );
+    logger.warn('[db:user-practices]', `updateUserPractice called with no fields for ${id}`);
     return;
   }
 
   values.push(id);
 
-  await db.runAsync(
-    `UPDATE user_practices SET ${fields.join(', ')} WHERE id = ?`,
-    ...values,
-  );
+  await db.runAsync(`UPDATE user_practices SET ${fields.join(', ')} WHERE id = ?`, ...values);
 
   logger.debug('[db:user-practices]', `Updated practice ${id}`);
 }

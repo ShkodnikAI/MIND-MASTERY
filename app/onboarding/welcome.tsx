@@ -106,8 +106,8 @@ export default function WelcomeScreen() {
           <Text style={styles.titleText}>Добро пожаловать</Text>
 
           <Text style={styles.subtitleText}>
-            MIND MASTERY — ваш путеводитель в мир медитации и осознанности.
-            Пять проверенных систем для трансформации сознания.
+            MIND MASTERY — ваш путеводитель в мир медитации и осознанности. Пять проверенных систем
+            для трансформации сознания.
           </Text>
 
           <TouchableOpacity

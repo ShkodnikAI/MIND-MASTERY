@@ -9,13 +9,7 @@
  * intents flow through engine events.
  */
 
-import type {
-  Segment,
-  SessionPhase,
-  AudioSettings,
-  VoiceSettings,
-  SessionLength,
-} from '@/types';
+import type { Segment, SessionPhase, AudioSettings, VoiceSettings, SessionLength } from '@/types';
 
 // ---------------------------------------------------------------------------
 // Engine state machine
@@ -29,12 +23,7 @@ import type {
  *     ^                                                      |
  *     +------------------------------------------------------+
  */
-export type EngineState =
-  | 'idle'
-  | 'preparing'
-  | 'playing'
-  | 'paused'
-  | 'finished';
+export type EngineState = 'idle' | 'preparing' | 'playing' | 'paused' | 'finished';
 
 // ---------------------------------------------------------------------------
 // Session configuration (input)
@@ -148,9 +137,18 @@ export type EngineEvent =
       readonly volume: number;
     }
   | { readonly type: 'stopBinaural'; readonly fadeOutMs: number }
-  | { readonly type: 'setLayerVolume'; readonly layer: 'music' | 'binaural'; readonly volume: number }
+  | {
+      readonly type: 'setLayerVolume';
+      readonly layer: 'music' | 'binaural';
+      readonly volume: number;
+    }
   | { readonly type: 'triggerHaptic'; readonly pattern: 'light' | 'medium' | 'heavy' }
   | { readonly type: 'showTheory' }
 
   // -- Error events --
-  | { readonly type: 'error'; readonly message: string; readonly segmentIndex?: number; readonly fatal: boolean };
+  | {
+      readonly type: 'error';
+      readonly message: string;
+      readonly segmentIndex?: number;
+      readonly fatal: boolean;
+    };

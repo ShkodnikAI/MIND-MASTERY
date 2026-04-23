@@ -34,17 +34,11 @@ export async function initializeDatabase(): Promise<void> {
 export function registerAppStateListener(): () => void {
   let currentStatus: AppStateStatus = AppState.currentState;
 
-  const subscription = AppState.addEventListener('change', (
-    nextStatus: AppStateStatus,
-  ) => {
+  const subscription = AppState.addEventListener('change', (nextStatus: AppStateStatus) => {
     if (currentStatus === 'active' && nextStatus !== 'active') {
       // App moving to background
       checkpointWal().catch((error: unknown) => {
-        logger.warn(
-          '[db:lifecycle]',
-          'WAL checkpoint on background failed',
-          error,
-        );
+        logger.warn('[db:lifecycle]', 'WAL checkpoint on background failed', error);
       });
     }
     currentStatus = nextStatus;

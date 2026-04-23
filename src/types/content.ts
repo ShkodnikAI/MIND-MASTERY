@@ -14,20 +14,10 @@ import type { ProgressionRule } from './progression';
 // ---------------------------------------------------------------------------
 
 /** Identifies one of the five consciousness / meditation systems in the app. */
-export type SystemId =
-  | 'transurfing'
-  | 'silva'
-  | 'dispenza'
-  | 'feldenkrais'
-  | 'breath';
+export type SystemId = 'transurfing' | 'silva' | 'dispenza' | 'feldenkrais' | 'breath';
 
 /** Ordered difficulty levels that gate practice availability. */
-export type DifficultyLevel =
-  | 'beginner'
-  | 'elementary'
-  | 'intermediate'
-  | 'advanced'
-  | 'master';
+export type DifficultyLevel = 'beginner' | 'elementary' | 'intermediate' | 'advanced' | 'master';
 
 /** Session length presets offered to the user before starting a practice. */
 export type SessionLength = 'short' | 'medium' | 'full';
@@ -37,13 +27,7 @@ export type SessionLength = 'short' | 'medium' | 'full';
 // ---------------------------------------------------------------------------
 
 /** Describes the particle rendering style used in visualisations. */
-export type ParticleStyle =
-  | 'dots'
-  | 'waves'
-  | 'spiral'
-  | 'fractal'
-  | 'orbital'
-  | 'flow';
+export type ParticleStyle = 'dots' | 'waves' | 'spiral' | 'fractal' | 'orbital' | 'flow';
 
 /**
  * Visual theme configuration unique to each SystemId.

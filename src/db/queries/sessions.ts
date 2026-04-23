@@ -4,17 +4,11 @@
  */
 
 import { getDatabase } from '@/db/index';
-import {
-  SessionRecord,
-  CreateSessionInput,
-  UpdateSessionInput,
-} from '@/db/types';
+import { SessionRecord, CreateSessionInput, UpdateSessionInput } from '@/db/types';
 import { logger } from '@/utils/logger';
 
 /** Insert a new session and return its id. */
-export async function createSession(
-  record: CreateSessionInput,
-): Promise<string> {
+export async function createSession(record: CreateSessionInput): Promise<string> {
   const db = await getDatabase();
 
   await db.runAsync(
@@ -39,10 +33,7 @@ export async function createSession(
 }
 
 /** Update mutable fields on an existing session. */
-export async function updateSession(
-  id: string,
-  updates: UpdateSessionInput,
-): Promise<void> {
+export async function updateSession(id: string, updates: UpdateSessionInput): Promise<void> {
   const db = await getDatabase();
 
   const fields: string[] = [];
@@ -80,31 +71,19 @@ export async function updateSession(
 
   values.push(id);
 
-  await db.runAsync(
-    `UPDATE sessions SET ${fields.join(', ')} WHERE id = ?`,
-    ...values,
-  );
+  await db.runAsync(`UPDATE sessions SET ${fields.join(', ')} WHERE id = ?`, ...values);
 
   logger.debug('[db:sessions]', `Updated session ${id}`);
 }
 
 /** Fetch a single session by id. Returns null if not found. */
-export async function getSession(
-  id: string,
-): Promise<SessionRecord | null> {
+export async function getSession(id: string): Promise<SessionRecord | null> {
   const db = await getDatabase();
-  return (
-    db.getFirstAsync<SessionRecord>(
-      'SELECT * FROM sessions WHERE id = ?',
-      id,
-    ) ?? null
-  );
+  return db.getFirstAsync<SessionRecord>('SELECT * FROM sessions WHERE id = ?', id) ?? null;
 }
 
 /** Fetch the most recent sessions, ordered by created_at descending. */
-export async function getRecentSessions(
-  limit: number,
-): Promise<SessionRecord[]> {
+export async function getRecentSessions(limit: number): Promise<SessionRecord[]> {
   const db = await getDatabase();
   return db.getAllAsync<SessionRecord>(
     'SELECT * FROM sessions ORDER BY created_at DESC LIMIT ?',

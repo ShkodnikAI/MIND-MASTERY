@@ -72,9 +72,7 @@ export function checkSafety(
   // 2. Check disclaimer version
   const warnings: string[] = [];
   if (safetyState.disclaimerVersion !== CURRENT_DISCLAIMER_VERSION) {
-    warnings.push(
-      'Версия медицинского дисклеймера обновлена. Пожалуйста, ознакомьтесь.',
-    );
+    warnings.push('Версия медицинского дисклеймера обновлена. Пожалуйста, ознакомьтесь.');
   }
 
   // 3. Check practice-specific consent
@@ -128,12 +126,7 @@ export function hasAdvancedBreathwork(practiceId: string): boolean {
  *
  * Triggers for entrainment (flicker) and pulse effects.
  */
-export function needsPhotosensitiveWarning(
-  enabledEffects: readonly string[],
-): boolean {
-  const sensitiveEffects: ReadonlySet<string> = new Set([
-    'entrainment',
-    'pulse',
-  ]);
+export function needsPhotosensitiveWarning(enabledEffects: readonly string[]): boolean {
+  const sensitiveEffects: ReadonlySet<string> = new Set(['entrainment', 'pulse']);
   return enabledEffects.some((effect) => sensitiveEffects.has(effect));
 }

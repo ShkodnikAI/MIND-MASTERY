@@ -12,11 +12,7 @@ import { create } from 'zustand';
 import type { Practice } from '@/types';
 import type { PracticeTextSchema } from '@content/schema';
 import type { LoadedText } from '@/services/content/textLoader';
-import {
-  registerAllSystems,
-  getAllSystems,
-  getTotalPracticeCount,
-} from '@/content/registry';
+import { registerAllSystems, getAllSystems, getTotalPracticeCount } from '@/content/registry';
 import { logger } from '@/utils/logger';
 
 // ─── State Interface ────────────────────────────────────────────
@@ -121,7 +117,8 @@ export const useContentStore = create<ContentState>((set, get) => ({
     // Collect all practices and systems from the registry
     const allSystems = getAllSystems();
     const practicesMap: Record<string, Practice> = {};
-    const systemsMap: Record<string, { id: string; name: string; icon: string; color: string }> = {};
+    const systemsMap: Record<string, { id: string; name: string; icon: string; color: string }> =
+      {};
 
     for (const system of allSystems) {
       // Register the system metadata

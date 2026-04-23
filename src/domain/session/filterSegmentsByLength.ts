@@ -14,10 +14,7 @@ import type { Practice, SessionLength, Segment } from '@/types';
 /**
  * Checks whether a practice supports the given session-length preset.
  */
-export function isLengthAvailable(
-  practice: Practice,
-  length: SessionLength,
-): boolean {
+export function isLengthAvailable(practice: Practice, length: SessionLength): boolean {
   return practice.includeIn.includes(length);
 }
 
@@ -39,10 +36,7 @@ export function getAvailableLengths(practice: Practice): SessionLength[] {
  * without trimming. Future versions may remove optional deepening
  * or extension segments for shorter presets.
  */
-export function getSegmentsForLength(
-  practice: Practice,
-  length: SessionLength,
-): Segment[] {
+export function getSegmentsForLength(practice: Practice, length: SessionLength): Segment[] {
   if (!isLengthAvailable(practice, length)) {
     return [];
   }

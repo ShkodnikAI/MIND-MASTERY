@@ -144,10 +144,7 @@ export function loadAllTexts(locale: string = 'ru'): LoadedText[] {
 
       // Validate system
       if (!VALID_SYSTEMS.has(systemId)) {
-        logger.warn(
-          '[textLoader]',
-          `Skipping unknown system "${systemId}" in ${key}`,
-        );
+        logger.warn('[textLoader]', `Skipping unknown system "${systemId}" in ${key}`);
         errorCount++;
         continue;
       }
@@ -173,10 +170,7 @@ export function loadAllTexts(locale: string = 'ru'): LoadedText[] {
   }
 
   if (errorCount > 0) {
-    logger.warn(
-      '[textLoader]',
-      `Loaded ${texts.length} texts with ${errorCount} errors`,
-    );
+    logger.warn('[textLoader]', `Loaded ${texts.length} texts with ${errorCount} errors`);
   } else {
     logger.info('[textLoader]', `Loaded ${texts.length} texts for locale "${locale}"`);
   }

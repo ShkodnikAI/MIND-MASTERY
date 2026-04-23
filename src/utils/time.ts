@@ -48,9 +48,7 @@ export function hourToMinutes(hour: number): number {
  * Convert total minutes since midnight to { hour, minute }.
  * Example: 510 → { hour: 8, minute: 30 }
  */
-export function minutesToHourMin(
-  totalMin: number,
-): { hour: number; minute: number } {
+export function minutesToHourMin(totalMin: number): { hour: number; minute: number } {
   const hour = Math.floor(totalMin / 60);
   const minute = totalMin % 60;
   return { hour, minute };

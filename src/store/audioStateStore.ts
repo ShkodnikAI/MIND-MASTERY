@@ -46,14 +46,8 @@ interface AudioStateActions {
   setTotalDuration: (ms: number) => void;
 
   // -- Layer state --
-  setLayerState: (
-    layer: 'music' | 'binaural' | 'voice',
-    update: Partial<AudioLayerState>,
-  ) => void;
-  setLayerVolume: (
-    layer: 'music' | 'binaural' | 'voice',
-    volume: number,
-  ) => void;
+  setLayerState: (layer: 'music' | 'binaural' | 'voice', update: Partial<AudioLayerState>) => void;
+  setLayerVolume: (layer: 'music' | 'binaural' | 'voice', volume: number) => void;
 
   // -- Errors --
   setError: (error: string | null) => void;
@@ -88,9 +82,7 @@ const INITIAL_STATE: AudioEngineUIState = {
 // Store
 // ---------------------------------------------------------------------------
 
-export const useAudioStateStore = create<
-  AudioEngineUIState & AudioStateActions
->()((set) => ({
+export const useAudioStateStore = create<AudioEngineUIState & AudioStateActions>()((set) => ({
   ...INITIAL_STATE,
 
   // -- Engine state ------------------------------------------------------
@@ -101,8 +93,7 @@ export const useAudioStateStore = create<
 
   // -- Progress ----------------------------------------------------------
 
-  setProgress: (currentSegmentIndex, elapsedMs) =>
-    set({ currentSegmentIndex, elapsedMs }),
+  setProgress: (currentSegmentIndex, elapsedMs) => set({ currentSegmentIndex, elapsedMs }),
 
   setTotalDuration: (totalDurationMs) => set({ totalDurationMs }),
 
