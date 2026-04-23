@@ -1,0 +1,563 @@
+import type { Practice, Segment, SessionLength } from '@/types';
+
+const ALL_LENGTHS: SessionLength[] = ['short', 'medium', 'full'];
+
+type DiffMap = {
+  [level: number]: 'beginner' | 'elementary' | 'intermediate' | 'advanced' | 'master';
+};
+
+const DIFF_MAP: DiffMap = {
+  1: 'beginner',
+  2: 'elementary',
+  3: 'intermediate',
+  4: 'advanced',
+  5: 'master',
+};
+
+function makePractice(
+  id: string,
+  title: string,
+  description: string,
+  level: number,
+  estimatedMin: number,
+  contraindications: string[],
+  tags: string[],
+  segments: Segment[],
+): Practice {
+  return {
+    id,
+    systemId: 'silva',
+    title,
+    description,
+    difficulty: DIFF_MAP[level] ?? 'beginner',
+    estimatedDurationMin: estimatedMin,
+    segments,
+    includeIn: ALL_LENGTHS,
+    requiredLevel: level,
+    contraindications,
+    tags,
+  };
+}
+
+/* =========================================================================
+ * Practice 1 — Вход на альфа-уровень  (Level 1, ~15 min)
+ * ========================================================================= */
+const silva_alpha_entry = makePractice(
+  'silva_alpha_entry',
+  'Вход на альфа-уровень',
+  'Базовая техника достижения альфа-состояния мозга через обратный отсчёт. Фундамент всего метода Сильва.',
+  1,
+  15,
+  [],
+  ['основы', 'альфа', 'расслабление'],
+  [
+    { kind: 'voice', textKey: 'silva_alpha_entry.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_alpha_entry.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_alpha_entry.countdown', durationSec: 90, phase: 'deepening', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_alpha_entry.alpha_state', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_alpha_entry.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_alpha_entry.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 2 — Ментальный экран  (Level 1, ~15 min)
+ * ========================================================================= */
+const silva_mental_screen = makePractice(
+  'silva_mental_screen',
+  'Ментальный экран',
+  'Создание внутреннего ментального экрана для визуализации. Инструмент для программирования подсознания.',
+  1,
+  15,
+  [],
+  ['основы', 'экран', 'визуализация'],
+  [
+    { kind: 'voice', textKey: 'silva_mental_screen.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_mental_screen.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_mental_screen.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_mental_screen.creating_screen', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_mental_screen.projecting', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_mental_screen.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_mental_screen.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 3 — Лаборатория разума  (Level 1, ~20 min)
+ * ========================================================================= */
+const silva_laboratory = makePractice(
+  'silva_laboratory',
+  'Лаборатория разума',
+  'Создание ментальной лаборатории для решения задач и поиска ответов. Место силы внутри сознания.',
+  1,
+  20,
+  [],
+  ['основы', 'лаборатория', 'решение'],
+  [
+    { kind: 'voice', textKey: 'silva_laboratory.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_laboratory.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_laboratory.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_laboratory.entering_lab', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_laboratory.exploring_lab', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_laboratory.counselors', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_laboratory.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_laboratory.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 4 — Глубокое расслабление  (Level 1, ~15 min)
+ * ========================================================================= */
+const silva_deep_relaxation = makePractice(
+  'silva_deep_relaxation',
+  'Глубокое расслабление',
+  'Прогрессивная релаксация по методу Сильва. Освобождает физическое и ментальное напряжение.',
+  1,
+  15,
+  [],
+  ['основы', 'расслабление', 'тело'],
+  [
+    { kind: 'voice', textKey: 'silva_deep_relaxation.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_deep_relaxation.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_deep_relaxation.body_scan', durationSec: 90, phase: 'deepening', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_deep_relaxation.releasing_tension', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_deep_relaxation.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_deep_relaxation.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 5 — Зеркало исцеления  (Level 2, ~20 min)
+ * ========================================================================= */
+const silva_healing_mirror = makePractice(
+  'silva_healing_mirror',
+  'Зеркало исцеления',
+  'Техника ментального исцеления через визуализацию идеального состояния здоровья на ментальном экране.',
+  2,
+  20,
+  ['Тяжёлые психические расстройства'],
+  ['исцеление', 'здоровье', 'визуализация'],
+  [
+    { kind: 'voice', textKey: 'silva_healing_mirror.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_healing_mirror.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_healing_mirror.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_healing_mirror.mirror_concept', durationSec: 80, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_healing_mirror.current_state', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_healing_mirror.ideal_state', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_healing_mirror.transformation', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_healing_mirror.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_healing_mirror.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 6 — Работа с делом  (Level 2, ~20 min)
+ * ========================================================================= */
+const silva_case_working = makePractice(
+  'silva_case_working',
+  'Работа с делом',
+  'Техника решения конкретной жизненной задачи через ментальный экран и работу с подсознанием.',
+  2,
+  20,
+  [],
+  ['задачи', 'решение', 'подсознание'],
+  [
+    { kind: 'voice', textKey: 'silva_case_working.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_case_working.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_case_working.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_case_working.defining_problem', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_case_working.projecting_solution', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_case_working.programming', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_case_working.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_case_working.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 7 — Субъективная коммуникация  (Level 2, ~20 min)
+ * ========================================================================= */
+const silva_subjective_comm = makePractice(
+  'silva_subjective_comm',
+  'Субъективная коммуникация',
+  'Техника установления ментального контакта на подсознательном уровне с другими людьми.',
+  2,
+  20,
+  ['Маниакально-депрессивный психоз'],
+  ['коммуникация', 'контакт', 'подсознание'],
+  [
+    { kind: 'voice', textKey: 'silva_subjective_comm.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_subjective_comm.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_subjective_comm.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_subjective_comm.comm_concept', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_subjective_comm.establishing', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_subjective_comm.sending_message', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_subjective_comm.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_subjective_comm.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 8 — Контроль привычек  (Level 2, ~15 min)
+ * ========================================================================= */
+const silva_habit_control = makePractice(
+  'silva_habit_control',
+  'Контроль привычек',
+  'Программирование подсознания для высвобождения нежелательных привычек и создания полезных паттернов.',
+  2,
+  15,
+  [],
+  ['привычки', 'контроль', 'подсознание'],
+  [
+    { kind: 'voice', textKey: 'silva_habit_control.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_habit_control.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_habit_control.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_habit_control.identifying', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_habit_control.releasing', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_habit_control.installing_new', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_habit_control.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_habit_control.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 9 — Управление сновидениями  (Level 2, ~15 min)
+ * ========================================================================= */
+const silva_dream_control = makePractice(
+  'silva_dream_control',
+  'Управление сновидениями',
+  'Техника программирования осознанных сновидений и получения информации из подсознания во сне.',
+  2,
+  15,
+  ['Нарушения сна, бессонница'],
+  ['сновидения', 'осознанность', 'сон'],
+  [
+    { kind: 'voice', textKey: 'silva_dream_control.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_dream_control.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_dream_control.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_dream_control.dream_concept', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_dream_control.programming', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_dream_control.intent_setting', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_dream_control.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_dream_control.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 10 — Стакан воды  (Level 2, ~10 min)
+ * ========================================================================= */
+const silva_glass_water = makePractice(
+  'silva_glass_water',
+  'Стакан воды',
+  'Известная техника «стакана воды» для получения ответов на вопросы от подсознания во сне.',
+  2,
+  10,
+  [],
+  ['ответы', 'подсознание', 'быстрая'],
+  [
+    { kind: 'voice', textKey: 'silva_glass_water.preparation', durationSec: 30, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_glass_water.induction', durationSec: 45, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_glass_water.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_glass_water.formulating_question', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_glass_water.programming_glass', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_glass_water.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_glass_water.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 11 — Техника трёх пальцев  (Level 3, ~15 min)
+ * ========================================================================= */
+const silva_three_fingers = makePractice(
+  'silva_three_fingers',
+  'Техника трёх пальцев',
+  'Быстрый доступ к альфа-состоянию через физический якорь — соединение трёх пальцев.',
+  3,
+  15,
+  [],
+  ['якорь', 'альфа', 'быстрый доступ'],
+  [
+    { kind: 'voice', textKey: 'silva_three_fingers.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_three_fingers.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_three_fingers.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_three_fingers.anchor_concept', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_three_fingers.installing_anchor', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_three_fingers.testing_anchor', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_three_fingers.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_three_fingers.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 12 — Пять чувств  (Level 3, ~20 min)
+ * ========================================================================= */
+const silva_five_senses = makePractice(
+  'silva_five_senses',
+  'Пять чувств',
+  'Развитие ментальных органов чувств. Усиливает восприятие через визуализацию всех пяти каналов.',
+  3,
+  20,
+  [],
+  ['чувства', 'восприятие', 'развитие'],
+  [
+    { kind: 'voice', textKey: 'silva_five_senses.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_five_senses.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_five_senses.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_five_senses.sight', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_five_senses.sound', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_five_senses.touch', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_five_senses.smell_taste', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_five_senses.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_five_senses.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 13 — Развитие креативности  (Level 3, ~20 min)
+ * ========================================================================= */
+const silva_creativity = makePractice(
+  'silva_creativity',
+  'Развитие креативности',
+  'Активация творческого потенциала через альфа-состояние. Генерация идей и вдохновение.',
+  3,
+  20,
+  [],
+  ['креативность', 'творчество', 'идеи'],
+  [
+    { kind: 'voice', textKey: 'silva_creativity.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_creativity.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_creativity.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_creativity.opening_channels', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_creativity.idea_generation', durationSec: 90, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_creativity.capturing', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_creativity.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_creativity.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 14 — Решение проблем  (Level 3, ~25 min)
+ * ========================================================================= */
+const silva_problem_solving = makePractice(
+  'silva_problem_solving',
+  'Решение проблем',
+  'Комплексная техника работы со сложными жизненными ситуациями с помощью ментального экрана.',
+  3,
+  25,
+  [],
+  ['проблемы', 'анализ', 'решение'],
+  [
+    { kind: 'voice', textKey: 'silva_problem_solving.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_problem_solving.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_problem_solving.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_problem_solving.defining', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_problem_solving.mental_review', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_problem_solving.solutions', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_problem_solving.choosing_best', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_problem_solving.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_problem_solving.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 15 — Субъективные точки  (Level 4, ~25 min)
+ * ========================================================================= */
+const silva_subjective_points = makePractice(
+  'silva_subjective_points',
+  'Субъективные точки',
+  'Продвинутая техника работы с биоэнергетическими точками для управления физическим состоянием.',
+  4,
+  25,
+  ['Гемофилия, кровоточащие раны'],
+  ['точки', 'биоэнергия', 'тело'],
+  [
+    { kind: 'voice', textKey: 'silva_subjective_points.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_subjective_points.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_subjective_points.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_subjective_points.points_concept', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_subjective_points.locating_points', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_subjective_points.applying_energy', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_subjective_points.healing_focus', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_subjective_points.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_subjective_points.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 16 — Быстрая манифестация  (Level 4, ~25 min)
+ * ========================================================================= */
+const silva_rapid_manifest = makePractice(
+  'silva_rapid_manifest',
+  'Быстрая манифестация',
+  'Техника ускоренного воплощения намерений через согласованные усилия сознания и подсознания.',
+  4,
+  25,
+  ['Бредовые состояния'],
+  ['манифестация', 'намерение', 'ускорение'],
+  [
+    { kind: 'voice', textKey: 'silva_rapid_manifest.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_rapid_manifest.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_rapid_manifest.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_rapid_manifest.manifest_concept', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_rapid_manifest.clarifying_intent', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_rapid_manifest.vivid_projection', durationSec: 90, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_rapid_manifest.releasing', durationSec: 45, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_rapid_manifest.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 17 — Цикл 28  (Level 4, ~20 min)
+ * ========================================================================= */
+const silva_cycle_28 = makePractice(
+  'silva_cycle_28',
+  'Цикл 28',
+  'Работа с 28-дневным циклом убеждений для глубокого перепрограммирования ограничивающих установок.',
+  4,
+  20,
+  [],
+  ['убеждения', 'цикл', 'перепрограммирование'],
+  [
+    { kind: 'voice', textKey: 'silva_cycle_28.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_cycle_28.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_cycle_28.deepening', durationSec: 30, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_cycle_28.cycle_concept', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_cycle_28.identifying_beliefs', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_cycle_28.reprogramming', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_cycle_28.affirmation_implant', durationSec: 45, phase: 'work', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_cycle_28.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_cycle_28.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 18 — Мастерство интуиции  (Level 5, ~35 min)
+ * ========================================================================= */
+const silva_intuition_mastery = makePractice(
+  'silva_intuition_mastery',
+  'Мастерство интуиции',
+  'Финальная практика: развитие и интеграция интуитивных способностей в повседневную жизнь.',
+  5,
+  35,
+  ['Шизофрения, бредовые расстройства'],
+  ['интуиция', 'мастерство', 'интеграция'],
+  [
+    { kind: 'voice', textKey: 'silva_intuition_mastery.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 5 },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.induction', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.deepening', durationSec: 45, phase: 'deepening', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.intuition_concept', durationSec: 90, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.sensing_exercise', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.decision_testing', durationSec: 75, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 20 },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.daily_integration', durationSec: 60, phase: 'work', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.integration', durationSec: 45, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'silva_intuition_mastery.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Export: all 18 Silva practices
+ * ========================================================================= */
+export const silvaPractices: Practice[] = [
+  silva_alpha_entry,
+  silva_mental_screen,
+  silva_laboratory,
+  silva_deep_relaxation,
+  silva_healing_mirror,
+  silva_case_working,
+  silva_subjective_comm,
+  silva_habit_control,
+  silva_dream_control,
+  silva_glass_water,
+  silva_three_fingers,
+  silva_five_senses,
+  silva_creativity,
+  silva_problem_solving,
+  silva_subjective_points,
+  silva_rapid_manifest,
+  silva_cycle_28,
+  silva_intuition_mastery,
+];

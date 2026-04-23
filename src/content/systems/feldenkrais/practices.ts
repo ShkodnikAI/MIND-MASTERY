@@ -1,0 +1,399 @@
+import type { Practice, Segment, SessionLength } from '@/types';
+
+const ALL_LENGTHS: SessionLength[] = ['short', 'medium', 'full'];
+
+type DiffMap = {
+  [level: number]: 'beginner' | 'elementary' | 'intermediate' | 'advanced';
+};
+
+const DIFF_MAP: DiffMap = {
+  1: 'beginner',
+  2: 'elementary',
+  3: 'intermediate',
+  4: 'advanced',
+};
+
+function makePractice(
+  id: string,
+  title: string,
+  description: string,
+  level: number,
+  estimatedMin: number,
+  contraindications: string[],
+  tags: string[],
+  segments: Segment[],
+): Practice {
+  return {
+    id,
+    systemId: 'feldenkrais',
+    title,
+    description,
+    difficulty: DIFF_MAP[level] ?? 'beginner',
+    estimatedDurationMin: estimatedMin,
+    segments,
+    includeIn: ALL_LENGTHS,
+    requiredLevel: level,
+    contraindications,
+    tags,
+  };
+}
+
+/* =========================================================================
+ * Practice 1 — Осознанность через движение: введение  (Level 1, ~20 min)
+ * ========================================================================= */
+const feld_atm_intro = makePractice(
+  'feld_atm_intro',
+  'Осознанность через движение: введение',
+  'Вводный урок метода Фельденкрайза. Знакомит с принципами мягкого исследования собственных движений.',
+  1,
+  20,
+  [],
+  ['основы', 'осознанность', 'движение'],
+  [
+    { kind: 'voice', textKey: 'feld_atm_intro.preparation', durationSec: 60, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_atm_intro.principles', durationSec: 90, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 30 },
+    { kind: 'voice', textKey: 'feld_atm_intro.first_scan', durationSec: 60, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_atm_intro.gentle_movement', durationSec: 60, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 180 },
+    { kind: 'voice', textKey: 'feld_atm_intro.second_scan', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_atm_intro.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_atm_intro.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 2 — Тазовые часы  (Level 1, ~20 min)
+ * ========================================================================= */
+const feld_pelvic_clock = makePractice(
+  'feld_pelvic_clock',
+  'Тазовые часы',
+  'Классический урок Фельденкрайза. Исследует движения таза как циферблат часов для улучшения мобильности.',
+  1,
+  20,
+  ['Беременность (III триместр)', 'Острая боль в пояснице'],
+  ['таз', 'мобильность', 'пол'],
+  [
+    { kind: 'voice', textKey: 'feld_pelvic_clock.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_pelvic_clock.lying_down', durationSec: 45, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_pelvic_clock.exploring_twelve', durationSec: 60, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_pelvic_clock.exploring_three', durationSec: 60, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_pelvic_clock.circling', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_pelvic_clock.resting', durationSec: 30, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 60 },
+    { kind: 'voice', textKey: 'feld_pelvic_clock.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_pelvic_clock.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 3 — Позвоночник как цепь  (Level 1, ~25 min)
+ * ========================================================================= */
+const feld_spine_chain = makePractice(
+  'feld_spine_chain',
+  'Позвоночник как цепь',
+  'Урок для артикуляции позвоночника. Исследует каждое позвонковое сочленение отдельно и в цепи.',
+  1,
+  25,
+  ['Грыжи межпозвонковых дисков (обострение)'],
+  ['позвоночник', 'артикуляция', 'цепь'],
+  [
+    { kind: 'voice', textKey: 'feld_spine_chain.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_spine_chain.body_scan', durationSec: 45, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_spine_chain.lower_spine', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_spine_chain.mid_spine', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_spine_chain.upper_spine', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_spine_chain.full_chain', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_spine_chain.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_spine_chain.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 4 — Сидение с лёгкостью  (Level 1, ~15 min)
+ * ========================================================================= */
+const feld_sitting_ease = makePractice(
+  'feld_sitting_ease',
+  'Сидение с лёгкостью',
+  'Урок на стуле для улучшения осанки и комфорта при сидении. Подходит для офисных работников.',
+  1,
+  15,
+  [],
+  ['стул', 'осанка', 'сидение'],
+  [
+    { kind: 'voice', textKey: 'feld_sitting_ease.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_sitting_ease.finding_sitbones', durationSec: 60, phase: 'induction', optionalTts: true },
+    { kind: 'silence', durationSec: 60 },
+    { kind: 'voice', textKey: 'feld_sitting_ease.shifting_weight', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 90 },
+    { kind: 'voice', textKey: 'feld_sitting_ease.spine_lengthening', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 90 },
+    { kind: 'voice', textKey: 'feld_sitting_ease.turning', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 90 },
+    { kind: 'voice', textKey: 'feld_sitting_ease.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_sitting_ease.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 5 — Перекаты  (Level 2, ~25 min)
+ * ========================================================================= */
+const feld_rolling = makePractice(
+  'feld_rolling',
+  'Перекаты',
+  'Урок мягких перекатов на полу. Развивает координацию и осознание движения центра тяжести.',
+  2,
+  25,
+  ['Головокружения, вестибулярные нарушения'],
+  ['перекаты', 'координация', 'пол'],
+  [
+    { kind: 'voice', textKey: 'feld_rolling.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_rolling.grounding', durationSec: 45, phase: 'induction', optionalTts: true },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_rolling.head_rolling', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_rolling.shoulder_rolling', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_rolling.full_rolling', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 150 },
+    { kind: 'voice', textKey: 'feld_rolling.resting', durationSec: 30, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 60 },
+    { kind: 'voice', textKey: 'feld_rolling.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_rolling.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 6 — Расширение рёбер  (Level 2, ~20 min)
+ * ========================================================================= */
+const feld_ribcage = makePractice(
+  'feld_ribcage',
+  'Расширение рёбер',
+  'Дыхательный урок для расширения объёма и свободы дыхания через мягкие движения рёбер.',
+  2,
+  20,
+  ['Астма тяжёлой степени', 'ХОБЛ'],
+  ['дыхание', 'рёбра', 'объём'],
+  [
+    { kind: 'voice', textKey: 'feld_ribcage.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_ribcage.initial_breath', durationSec: 45, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_ribcage.side_ribs', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_ribcage.back_ribs', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_ribcage.full_breathing', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_ribcage.comparison', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_ribcage.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 7 — Смягчение взгляда  (Level 2, ~15 min)
+ * ========================================================================= */
+const feld_eyes = makePractice(
+  'feld_eyes',
+  'Смягчение взгляда',
+  'Урок для глаз и зрения. Снимает напряжение глазных мышц и восстанавливает подвижность взгляда.',
+  2,
+  15,
+  ['Отслойка сетчатки, глаукома (консультация офтальмолога)'],
+  ['глаза', 'зрение', 'расслабление'],
+  [
+    { kind: 'voice', textKey: 'feld_eyes.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_eyes.palming', durationSec: 45, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_eyes.eye_movements', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 90 },
+    { kind: 'voice', textKey: 'feld_eyes.peripheral', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 90 },
+    { kind: 'voice', textKey: 'feld_eyes.soft_gaze', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 90 },
+    { kind: 'voice', textKey: 'feld_eyes.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_eyes.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 8 — Артикуляция позвоночника (продвинутая)  (Level 2, ~25 min)
+ * ========================================================================= */
+const feld_spine_articulation = makePractice(
+  'feld_spine_articulation',
+  'Артикуляция позвоночника',
+  'Продвинутый урок для детальной проработки каждого отдела позвоночника в разных положениях.',
+  2,
+  25,
+  ['Спондилёз тяжёлой степени'],
+  ['позвоночник', 'артикуляция', 'продвинутый'],
+  [
+    { kind: 'voice', textKey: 'feld_spine_articulation.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_spine_articulation.supine_scan', durationSec: 45, phase: 'induction', optionalTts: true },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_spine_articulation.side_bending', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_spine_articulation.rotation', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_spine_articulation.combined', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 150 },
+    { kind: 'voice', textKey: 'feld_spine_articulation.standing_scan', durationSec: 45, phase: 'integration', optionalTts: true },
+    { kind: 'silence', durationSec: 60 },
+    { kind: 'voice', textKey: 'feld_spine_articulation.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 9 — Атлантическая кукла  (Level 3, ~30 min)
+ * ========================================================================= */
+const feld_atlantic_puppet = makePractice(
+  'feld_atlantic_puppet',
+  'Атлантическая кукла',
+  'Классический длинный урок. Исследует связь головы, шеи и таза через образ марионетки на нитях.',
+  3,
+  30,
+  ['Остеохондроз шейного отдела в острой фазе'],
+  ['голова', 'шея', 'таз', 'марионетка'],
+  [
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.puppet_image', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.head_nodding', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.pelvic_response', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.connecting', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 150 },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.whole_puppet', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.resting', durationSec: 30, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 60 },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_atlantic_puppet.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 10 — Распределение веса на стуле  (Level 3, ~20 min)
+ * ========================================================================= */
+const feld_weight_distribution = makePractice(
+  'feld_weight_distribution',
+  'Распределение веса на стуле',
+  'Продвинутый урок на стуле. Исследует тонкие сдвиги веса и их влияние на осанку и свободу.',
+  3,
+  20,
+  [],
+  ['стул', 'вес', 'осанка', 'продвинутый'],
+  [
+    { kind: 'voice', textKey: 'feld_weight_distribution.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_weight_distribution.exploring_base', durationSec: 45, phase: 'induction', optionalTts: true },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_weight_distribution.forward_back', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_weight_distribution.side_to_side', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_weight_distribution.diagonals', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_weight_distribution.circling', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 90 },
+    { kind: 'voice', textKey: 'feld_weight_distribution.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_weight_distribution.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 11 — Ходьба в осознанности  (Level 3, ~25 min)
+ * ========================================================================= */
+const feld_walking_awareness = makePractice(
+  'feld_walking_awareness',
+  'Ходьба в осознанности',
+  'Интегративный урок: переносит открытия с пола в вертикальное положение и ходьбу.',
+  3,
+  25,
+  ['Травмы ног, нарушение равновесия'],
+  ['ходьба', 'интеграция', 'вертикаль'],
+  [
+    { kind: 'voice', textKey: 'feld_walking_awareness.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_walking_awareness.standing_scan', durationSec: 45, phase: 'induction', optionalTts: true },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_walking_awareness.weight_shift', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_walking_awareness.step_by_step', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_walking_awareness.spine_in_walking', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_walking_awareness.free_walking', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_walking_awareness.integration', durationSec: 30, phase: 'integration', optionalTts: false },
+    { kind: 'voice', textKey: 'feld_walking_awareness.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Practice 12 — Образ себя  (Level 4, ~35 min)
+ * ========================================================================= */
+const feld_self_image = makePractice(
+  'feld_self_image',
+  'Образ себя',
+  'Финальная практика: глубокое исследование самовосприятия тела и расширение телесного образа «я».',
+  4,
+  35,
+  ['Дисморфофобия, расстройства телесного образа'],
+  ['образ себя', 'мастерство', 'тело'],
+  [
+    { kind: 'voice', textKey: 'feld_self_image.preparation', durationSec: 45, phase: 'preparation', optionalTts: false },
+    { kind: 'silence', durationSec: 10 },
+    { kind: 'voice', textKey: 'feld_self_image.current_image', durationSec: 60, phase: 'induction', optionalTts: false },
+    { kind: 'silence', durationSec: 15 },
+    { kind: 'voice', textKey: 'feld_self_image.body_mapping', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_self_image.edge_exploration', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 150 },
+    { kind: 'voice', textKey: 'feld_self_image.expanding_image', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 150 },
+    { kind: 'voice', textKey: 'feld_self_image.integrated_movement', durationSec: 45, phase: 'work', optionalTts: true },
+    { kind: 'silence', durationSec: 120 },
+    { kind: 'voice', textKey: 'feld_self_image.new_image', durationSec: 45, phase: 'integration', optionalTts: false },
+    { kind: 'silence', durationSec: 60 },
+    { kind: 'voice', textKey: 'feld_self_image.reorientation', durationSec: 30, phase: 'reorientation', optionalTts: false },
+  ],
+);
+
+/* =========================================================================
+ * Export: all 12 Feldenkrais practices
+ * ========================================================================= */
+export const feldenkraisPractices: Practice[] = [
+  feld_atm_intro,
+  feld_pelvic_clock,
+  feld_spine_chain,
+  feld_sitting_ease,
+  feld_rolling,
+  feld_ribcage,
+  feld_eyes,
+  feld_spine_articulation,
+  feld_atlantic_puppet,
+  feld_weight_distribution,
+  feld_walking_awareness,
+  feld_self_image,
+];

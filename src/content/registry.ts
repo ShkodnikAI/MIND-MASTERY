@@ -2,21 +2,22 @@
  * @file Content Registry — plugin architecture for practice systems.
  *
  * Provides a runtime map of `System` objects. Each system is registered
- * at app startup via `registerSystem()`, then looked up by consumers:
- *
- *   const system = getSystem('transurfing');
- *   const practice = getPractice('transurfing', 'transurfing-lift-anchor');
- *   const all = getAllSystems();
+ * at app startup via `registerSystem()`, then looked up by consumers.
  *
  * Source of truth:
  *   - UI chrome strings → src/i18n/
  *   - Practice narration texts → content/texts/<system>/<practice>.json
  *   - Type definitions → src/types/content.ts
  *
- * @stage 2a — Implement full registry with system registration and validation.
+ * @stage 2a — Full registry with auto-registration of all 5 systems.
  */
 
 import type { System, Practice } from '@/types';
+import { transurfingSystem } from './systems/transurfing';
+import { silvaSystem } from './systems/silva';
+import { dispenzaSystem } from './systems/dispenza';
+import { feldenkraisSystem } from './systems/feldenkrais';
+import { breathSystem } from './systems/breath';
 
 // ---------------------------------------------------------------------------
 // Internal store
@@ -24,6 +25,32 @@ import type { System, Practice } from '@/types';
 
 /** Runtime registry of all registered systems, keyed by system ID. */
 const systems = new Map<string, System>();
+
+// ---------------------------------------------------------------------------
+// Auto-registration (runs once at import time)
+// ---------------------------------------------------------------------------
+
+const ALL_SYSTEMS: readonly System[] = [
+  transurfingSystem,
+  silvaSystem,
+  dispenzaSystem,
+  feldenkraisSystem,
+  breathSystem,
+];
+
+let isRegistered = false;
+
+/**
+ * Registers all built-in practice systems.
+ * Call once during app startup. Safe to call multiple times (idempotent).
+ */
+export function registerAllSystems(): void {
+  if (isRegistered) return;
+  for (const system of ALL_SYSTEMS) {
+    systems.set(system.id, system);
+  }
+  isRegistered = true;
+}
 
 // ---------------------------------------------------------------------------
 // Public API
@@ -57,13 +84,43 @@ export function getPractice(
 }
 
 /**
+ * Find a practice by ID across ALL systems.
+ * Returns the practice and its parent system, or null if not found.
+ */
+export function findPracticeGlobal(
+  practiceId: string,
+): { practice: Practice; system: System } | null {
+  for (const system of systems.values()) {
+    const practice = system.practices.find((p) => p.id === practiceId);
+    if (practice) return { practice, system };
+  }
+  return null;
+}
+
+/**
  * Register a system into the content registry.
  * Overwrites any previously registered system with the same ID.
- *
- * Call this during app startup (Stage 2b/2c) after importing system modules.
  */
 export function registerSystem(system: System): void {
   systems.set(system.id, system);
+}
+
+/**
+ * Get total practice count across all systems.
+ */
+export function getTotalPracticeCount(): number {
+  let count = 0;
+  for (const system of systems.values()) {
+    count += system.practices.length;
+  }
+  return count;
+}
+
+/**
+ * Get practice count for a specific system.
+ */
+export function getSystemPracticeCount(systemId: string): number {
+  return systems.get(systemId)?.practices.length ?? 0;
 }
 
 /**
@@ -72,4 +129,5 @@ export function registerSystem(system: System): void {
  */
 export function clearRegistry(): void {
   systems.clear();
+  isRegistered = false;
 }

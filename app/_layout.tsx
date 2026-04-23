@@ -14,6 +14,7 @@ import { useFonts } from 'expo-font';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet } from 'react-native';
 import { useContentStore } from '@/store/contentStore';
+import { registerAllSystems, getTotalPracticeCount } from '@/content/registry';
 import { initializeDatabase, registerAppStateListener } from '@/db/lifecycle';
 import { colors } from '@/ui/theme';
 import { logger } from '@/utils/logger';
@@ -55,7 +56,11 @@ export default function RootLayout() {
         unsubscribe = registerAppStateListener();
         logger.info('[root]', 'App-state listener registered');
 
-        // 3. Hydrate content store (INV-3)
+        // 3. Register all 5 practice systems in content registry
+        registerAllSystems();
+        logger.info('[root]', `Registered ${getTotalPracticeCount()} practices across 5 systems`);
+
+        // 4. Hydrate content store (INV-3)
         await loadPractices();
         logger.info('[root]', 'Content store hydrated');
       } catch (error) {
