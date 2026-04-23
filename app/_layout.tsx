@@ -3,7 +3,7 @@
  *
  * Wraps the entire app in providers (gesture handler, safe area),
  * initializes i18n, hydrates the content store, opens the database,
- * loads fonts, and applies the dark theme.
+ * loads fonts, sets up notifications, and applies the dark theme.
  */
 
 import { useEffect } from 'react';
@@ -16,6 +16,7 @@ import { StyleSheet } from 'react-native';
 import { useContentStore } from '@/store/contentStore';
 import { loadAllTexts } from '@/services/content/textLoader';
 import { initializeDatabase, registerAppStateListener } from '@/db/lifecycle';
+import { setupNotificationChannels, registerNotificationHandlers } from '@/services/notifications';
 import { colors } from '@/ui/theme';
 import { logger } from '@/utils/logger';
 
@@ -65,6 +66,10 @@ export default function RootLayout() {
         const texts = loadAllTexts('ru');
         loadTexts(texts);
         logger.info('[root]', `Loaded ${texts.length} practice texts`);
+
+        // 5. Set up notification channels (Android)
+        await setupNotificationChannels();
+        logger.info('[root]', 'Notification channels configured');
       } catch (error) {
         logger.error('[root]', 'Initialization failed', error);
       }
@@ -77,10 +82,16 @@ export default function RootLayout() {
     };
   }, [loadPractices]);
 
+  // ── Notification handler registration (runs once) ──────────────
+  useEffect(() => {
+    const cleanup = registerNotificationHandlers();
+    return () => {
+      cleanup();
+    };
+  }, []);
+
   // ── Render ─────────────────────────────────────────────────────
 
-  // Show nothing while fonts load (SplashScreen would be better, but
-  // keeping it simple for Stage 1).
   if (!fontsLoaded && !fontError) {
     return null;
   }

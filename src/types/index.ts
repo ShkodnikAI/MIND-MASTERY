@@ -75,5 +75,13 @@ export type {
 // Moment of Stillness
 export type { MomentSettings, MomentRecord, MomentDay } from './moment';
 
-// Settings & safety
-export type { ThemeMode, AppSettings, SafetyState } from './settings';
+// Settings, safety & notifications
+export type {
+  ThemeMode,
+  AppSettings,
+  SafetyState,
+  DayOfWeek,
+  NotificationCategoryId,
+  NotificationSettings,
+} from './settings';
+export { DAY_OF_WEEK_LABELS, DAY_OF_WEEK_FULL_LABELS } from './settings';

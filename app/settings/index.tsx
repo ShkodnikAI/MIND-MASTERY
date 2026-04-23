@@ -25,6 +25,12 @@ interface SettingsSection {
 
 const SECTIONS: readonly SettingsSection[] = [
   {
+    id: 'notifications',
+    title: 'Уведомления',
+    icon: 'notifications-outline',
+    route: '/settings/notifications',
+  },
+  {
     id: 'audio',
     title: 'Аудио',
     icon: 'volume-high-outline',

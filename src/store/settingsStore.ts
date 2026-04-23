@@ -6,6 +6,8 @@ import type {
   AudioSettings,
   VoiceSettings,
   LightConfig,
+  NotificationSettings,
+  DayOfWeek,
   AudioErrorPolicy,
   VoiceMode,
   LightThemeId,
@@ -36,6 +38,17 @@ const DEFAULT_VOICE: VoiceSettings = {
   pitch: 1.0,
 };
 
+const DEFAULT_NOTIFICATIONS: NotificationSettings = {
+  dailyReminderEnabled: false,
+  dailyReminderHour: 9,
+  dailyReminderMinute: 0,
+  dailyReminderDays: [1, 2, 3, 4, 5, 6, 7] as DayOfWeek[],
+  streakReminderEnabled: true,
+  streakReminderHour: 20,
+  achievementEnabled: true,
+  permissionGranted: false,
+};
+
 const DEFAULT_LIGHT: LightConfig = {
   enabled: true,
   theme: 'cosmic' as LightThemeId,
@@ -59,6 +72,7 @@ interface SettingsState {
   audio: AudioSettings;
   voice: VoiceSettings;
   light: LightConfig;
+  notifications: NotificationSettings;
 
   // Actions
   setOnboarded: (value: boolean) => void;
@@ -69,6 +83,8 @@ interface SettingsState {
   updateAudio: (partial: Partial<AudioSettings>) => void;
   updateVoice: (partial: Partial<VoiceSettings>) => void;
   updateLight: (partial: Partial<LightConfig>) => void;
+  updateNotifications: (partial: Partial<NotificationSettings>) => void;
+  setNotificationPermission: (granted: boolean) => void;
   resetSettings: () => void;
 }
 
@@ -87,6 +103,7 @@ export const useSettingsStore = create<SettingsState>()(
       audio: { ...DEFAULT_AUDIO },
       voice: { ...DEFAULT_VOICE },
       light: { ...DEFAULT_LIGHT },
+      notifications: { ...DEFAULT_NOTIFICATIONS },
 
       // ── Actions ──────────────────────────────────────────────
 
@@ -135,6 +152,16 @@ export const useSettingsStore = create<SettingsState>()(
           light: { ...state.light, ...partial },
         })),
 
+      updateNotifications: (partial: Partial<NotificationSettings>) =>
+        set((state) => ({
+          notifications: { ...state.notifications, ...partial },
+        })),
+
+      setNotificationPermission: (granted: boolean) =>
+        set((state) => ({
+          notifications: { ...state.notifications, permissionGranted: granted },
+        })),
+
       resetSettings: () =>
         set({
           onboarded: false,
@@ -144,6 +171,7 @@ export const useSettingsStore = create<SettingsState>()(
           audio: { ...DEFAULT_AUDIO },
           voice: { ...DEFAULT_VOICE },
           light: { ...DEFAULT_LIGHT },
+          notifications: { ...DEFAULT_NOTIFICATIONS },
         }),
     }),
     {
