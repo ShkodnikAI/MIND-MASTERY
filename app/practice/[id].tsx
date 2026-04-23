@@ -9,7 +9,7 @@
  * INV-A3: All styles via StyleSheet.create.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
@@ -19,13 +19,14 @@ import { useContentStore } from '@/store/contentStore';
 import { useProgressStore } from '@/store/progressStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { colors, typography, spacing, radii } from '@/ui/theme';
+import { getDefaultLength, isLengthAvailable } from '@/domain/session/filterSegmentsByLength';
 import { getSystemTheme } from '@/ui/theme/systemThemes';
 import {
   isPracticeUnlocked,
   getLockReason,
   type SystemProgressSnapshot,
 } from '@/domain/progression/checkUnlock';
-import type { DifficultyLevel } from '@/types';
+import type { DifficultyLevel, SessionLength } from '@/types';
 
 // ─── Difficulty labels ───────────────────────────────────────────
 
@@ -257,6 +258,7 @@ const styles = StyleSheet.create({
 export default function PracticeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const [selectedLength, setSelectedLength] = useState<SessionLength | null>(null);
 
   const practice = useContentStore((s) => s.getPractice(id ?? ''));
   const loaded = useContentStore((s) => s.loaded);
@@ -269,6 +271,13 @@ export default function PracticeDetailScreen() {
     const theme = getSystemTheme(practice.systemId);
     return theme.gradientColors[0];
   }, [practice]);
+
+  // Effective session length (user selection or default)
+  const effectiveLength = useMemo((): SessionLength => {
+    if (!practice) return 'medium';
+    if (selectedLength && isLengthAvailable(practice, selectedLength)) return selectedLength;
+    return getDefaultLength(practice);
+  }, [practice, selectedLength]);
 
   // Build unlock state
   const { isUnlocked, lockReason, hasContraindications, consentGiven } = useMemo(() => {
@@ -312,9 +321,8 @@ export default function PracticeDetailScreen() {
     if (hasContraindications && !consentGiven) {
       giveConsent(practice.id);
     }
-    // TODO: Launch session with audio engine (Stage 4)
-    // TODO: Stage 4 — launch session via audio engine
-  }, [practice, hasContraindications, consentGiven, giveConsent]);
+    router.push(`/player/${practice.id}?length=${effectiveLength}`);
+  }, [practice, hasContraindications, consentGiven, giveConsent, router, effectiveLength]);
 
   const handleBack = useCallback(() => {
     router.back();
@@ -492,13 +500,28 @@ export default function PracticeDetailScreen() {
           {/* Length presets */}
           <Text style={styles.sectionTitle}>Длительность</Text>
           <View style={styles.metaRow}>
-            {practice.includeIn.map((length) => (
-              <View key={length} style={styles.badge}>
-                <Text style={styles.badgeText}>
-                  {length === 'short' ? 'Короткая' : length === 'medium' ? 'Средняя' : 'Полная'}
-                </Text>
-              </View>
-            ))}
+            {practice.includeIn.map((length) => {
+              const isSelected = length === effectiveLength;
+              return (
+                <TouchableOpacity
+                  key={length}
+                  style={[
+                    styles.badge,
+                    isSelected && {
+                      backgroundColor: `${systemColor}33`,
+                      borderWidth: 1,
+                      borderColor: systemColor,
+                    },
+                  ]}
+                  onPress={() => setSelectedLength(length)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.badgeText, isSelected && { color: systemColor }]}>
+                    {length === 'short' ? 'Короткая' : length === 'medium' ? 'Средняя' : 'Полная'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
           {/* Start button */}

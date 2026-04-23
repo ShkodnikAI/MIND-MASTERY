@@ -9,3 +9,4 @@ export { PracticeCard } from './PracticeCard';
 export { SystemTabContent } from './SystemTabContent';
 export { SettingsSlider } from './SettingsSlider';
 export { SettingsToggle } from './SettingsToggle';
+export { ProgressRing } from './ProgressRing';
