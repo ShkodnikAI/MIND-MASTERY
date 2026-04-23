@@ -45,6 +45,16 @@ export type {
   AudioLayerState,
 } from './audio';
 
+// Audio engine state-machine types (re-exported from src/audio for convenience)
+export type {
+  EngineState,
+  SessionConfig as EngineSessionConfig,
+  SessionPlan,
+  TimelineEntry,
+  BackgroundLayer,
+  EngineEvent,
+} from '@/audio/types';
+
 // Light / hardware types
 export type {
   LightThemeId,

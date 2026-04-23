@@ -30,3 +30,34 @@ Stage Summary:
 - textLoader implements Metro require.context with proper TypeScript typing
 - checkUnlock.ts properly uses system-level progression rules (not per-practice)
 - validate-content.ts: full pipeline catches schema errors, TS↔JSON mismatches, text length warnings
+
+---
+Task ID: 2b
+Agent: Super Z (main)
+Task: Stage 2b — Audio Engine (expo-audio, state machine, segment sequencer, fade controller)
+
+Work Log:
+- Analyzed expo-audio v0.3 actual API via node_modules: useAudioPlayer() returns AudioPlayer directly, replace() for source change, .volume setter
+- Designed event-driven architecture: AudioEngine (pure state machine) emits EngineEvents → useAudioEngine hook executes I/O via expo-audio/expo-speech/expo-haptics
+- Created src/audio/types.ts: EngineState, SessionConfig, SessionPlan, TimelineEntry, BackgroundLayer, EngineEvent (16 event types)
+- Created src/audio/FadeController.ts: startFade() with linear/exponential curves, effectiveVolume() utility, FadeHandle for cancellation
+- Created src/audio/SegmentQueue.ts: buildSessionPlan() splits segments into sequential timeline + background layers
+- Created src/audio/AudioEngine.ts: Singleton state machine (idle→preparing→playing⇄paused→finished), progress timer (2Hz), recursive timeline advancement, error counting (auto-abort at 5 errors), event subscription
+- Created src/store/audioStateStore.ts: Zustand store for runtime audio state (INV-3 compliance), per-layer AudioLayerState tracking
+- Created src/hooks/useAudioEngine.ts: React hook bridging AudioEngine↔expo-audio, creates 2 AudioPlayer instances (music+binaural), handles all 16 engine event types, resolves textKeys from contentStore, syncs to sessionStore+audioStateStore
+- Created src/audio/index.ts: Barrel exports for all audio module types and functions
+- Updated src/types/index.ts: Added re-exports for EngineState, SessionConfig, SessionPlan, TimelineEntry, BackgroundLayer, EngineEvent
+- TypeScript strict: 0 errors
+
+Stage Summary:
+- 7 new files in src/audio/, src/store/, src/hooks/
+- AudioEngine: ~380 lines — pure state machine, no platform deps
+- useAudioEngine: ~430 lines — full expo-audio v0.3 integration
+- INV-2 compliant: single AVAudioSession owner (AudioEngine singleton)
+- INV-3 compliant: UI reads from audioStateStore only
+- INV-6 compliant: discriminated union EngineEvent with exhaustive switch handling
+- 16 engine event types: 7 state events + 9 command events
+- expo-audio v0.3 API properly used: useAudioPlayer()→AudioPlayer, replace(), .volume, play(), pause()
+- expo-speech integration: speak/stop with language/rate/pitch from voiceSettings
+- expo-haptics integration: light/medium/heavy patterns from triggerHaptic events
+- FadeController: linear + exponential curves, 20-step interpolation, cancel support
