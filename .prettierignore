@@ -1,0 +1,5 @@
+node_modules
+.expo
+assets
+*.lock
+dist

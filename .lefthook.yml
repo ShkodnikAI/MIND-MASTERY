@@ -1,0 +1,25 @@
+# MIND MASTERY — Pre-commit Validation Pipeline
+# Canonical v2.3 — Architectural Invariant INV-4
+
+pre-commit:
+  parallel: true
+  commands:
+    typecheck:
+      run: npx tsc --noEmit
+      glob: "*.{ts,tsx}"
+    lint:
+      run: npx eslint --max-warnings=0 {staged_files}
+      glob: "*.{ts,tsx}"
+    format:
+      run: npx prettier --check {staged_files}
+      glob: "*.{ts,tsx,json,md}"
+    validate-content:
+      run: npx tsx scripts/validate-content.ts
+      glob: "content/**/*.json"
+
+pre-push:
+  commands:
+    typecheck-full:
+      run: npx tsc --noEmit
+    validate-schema:
+      run: npx tsx scripts/validate-schema.ts
