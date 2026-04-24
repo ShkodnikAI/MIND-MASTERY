@@ -49,6 +49,12 @@ const SECTIONS: readonly SettingsSection[] = [
     route: '/settings/light',
   },
   {
+    id: 'stats',
+    title: 'Статистика',
+    icon: 'stats-chart-outline',
+    route: '/stats',
+  },
+  {
     id: 'backup',
     title: 'Резервное копирование',
     icon: 'cloud-upload-outline',

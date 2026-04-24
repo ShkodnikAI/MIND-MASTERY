@@ -111,6 +111,10 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     flex: 1,
   },
+  headerActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
   settingsButton: {
     width: 44,
     height: 44,
@@ -225,6 +229,10 @@ export default function HubScreen() {
     router.push('/moment');
   }, [router]);
 
+  const handleStatsPress = useCallback(() => {
+    router.push('/stats');
+  }, [router]);
+
   return (
     <LinearGradient
       colors={[colors.background.primary, colors.background.secondary]}
@@ -240,14 +248,24 @@ export default function HubScreen() {
             <Text style={styles.greetingText} numberOfLines={1}>
               {greeting}
             </Text>
-            <TouchableOpacity
-              style={styles.settingsButton}
-              onPress={handleSettingsPress}
-              accessibilityLabel="Настройки"
-              accessibilityRole="button"
-            >
-              <Ionicons name="settings-outline" size={22} color={colors.text.secondary} />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={styles.settingsButton}
+                onPress={handleStatsPress}
+                accessibilityLabel="Статистика"
+                accessibilityRole="button"
+              >
+                <Ionicons name="stats-chart-outline" size={22} color={colors.text.secondary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.settingsButton}
+                onPress={handleSettingsPress}
+                accessibilityLabel="Настройки"
+                accessibilityRole="button"
+              >
+                <Ionicons name="settings-outline" size={22} color={colors.text.secondary} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Text style={styles.subtitleText}>Выберите систему для практики</Text>
