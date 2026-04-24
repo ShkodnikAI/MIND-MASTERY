@@ -83,9 +83,7 @@ export function ProgressRing({
       </Svg>
 
       {/* Center content (absolute positioned over the SVG) */}
-      <View style={[styles.center, { width: size, height: size }]}>
-        {children}
-      </View>
+      <View style={[styles.center, { width: size, height: size }]}>{children}</View>
     </View>
   );
 }

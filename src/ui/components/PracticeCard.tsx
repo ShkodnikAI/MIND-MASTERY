@@ -168,19 +168,11 @@ export function PracticeCard({
         >
           <Ionicons
             name={
-              !isUnlocked
-                ? 'lock-closed-outline'
-                : isCompleted
-                  ? 'checkmark-done'
-                  : 'play-outline'
+              !isUnlocked ? 'lock-closed-outline' : isCompleted ? 'checkmark-done' : 'play-outline'
             }
             size={18}
             color={
-              !isUnlocked
-                ? colors.text.tertiary
-                : isCompleted
-                  ? systemColor
-                  : colors.accent.success
+              !isUnlocked ? colors.text.tertiary : isCompleted ? systemColor : colors.accent.success
             }
           />
         </View>
@@ -211,8 +203,7 @@ export function PracticeCard({
 
         {completed > 0 && (
           <Text style={styles.completedCountText}>
-            {completed}{' '}
-            {completed === 1 ? 'раз' : completed < 5 ? 'раза' : 'раз'}
+            {completed} {completed === 1 ? 'раз' : completed < 5 ? 'раза' : 'раз'}
           </Text>
         )}
       </View>

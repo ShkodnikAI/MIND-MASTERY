@@ -50,12 +50,7 @@ const styles = StyleSheet.create({
 
 // ─── Component ───────────────────────────────────────────────────
 
-export function SettingsToggle({
-  label,
-  description,
-  value,
-  onValueChange,
-}: SettingsToggleProps) {
+export function SettingsToggle({ label, description, value, onValueChange }: SettingsToggleProps) {
   return (
     <View style={styles.container}>
       <View style={styles.textColumn}>

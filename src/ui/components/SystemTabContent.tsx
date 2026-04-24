@@ -120,12 +120,13 @@ export function SystemTabContent({ systemId, title, icon }: SystemTabContentProp
 
     return {
       totalSessionMin: sysProgress.totalSessionMin,
-      completedCount: sysProgress.totalPractices > 0
-        ? practices.reduce((sum: number, _p: Practice) => {
-            const pp = getPracticeProgress(_p.id);
-            return sum + (pp?.completedCount ?? 0);
-          }, 0)
-        : 0,
+      completedCount:
+        sysProgress.totalPractices > 0
+          ? practices.reduce((sum: number, _p: Practice) => {
+              const pp = getPracticeProgress(_p.id);
+              return sum + (pp?.completedCount ?? 0);
+            }, 0)
+          : 0,
       progressionRules: rules,
     };
   }, [loaded, systemId, practices, getSystemProgress, getPracticeProgress]);
@@ -184,11 +185,7 @@ export function SystemTabContent({ systemId, title, icon }: SystemTabContentProp
         <View style={styles.countBadge}>
           <Text style={styles.countText}>
             {practices.length}{' '}
-            {practices.length === 1
-              ? 'практика'
-              : practices.length < 5
-                ? 'практики'
-                : 'практик'}
+            {practices.length === 1 ? 'практика' : practices.length < 5 ? 'практики' : 'практик'}
           </Text>
         </View>
       </View>
