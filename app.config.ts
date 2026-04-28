@@ -86,7 +86,7 @@ export default (): ExpoConfig => ({
   },
   extra: {
     eas: {
-      projectId: 'mindmastery-local',
+      projectId: '3ec24a8a-9f3c-4a37-89a7-f767ba425df6',
     },
   },
 });
