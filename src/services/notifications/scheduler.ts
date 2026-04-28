@@ -584,15 +584,19 @@ function checkIfPracticedToday(progressState: {
   practices: Record<
     string,
     {
-      lastCompletedAt: string | null;
+      lastCompletedAt: number | null | string | null;
     }
   >;
 }): boolean {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
   for (const stored of Object.values(progressState.practices)) {
-    if (stored.lastCompletedAt && stored.lastCompletedAt.startsWith(today)) {
-      return true;
+    if (stored.lastCompletedAt) {
+      const dateStr =
+        typeof stored.lastCompletedAt === 'number'
+          ? new Date(stored.lastCompletedAt).toISOString().split('T')[0]
+          : stored.lastCompletedAt.startsWith(today);
+      if (dateStr === today) return true;
     }
   }
 
@@ -602,11 +606,17 @@ function checkIfPracticedToday(progressState: {
 /**
  * Compute the longest active streak across all systems.
  */
+function toDateStr(ts: number | null | string | null): string | null {
+  if (!ts) return null;
+  if (typeof ts === 'number') return new Date(ts).toISOString().split('T')[0];
+  return ts.split('T')[0];
+}
+
 function computeOverallStreak(progressState: {
   practices: Record<
     string,
     {
-      lastCompletedAt: string | null;
+      lastCompletedAt: number | null | string | null;
       completedCount: number;
     }
   >;
@@ -626,7 +636,8 @@ function computeOverallStreak(progressState: {
       // Check if any practice was completed on this date
       let found = false;
       for (const s of Object.values(progressState.practices)) {
-        if (s.lastCompletedAt && s.lastCompletedAt.startsWith(dateStr)) {
+        const sDateStr = toDateStr(s.lastCompletedAt);
+        if (sDateStr && sDateStr === dateStr) {
           found = true;
           break;
         }

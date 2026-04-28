@@ -5,7 +5,7 @@
  * and device information.
  */
 
-import { exportLogs, createGitHubIssueBody } from './crashLogger';
+import { createGitHubIssueBody } from './crashLogger';
 import { logger } from './logger';
 
 const GITHUB_API = 'https://api.github.com';

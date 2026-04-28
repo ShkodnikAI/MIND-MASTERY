@@ -460,7 +460,8 @@ export default function StatsScreen() {
   const { currentStreak, longestStreak } = useMemo(() => {
     const dates = Object.values(practices)
       .map((p) => p.lastCompletedAt)
-      .filter((d): d is string => d !== null);
+      .filter((d): d is number => d !== null)
+      .map((d) => new Date(d).toISOString());
     const streaks = computeStreaks(dates);
     return { currentStreak: streaks.current, longestStreak: streaks.longest };
   }, [practices]);
@@ -495,8 +496,8 @@ export default function StatsScreen() {
     const activeDays = new Set(
       Object.values(practices)
         .map((p) => p.lastCompletedAt)
-        .filter((d): d is string => d !== null)
-        .map((d) => getDayKey(d)),
+        .filter((d): d is number => d !== null)
+        .map((d) => getDayKey(new Date(d).toISOString())),
     );
 
     return Array.from({ length: 7 }, (_, i) => {

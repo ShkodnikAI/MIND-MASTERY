@@ -47,14 +47,6 @@ function hasDomfreqReminders(): boolean {
   return reminders.some((r) => r.label.startsWith(DFP_LABEL_PREFIX));
 }
 
-/**
- * Count existing DFP reminders.
- */
-function countDomfreqReminders(): number {
-  const reminders = useReminderStore.getState().reminders;
-  if (!reminders) return 0;
-  return reminders.filter((r) => r.label.startsWith(DFP_LABEL_PREFIX)).length;
-}
 
 /**
  * Ensure DFP persistent reminders exist.

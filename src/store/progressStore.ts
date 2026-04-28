@@ -15,7 +15,6 @@ import {
   getAllProgress,
   updateProgress,
   incrementCompleted as dbIncrementCompleted,
-  getSystemProgress as dbGetSystemProgress,
 } from '@/db/queries/progress';
 import { logger } from '@/utils/logger';
 
