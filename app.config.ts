@@ -75,10 +75,6 @@ export default (): ExpoConfig => ({
         enableFTS: true,
       },
     ],
-    'expo-keep-awake',
-    'expo-brightness',
-    'expo-haptics',
-    'expo-localization',
   ],
   updates: {
     url: 'https://u.expo.dev/mindmastery',
