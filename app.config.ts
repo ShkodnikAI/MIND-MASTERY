@@ -52,9 +52,7 @@ export default (): ExpoConfig => ({
     ],
     // minSdkVersion: 26, // Set in eas.json instead
   },
-  web: {
-    favicon: './assets/images/favicon.png',
-  },
+  web: {},
   scheme: 'mindmastery',
   plugins: [
     'expo-router',
@@ -69,7 +67,6 @@ export default (): ExpoConfig => ({
       {
         icon: './assets/images/notification-icon.png',
         color: '#6C5CE7',
-        sounds: ['moment_chime.wav'],
       },
     ],
     [
@@ -82,12 +79,6 @@ export default (): ExpoConfig => ({
     'expo-brightness',
     'expo-haptics',
     'expo-localization',
-    [
-      'expo-asset',
-      {
-        assets: ['./assets/fonts/Inter-Regular.ttf'],
-      },
-    ],
   ],
   updates: {
     url: 'https://u.expo.dev/mindmastery',
