@@ -15,7 +15,7 @@
     "validate-schema": "tsx scripts/validate-schema.ts",
     "build:dev": "eas build --profile development --platform android",
     "build:preview": "eas build --profile preview --platform android",
-    "build:prod": "eas build --profile production --platform android",
+    "build:prod": "eas build --profile production --platform android"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
