@@ -1,8 +1,9 @@
--- ============================================================================
--- Migration v1 — initial schema
--- Identical to schema.sql; applied by the migration runner.
--- ============================================================================
+/**
+ * Migration v1 — initial schema
+ * Identical to schema.sql; applied by the migration runner.
+ */
 
+export default `
 -- Session tracking
 CREATE TABLE IF NOT EXISTS sessions (
   id          TEXT PRIMARY KEY,
@@ -85,3 +86,4 @@ CREATE TABLE IF NOT EXISTS settings (
 -- Record migration version
 INSERT OR IGNORE INTO settings (key, value_json, updated_at)
 VALUES ('db_version', '1', strftime('%s', 'now') * 1000);
+`;

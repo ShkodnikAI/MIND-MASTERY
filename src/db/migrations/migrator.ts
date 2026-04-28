@@ -5,11 +5,13 @@
 
 import { getDatabase } from '@/db/index';
 import { logger } from '@/utils/logger';
+import v1 from './v1';
+import v2 from './v2';
 
 /** Ordered list of migration SQL strings, keyed by version number. */
 const MIGRATIONS: Record<number, string> = {
-  1: require('./v1.sql'),
-  2: require('./v2.sql'),
+  1: v1,
+  2: v2,
 };
 
 /** Latest schema version known to this build of the app. */

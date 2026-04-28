@@ -1,8 +1,9 @@
--- ============================================================================
--- Mind Mastery — Schema v2 Migration
--- Adds `reminders` table for user-created practice notifications.
--- ============================================================================
+/**
+ * Mind Mastery — Schema v2 Migration
+ * Adds `reminders` table for user-created practice notifications.
+ */
 
+export default `
 -- User-created practice reminders
 CREATE TABLE IF NOT EXISTS reminders (
   id           TEXT    PRIMARY KEY,
@@ -24,3 +25,4 @@ CREATE INDEX IF NOT EXISTS idx_reminders_created_at ON reminders (created_at);
 -- Update schema version
 INSERT OR REPLACE INTO settings (key, value_json, updated_at)
 VALUES ('db_version', '2', strftime('%s', 'now'));
+`;
