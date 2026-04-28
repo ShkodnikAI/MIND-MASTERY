@@ -72,6 +72,12 @@ const SECTIONS: readonly SettingsSection[] = [
     icon: 'information-circle-outline',
     route: '/settings/about',
   },
+  {
+    id: 'debug',
+    title: 'Отладка (TEST)',
+    icon: 'bug-outline',
+    route: '/settings/debug',
+  },
 ] as const;
 
 // ─── Styles ─────────────────────────────────────────────────────

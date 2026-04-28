@@ -15,7 +15,7 @@ import { logger } from '@/utils/logger';
 const PRACTICE_ID_REGEX = /^[a-z][a-z0-9_]*$/;
 
 // Valid system IDs
-const VALID_SYSTEMS = new Set(['transurfing', 'silva', 'dispenza', 'feldenkrais', 'breath']);
+const VALID_SYSTEMS = new Set(['transurfing', 'silva', 'dispenza', 'feldenkrais', 'breath', 'domfreq']);
 
 // ---------------------------------------------------------------------------
 // Public types

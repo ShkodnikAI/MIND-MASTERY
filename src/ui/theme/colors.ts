@@ -40,6 +40,7 @@ export const colors = {
   dispenza: '#FDCB6E',
   feldenkrais: '#E17055',
   breath: '#74B9FF',
+  domfreq: '#E84393',
 
   // UI chrome
   border: '#2D3748',

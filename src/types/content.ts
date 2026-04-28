@@ -14,7 +14,7 @@ import type { ProgressionRule } from './progression';
 // ---------------------------------------------------------------------------
 
 /** Identifies one of the five consciousness / meditation systems in the app. */
-export type SystemId = 'transurfing' | 'silva' | 'dispenza' | 'feldenkrais' | 'breath';
+export type SystemId = 'transurfing' | 'silva' | 'dispenza' | 'feldenkrais' | 'breath' | 'domfreq';
 
 /** Ordered difficulty levels that gate practice availability. */
 export type DifficultyLevel = 'beginner' | 'elementary' | 'intermediate' | 'advanced' | 'master';

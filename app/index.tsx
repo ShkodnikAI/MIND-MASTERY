@@ -73,6 +73,14 @@ const SYSTEMS: readonly SystemDef[] = [
     color: colors.breath,
     tabRoute: '/(tabs)/breath',
   },
+  {
+    id: 'domfreq',
+    name: 'Частота',
+    tagline: 'Проекция доминантной частоты',
+    icon: 'radio-outline',
+    color: colors.domfreq,
+    tabRoute: '/(tabs)/domfreq',
+  },
 ] as const;
 
 // ─── Helpers ────────────────────────────────────────────────────

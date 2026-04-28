@@ -18,6 +18,7 @@ import { silvaSystem } from './systems/silva';
 import { dispenzaSystem } from './systems/dispenza';
 import { feldenkraisSystem } from './systems/feldenkrais';
 import { breathSystem } from './systems/breath';
+import { domfreqSystem } from './systems/domfreq';
 
 // ---------------------------------------------------------------------------
 // Internal store
@@ -36,6 +37,7 @@ const ALL_SYSTEMS: readonly System[] = [
   dispenzaSystem,
   feldenkraisSystem,
   breathSystem,
+  domfreqSystem,
 ];
 
 let isRegistered = false;

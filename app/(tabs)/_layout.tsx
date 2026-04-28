@@ -53,6 +53,12 @@ const TABS: readonly TabConfig[] = [
     icon: 'fitness-outline',
     color: colors.breath,
   },
+  {
+    name: 'domfreq',
+    title: 'Частота',
+    icon: 'radio-outline',
+    color: colors.domfreq,
+  },
 ] as const;
 
 // Find active tab color from config

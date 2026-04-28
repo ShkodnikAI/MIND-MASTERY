@@ -29,6 +29,7 @@ export default {
   'tabs.dispenza': 'Диспенза',
   'tabs.feldenkrais': 'Фельденкрайз',
   'tabs.breath': 'Дыхание',
+  'tabs.domfreq': 'Частота',
 
   // ── Hub screen ──────────────────────────────────────────────────────
   'hub.greeting.morning': 'Доброе утро',
@@ -50,6 +51,8 @@ export default {
   'system.feldenkrais.tagline': 'Телесное развитие и нейромоторное обучение',
   'system.breath': 'Дыхательные практики',
   'system.breath.tagline': 'Регуляция нервной системы через дыхание',
+  'system.domfreq': 'Проекция доминантной частоты',
+  'system.domfreq.tagline': 'Управляйте реальностью через доминантную частоту',
 
   // ── Practice screen ─────────────────────────────────────────────────
   'practice.theory': 'Теория',

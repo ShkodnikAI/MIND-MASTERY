@@ -15,6 +15,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet } from 'react-native';
 import { useContentStore } from '@/store/contentStore';
 import { useReminderStore } from '@/store/reminderStore';
+import { useProgressStore } from '@/store/progressStore';
+import { useJournalStore } from '@/store/journalStore';
+import { ErrorBoundary } from '@/ui/components/ErrorBoundary';
 import { loadAllTexts } from '@/services/content/textLoader';
 import { initializeDatabase, registerAppStateListener } from '@/db/lifecycle';
 import {
@@ -24,6 +27,7 @@ import {
 } from '@/services/notifications';
 import { colors } from '@/ui/theme';
 import { logger } from '@/utils/logger';
+import { initCrashLogger } from '@/utils/crashLogger';
 
 // Initialize i18n — side-effect import
 import '@/i18n';
@@ -41,6 +45,8 @@ export default function RootLayout() {
   const loadPractices = useContentStore((s) => s.loadPractices);
   const loadTexts = useContentStore((s) => s.loadTexts);
   const loadReminders = useReminderStore((s) => s.loadReminders);
+  const loadProgress = useProgressStore((s) => s.loadProgress);
+  const loadEntries = useJournalStore((s) => s.loadEntries);
 
   // ── Font loading ───────────────────────────────────────────────
   const [fontsLoaded, fontError] = useFonts({
@@ -56,6 +62,9 @@ export default function RootLayout() {
 
     async function init() {
       try {
+        // 0. Initialize crash logger (capture errors ASAP)
+        initCrashLogger();
+
         // 1. Initialize SQLite database and run migrations
         await initializeDatabase();
         logger.info('[root]', 'Database initialized');
@@ -81,6 +90,14 @@ export default function RootLayout() {
         await loadReminders();
         await rescheduleAllNotifications();
         logger.info('[root]', 'Reminders loaded and notifications rescheduled');
+
+        // 7. Hydrate progress from SQLite (INV-1)
+        await loadProgress();
+        logger.info('[root]', 'Progress loaded');
+
+        // 8. Hydrate journal entries from SQLite (INV-1)
+        await loadEntries();
+        logger.info('[root]', 'Journal entries loaded');
       } catch (error) {
         logger.error('[root]', 'Initialization failed', error);
       }
@@ -91,7 +108,7 @@ export default function RootLayout() {
     return () => {
       unsubscribe?.();
     };
-  }, [loadPractices, loadReminders]);
+  }, [loadPractices, loadReminders, loadProgress, loadEntries]);
 
   // ── Notification handler registration (runs once) ──────────────
   useEffect(() => {
@@ -114,7 +131,9 @@ export default function RootLayout() {
           colors={[colors.background.primary, colors.background.secondary]}
           style={styles.gradient}
         >
-          <Slot />
+          <ErrorBoundary>
+            <Slot />
+          </ErrorBoundary>
         </LinearGradient>
       </SafeAreaProvider>
     </GestureHandlerRootView>

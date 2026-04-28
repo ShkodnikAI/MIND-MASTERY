@@ -59,6 +59,16 @@ export const systemThemes: Record<string, VisualSignature> = {
     animationSpeed: 0.4,
     patternId: 'bubbles',
   },
+
+  domfreq: {
+    primaryColor: '#E84393',
+    secondaryColor: '#FD79A8',
+    gradientColors: ['#E84393', '#FD79A8', '#A29BFE'],
+    particleStyle: 'spiral',
+    glowIntensity: 0.8,
+    animationSpeed: 1.4,
+    patternId: 'frequency',
+  },
 } as const;
 
 /**
