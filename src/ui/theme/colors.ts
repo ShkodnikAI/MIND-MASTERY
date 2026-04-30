@@ -26,8 +26,8 @@ export const colors = {
 
   // Semantic accent colours
   accent: {
-    primary: '#6C5CE7', // Main brand accent (indigo)
-    secondary: '#A29BFE', // Lighter indigo
+    primary: '#D4A017', // Main brand accent (gold)
+    secondary: '#F0C040', // Light gold
     success: '#00B894', // Emerald green
     warning: '#FDCB6E', // Amber
     error: '#E17055', // Coral red
