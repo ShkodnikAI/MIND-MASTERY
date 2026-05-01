@@ -9,7 +9,6 @@
 import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, typography, spacing, radii } from '@/ui/theme';
@@ -115,7 +114,6 @@ export default function AboutSettingsScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Text style={styles.titleText}>О приложении</Text>

@@ -11,7 +11,6 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSettingsStore } from '@/store/settingsStore';
 import { SettingsSlider } from '@/ui/components/SettingsSlider';
@@ -134,7 +133,6 @@ export default function AudioSettingsScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Text style={styles.titleText}>Аудио</Text>

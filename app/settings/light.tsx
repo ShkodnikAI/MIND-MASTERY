@@ -10,7 +10,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useLightSettingsStore } from '@/store/lightSettingsStore';
@@ -292,7 +292,6 @@ export default function LightSettingsScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* ── Header ─────────────────────────────────────────── */}

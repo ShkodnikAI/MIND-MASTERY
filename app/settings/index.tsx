@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Stack, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, typography, spacing, radii } from '@/ui/theme';
@@ -71,12 +71,6 @@ const SECTIONS: readonly SettingsSection[] = [
     title: 'О приложении',
     icon: 'information-circle-outline',
     route: '/settings/about',
-  },
-  {
-    id: 'debug',
-    title: 'Отладка (TEST)',
-    icon: 'bug-outline',
-    route: '/settings/debug',
   },
 ] as const;
 
@@ -166,7 +160,6 @@ export default function SettingsScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.content}>
           <Text style={styles.headerText}>Настройки</Text>

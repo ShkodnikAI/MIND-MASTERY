@@ -12,7 +12,7 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useContentStore } from '@/store/contentStore';
@@ -335,7 +335,6 @@ export default function PracticeDetailScreen() {
         colors={[colors.background.primary, colors.background.secondary]}
         style={styles.gradient}
       >
-        <Stack.Screen options={{ headerShown: false }} />
         <SafeAreaView style={styles.safeArea} edges={['top']}>
           <View style={styles.scrollContent}>
             <Text style={styles.notFoundText}>Загрузка...</Text>
@@ -351,7 +350,6 @@ export default function PracticeDetailScreen() {
         colors={[colors.background.primary, colors.background.secondary]}
         style={styles.gradient}
       >
-        <Stack.Screen options={{ headerShown: false }} />
         <SafeAreaView style={styles.safeArea} edges={['top']}>
           <View style={styles.scrollContent}>
             <View style={styles.headerRow}>
@@ -379,7 +377,6 @@ export default function PracticeDetailScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
