@@ -5,12 +5,17 @@
  * INV-A3: All styles via StyleSheet.create.
  */
 
+import { useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SystemBackground } from '@/ui/components/SystemBackground';
 import { SystemTabContent } from '@/ui/components/SystemTabContent';
 
 export default function BreathScreen() {
   const router = useRouter();
+  const handlePracticePress = useCallback(
+    (id: string) => router.push(`/practice/${id}` as any),
+    [router],
+  );
 
   return (
     <SystemBackground systemId="breath">
@@ -18,7 +23,7 @@ export default function BreathScreen() {
         systemId="breath"
         title="Дыхательные практики"
         icon="fitness-outline"
-        onPracticePress={(id) => router.push(`/practice/${id}` as any)}
+        onPracticePress={handlePracticePress}
       />
     </SystemBackground>
   );

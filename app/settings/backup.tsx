@@ -562,7 +562,7 @@ export default function BackupSettingsScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <View style={styles.content}>
           <Text style={styles.titleText}>Резервное копирование</Text>
           <Text style={styles.descriptionText}>

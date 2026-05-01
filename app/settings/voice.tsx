@@ -246,7 +246,6 @@ const styles = StyleSheet.create({
 
   // ── Voice selector ──
   voiceList: {
-    maxHeight: 200,
     marginTop: spacing.sm,
     gap: spacing.xs,
   },
@@ -549,7 +548,7 @@ export default function VoiceSettingsScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}

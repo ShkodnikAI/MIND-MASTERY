@@ -6,7 +6,7 @@
  * INV-A3: All styles via StyleSheet.create.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter } from 'expo-router';
 import { SystemBackground } from '@/ui/components/SystemBackground';
 import { SystemTabContent } from '@/ui/components/SystemTabContent';
@@ -15,9 +15,12 @@ import { logger } from '@/utils/logger';
 
 export default function DomfreqScreen() {
   const router = useRouter();
+  const handlePracticePress = useCallback(
+    (id: string) => router.push(`/practice/${id}` as any),
+    [router],
+  );
 
   useEffect(() => {
-    // Auto-create persistent DFP reminders on first visit
     ensureDomfreqReminders().then((count) => {
       if (count > 0) {
         logger.info('[domfreq]', `Auto-created ${count} persistent reminders`);
@@ -31,7 +34,7 @@ export default function DomfreqScreen() {
         systemId="domfreq"
         title="Проекция доминантной частоты"
         icon="radio-outline"
-        onPracticePress={(id) => router.push(`/practice/${id}` as any)}
+        onPracticePress={handlePracticePress}
       />
     </SystemBackground>
   );
