@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   gradient: { flex: 1 },
   content: {
-    flex: 1,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.xxxl,

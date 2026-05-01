@@ -96,7 +96,12 @@ const styles = StyleSheet.create({
 
 export function SystemTabContent({ systemId, title, icon, onPracticePress }: SystemTabContentProps) {
 
-  const practices = useContentStore((s) => s.getPracticesBySystem(systemId));
+  // Memoize the selector so Zustand sees a stable reference
+  const practicesSelector = useMemo(
+    () => (s: any) => s.getPracticesBySystem(systemId),
+    [systemId],
+  );
+  const practices = useContentStore(practicesSelector);
   const loaded = useContentStore((s) => s.loaded);
   const getPracticeProgress = useProgressStore((s) => s.getPracticeProgress);
   const getSystemProgress = useProgressStore((s) => s.getSystemProgress);
