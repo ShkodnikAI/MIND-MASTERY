@@ -11,6 +11,7 @@ config.resolver.extraNodeModules = {
   '@': `${__dirname}/src`,
   '@content': `${__dirname}/content`,
   '@content-texts': `${__dirname}/content/texts`,
+  '@assets': `${__dirname}/assets`,
 };
 
 module.exports = config;

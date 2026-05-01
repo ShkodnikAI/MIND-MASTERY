@@ -9,7 +9,6 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useContentStore } from '@/store/contentStore';
 import { useProgressStore } from '@/store/progressStore';
@@ -26,6 +25,7 @@ interface SystemTabContentProps {
   readonly systemId: SystemId;
   readonly title: string;
   readonly icon: string;
+  readonly onPracticePress: (practiceId: string) => void;
 }
 
 // ─── Styles ──────────────────────────────────────────────────────
@@ -94,8 +94,7 @@ const styles = StyleSheet.create({
 
 // ─── Component ───────────────────────────────────────────────────
 
-export function SystemTabContent({ systemId, title, icon }: SystemTabContentProps) {
-  const router = useRouter();
+export function SystemTabContent({ systemId, title, icon, onPracticePress }: SystemTabContentProps) {
 
   const practices = useContentStore((s) => s.getPracticesBySystem(systemId));
   const loaded = useContentStore((s) => s.loaded);
@@ -131,12 +130,7 @@ export function SystemTabContent({ systemId, title, icon }: SystemTabContentProp
     };
   }, [loaded, systemId, practices, getSystemProgress, getPracticeProgress]);
 
-  const handlePracticePress = useCallback(
-    (practiceId: string) => {
-      router.push(`/practice/${practiceId}` as any);
-    },
-    [router],
-  );
+
 
   const renderItem = useCallback(
     ({ item }: { readonly item: Practice }) => {
@@ -151,11 +145,11 @@ export function SystemTabContent({ systemId, title, icon }: SystemTabContentProp
           isUnlocked={unlocked}
           lockReason={lockReason}
           systemColor={systemTheme.gradientColors[0]}
-          onPress={handlePracticePress}
+          onPress={onPracticePress}
         />
       );
     },
-    [getPracticeProgress, systemProgressSnapshot, systemTheme, handlePracticePress],
+    [getPracticeProgress, systemProgressSnapshot, systemTheme, onPracticePress],
   );
 
   // Loading state

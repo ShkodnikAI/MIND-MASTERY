@@ -248,7 +248,7 @@ export default function HubScreen() {
           <View style={styles.headerRow}>
             <View style={styles.logoRow}>
               <Text style={styles.logoText}>MIND</Text>
-              <Image source={require('../../assets/images/splash.png')} style={styles.logoImage} />
+              <Image source={require('../assets/images/splash.png')} style={styles.logoImage} />
               <Text style={styles.logoText}>MASTERY</Text>
             </View>
             <View style={styles.headerActions}>

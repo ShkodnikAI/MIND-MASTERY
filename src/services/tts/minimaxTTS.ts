@@ -14,7 +14,7 @@
 
 import * as FileSystem from 'expo-file-system';
 import { logger } from '@/utils/logger';
-import { useSettingsStore } from '@/store/settingsStore';
+import { useSettingsStore, type TTSSettings } from '@/store/settingsStore';
 
 // ---------------------------------------------------------------------------
 // Константы
@@ -72,11 +72,11 @@ export interface VoiceInfo {
   /** Идентификатор голоса (для передачи в API). */
   voice_id: string;
   /** Отображаемое имя голоса. */
-  display_name: string;
+  name: string;
   /** Пол голоса: 'male' | 'female'. */
-  gender: string;
+  gender?: string;
   /** Поддерживаемый язык (ISO-код). */
-  language: string;
+  language?: string;
   /** URL с примером звучания (если доступен). */
   preview_url?: string;
   /** Является ли голос клонированным пользователем. */
@@ -87,22 +87,6 @@ export interface VoiceInfo {
 export interface CloneVoiceResult {
   /** Идентификатор созданного клонированного голоса. */
   voice_id: string;
-}
-
-/** Настройки TTS, сохраняемые в settingsStore. */
-export interface TTSSettings {
-  /** API-ключ Minimax. */
-  apiKey: string;
-  /** Выбранный голос (voice_id). */
-  selectedVoice: string;
-  /** Скорость речи по умолчанию. */
-  defaultSpeed: number;
-  /** Высота голоса по умолчанию. */
-  defaultPitch: number;
-  /** Язык по умолчанию. */
-  defaultLanguage: string;
-  /** Список клонированных голосов. */
-  clonedVoices: VoiceInfo[];
 }
 
 /** Ошибка API Minimax с поддержкой русского описания. */
@@ -139,17 +123,17 @@ export const DEFAULT_TTS_SETTINGS: TTSSettings = {
  * Используется, когда API недоступен для получения списка.
  */
 const PRESET_VOICES: VoiceInfo[] = [
-  { voice_id: 'male-qn-qingse', display_name: 'Цинсэ (молодой)', gender: 'male', language: 'zh' },
-  { voice_id: 'male-qn-jingying', display_name: 'Цзинъин (деловой)', gender: 'male', language: 'zh' },
-  { voice_id: 'female-shaonv', display_name: 'Шаонв (девушка)', gender: 'female', language: 'zh' },
-  { voice_id: 'female-yujie', display_name: 'Юйцзе (зрелая)', gender: 'female', language: 'zh' },
-  { voice_id: 'presenter_male', display_name: 'Диктор (мужской)', gender: 'male', language: 'zh' },
-  { voice_id: 'presenter_female', display_name: 'Диктор (женский)', gender: 'female', language: 'zh' },
-  { voice_id: 'audiobook_male_1', display_name: 'Аудиокнига (муж.)', gender: 'male', language: 'zh' },
-  { voice_id: 'audiobook_female_1', display_name: 'Аудиокнига (жен.)', gender: 'female', language: 'zh' },
-  { voice_id: 'gentle_woman', display_name: 'Нежный женский', gender: 'female', language: 'zh' },
-  { voice_id: 'heliotrope', display_name: 'Гелиотроп', gender: 'female', language: 'en' },
-  { voice_id: 'troubadour', display_name: 'Трубадур', gender: 'male', language: 'en' },
+  { voice_id: 'male-qn-qingse', name: 'Цинсэ (молодой)', gender: 'male', language: 'zh' },
+  { voice_id: 'male-qn-jingying', name: 'Цзинъин (деловой)', gender: 'male', language: 'zh' },
+  { voice_id: 'female-shaonv', name: 'Шаонв (девушка)', gender: 'female', language: 'zh' },
+  { voice_id: 'female-yujie', name: 'Юйцзе (зрелая)', gender: 'female', language: 'zh' },
+  { voice_id: 'presenter_male', name: 'Диктор (мужской)', gender: 'male', language: 'zh' },
+  { voice_id: 'presenter_female', name: 'Диктор (женский)', gender: 'female', language: 'zh' },
+  { voice_id: 'audiobook_male_1', name: 'Аудиокнига (муж.)', gender: 'male', language: 'zh' },
+  { voice_id: 'audiobook_female_1', name: 'Аудиокнига (жен.)', gender: 'female', language: 'zh' },
+  { voice_id: 'gentle_woman', name: 'Нежный женский', gender: 'female', language: 'zh' },
+  { voice_id: 'heliotrope', name: 'Гелиотроп', gender: 'female', language: 'en' },
+  { voice_id: 'troubadour', name: 'Трубадур', gender: 'male', language: 'en' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -652,7 +636,7 @@ export async function cloneVoice(
   // Сохраняем в список клонированных голосов
   const newVoice: VoiceInfo = {
     voice_id: voiceId,
-    display_name: name,
+    name: name,
     gender: 'unknown',
     language: settings.defaultLanguage,
     is_cloned: true,

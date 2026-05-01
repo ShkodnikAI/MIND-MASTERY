@@ -503,22 +503,22 @@ export default function VoiceSettingsScreen() {
         });
 
         // Write to temp file and play
-        const { Audio } = await import('expo-audio');
-        const { FileSystem, EncodingType } = await import('expo-file-system');
-        const tempUri = FileSystem.cacheDirectory + `voice_test_${Date.now()}.mp3`;
+        const FS = await import('expo-file-system');
+        const tempUri = FS.cacheDirectory + `voice_test_${Date.now()}.mp3`;
 
-        await FileSystem.writeAsStringAsync(tempUri, base64Audio, {
-          encoding: EncodingType.Base64,
+        await FS.writeAsStringAsync(tempUri, base64Audio, {
+          encoding: FS.EncodingType.Base64,
         });
 
         try {
-          const { sound } = await Audio.Sound.createAsync({ uri: tempUri });
+          const AudioModule = await import('expo-audio');
+          const { sound } = await (AudioModule as any).Audio.Sound.createAsync({ uri: tempUri });
           await sound.playAsync();
 
-          sound.setOnPlaybackStatusUpdate((status) => {
+          sound.setOnPlaybackStatusUpdate((status: any) => {
             if (status.isLoaded && status.didJustFinish) {
               sound.unloadAsync();
-              FileSystem.deleteAsync(tempUri, { idempotent: true });
+              FS.deleteAsync(tempUri, { idempotent: true });
             }
           });
         } catch {
@@ -526,8 +526,8 @@ export default function VoiceSettingsScreen() {
         }
       } else {
         // System TTS fallback
-        const { Speech } = await import('expo-speech');
-        Speech.speak(TEST_SENTENCE, {
+        const SpeechModule = await import('expo-speech');
+        SpeechModule.speak(TEST_SENTENCE, {
           language: 'ru-RU',
           rate: voice.speed,
           pitch: voice.pitch,
@@ -727,7 +727,7 @@ export default function VoiceSettingsScreen() {
                         activeOpacity={0.7}
                       >
                         <View style={styles.voiceItemInfo}>
-                          <Text style={styles.voiceItemName}>{v.display_name}</Text>
+                          <Text style={styles.voiceItemName}>{v.name}</Text>
                           <Text style={styles.voiceItemMeta}>
                             {v.gender === 'male' ? '♂' : v.gender === 'female' ? '♀' : '◆'}{' '}
                             {v.voice_id}
@@ -740,7 +740,7 @@ export default function VoiceSettingsScreen() {
                         {v.is_cloned && (
                           <TouchableOpacity
                             style={styles.voiceItemDelete}
-                            onPress={() => handleDeleteClonedVoice(v.voice_id, v.display_name)}
+                            onPress={() => handleDeleteClonedVoice(v.voice_id, v.name)}
                             activeOpacity={0.7}
                             disabled={deletingVoiceId === v.voice_id}
                           >

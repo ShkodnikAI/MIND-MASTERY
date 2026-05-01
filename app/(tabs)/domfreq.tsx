@@ -7,12 +7,15 @@
  */
 
 import { useEffect } from 'react';
+import { useRouter } from 'expo-router';
 import { SystemBackground } from '@/ui/components/SystemBackground';
 import { SystemTabContent } from '@/ui/components/SystemTabContent';
 import { ensureDomfreqReminders } from '@/services/domfreq/domfreqReminders';
 import { logger } from '@/utils/logger';
 
 export default function DomfreqScreen() {
+  const router = useRouter();
+
   useEffect(() => {
     // Auto-create persistent DFP reminders on first visit
     ensureDomfreqReminders().then((count) => {
@@ -28,6 +31,7 @@ export default function DomfreqScreen() {
         systemId="domfreq"
         title="Проекция доминантной частоты"
         icon="radio-outline"
+        onPracticePress={(id) => router.push(`/practice/${id}` as any)}
       />
     </SystemBackground>
   );

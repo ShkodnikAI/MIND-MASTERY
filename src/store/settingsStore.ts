@@ -66,12 +66,18 @@ const DEFAULT_LIGHT: LightConfig = {
 export interface TTSSettings {
   readonly apiKey: string;
   readonly selectedVoice: string;
-  readonly clonedVoices: readonly { voice_id: string; name: string }[];
+  readonly defaultSpeed: number;
+  readonly defaultPitch: number;
+  readonly defaultLanguage: string;
+  readonly clonedVoices: readonly { voice_id: string; name: string; gender?: string; language?: string; display_name?: string; preview_url?: string; is_cloned?: boolean }[];
 }
 
 const DEFAULT_TTS: TTSSettings = {
   apiKey: '2031325794852152128',
   selectedVoice: 'male-qn-qingse',
+  defaultSpeed: 1.0,
+  defaultPitch: 1.0,
+  defaultLanguage: 'ru',
   clonedVoices: [],
 };
 

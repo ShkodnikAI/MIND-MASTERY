@@ -7,7 +7,6 @@ export default function SettingsLayout() {
         headerShown: true,
         headerTintColor: '#D4A017',
         headerBackTitle: '',
-        headerBackTitleStyle: { color: '#D4A017' },
         headerStyle: { backgroundColor: '#0A0E1A' },
         headerTitleStyle: {
           fontWeight: '700',
