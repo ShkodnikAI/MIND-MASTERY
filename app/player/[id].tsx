@@ -550,7 +550,6 @@ export default function PlayerScreen() {
         colors={[colors.background.primary, colors.background.secondary]}
         style={styles.gradient}
       >
-        <Stack.Screen options={{ headerShown: false }} />
         <SafeAreaView style={styles.safeArea} edges={['top']}>
           <View style={styles.loadingContainer}>
             <Ionicons name="fitness" size={48} color={colors.text.tertiary} />
@@ -573,7 +572,6 @@ export default function PlayerScreen() {
       colors={[colors.background.primary, colors.background.secondary]}
       style={styles.gradient}
     >
-      <Stack.Screen options={{ headerShown: false }} />
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <View style={styles.container}>
           {/* ── Header ───────────────────────────────────────── */}

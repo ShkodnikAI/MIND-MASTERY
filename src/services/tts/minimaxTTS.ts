@@ -162,7 +162,7 @@ const PRESET_VOICES: VoiceInfo[] = [
  */
 export function getTTSSettings(): TTSSettings {
   const store = useSettingsStore.getState();
-  const ttsSlice = (store as Record<string, unknown>).tts as TTSSettings | undefined;
+  const ttsSlice = store.tts;
   return ttsSlice ?? { ...DEFAULT_TTS_SETTINGS };
 }
 
@@ -172,7 +172,7 @@ export function getTTSSettings(): TTSSettings {
 function setTTSSettings(partial: Partial<TTSSettings>): void {
   const current = getTTSSettings();
   const updated: TTSSettings = { ...current, ...partial };
-  useSettingsStore.setState({ tts: updated } as Record<string, unknown>);
+  useSettingsStore.getState().updateTTS(updated);
 }
 
 /**

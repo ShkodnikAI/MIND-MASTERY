@@ -355,6 +355,9 @@ export default function VoiceSettingsScreen() {
   const [testingVoice, setTestingVoice] = useState(false);
   const [cloning, setCloning] = useState(false);
   const [deletingVoiceId, setDeletingVoiceId] = useState<string | null>(null);
+  const [showCloneModal, setShowCloneModal] = useState(false);
+  const [cloneName, setCloneName] = useState('');
+  const [cloneDesc, setCloneDesc] = useState('');
 
   const isMinimax = voice.mode === 'minimax';
 
@@ -429,46 +432,31 @@ export default function VoiceSettingsScreen() {
   );
 
   const handleCloneVoice = useCallback(() => {
-    let nameInput = '';
-    let descInput = '';
-
-    Alert.prompt(
-      'Клонировать голос',
-      'Введите название и описание для нового голоса.',
-      [
-        {
-          text: 'Отмена',
-          style: 'cancel',
-        },
-        {
-          text: 'Создать',
-          onPress: async () => {
-            if (!nameInput.trim()) return;
-
-            setCloning(true);
-            try {
-              await cloneVoice(nameInput, descInput);
-              // Refresh voice list
-              const list = await getVoices();
-              setVoices(list);
-              Alert.alert('Готово', `Голос "${nameInput}" успешно клонирован.`);
-            } catch (err) {
-              Alert.alert(
-                'Ошибка',
-                err instanceof Error ? err.message : 'Не удалось клонировать голос',
-              );
-            } finally {
-              setCloning(false);
-            }
-          },
-        },
-      ],
-      undefined,
-      undefined,
-      undefined,
-      { type: 'default', placeholder: 'Название голоса', defaultValue: '' },
-    );
+    setCloneName('');
+    setCloneDesc('');
+    setShowCloneModal(true);
   }, []);
+
+  const handleConfirmClone = useCallback(async () => {
+    if (!cloneName.trim()) return;
+    setShowCloneModal(false);
+
+    setCloning(true);
+    try {
+      await cloneVoice(cloneName, cloneDesc || `Клон голоса ${cloneName}`);
+      // Refresh voice list
+      const list = await getVoices();
+      setVoices(list);
+      Alert.alert('Готово', `Голос "${cloneName}" успешно клонирован.`);
+    } catch (err) {
+      Alert.alert(
+        'Ошибка',
+        err instanceof Error ? err.message : 'Не удалось клонировать голос',
+      );
+    } finally {
+      setCloning(false);
+    }
+  }, [cloneName, cloneDesc]);
 
   const handleDeleteClonedVoice = useCallback(
     (voiceId: string, displayName: string) => {
@@ -837,6 +825,88 @@ export default function VoiceSettingsScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+
+        {/* ── Clone Voice Modal ── */}
+        {showCloneModal ? (
+          <View
+            style={{
+              ...StyleSheet.absoluteFillObject,
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingHorizontal: spacing.xl,
+            }}
+          >
+            <View
+              style={{
+                width: '100%',
+                maxWidth: 340,
+                backgroundColor: colors.background.secondary,
+                borderRadius: radii.lg,
+                padding: spacing.lg,
+                gap: spacing.md,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: typography.fontFamily.semibold,
+                  fontSize: typography.sizes.lg,
+                  color: colors.text.primary,
+                }}
+              >
+                Клонировать голос
+              </Text>
+              <Text
+                style={{
+                  fontFamily: typography.fontFamily.regular,
+                  fontSize: typography.sizes.sm,
+                  color: colors.text.secondary,
+                }}
+              >
+                Введите название и описание для нового голоса.
+              </Text>
+              <TextInput
+                style={styles.apiKeyInput}
+                value={cloneName}
+                onChangeText={setCloneName}
+                placeholder="Название голоса"
+                placeholderTextColor={colors.text.tertiary}
+                autoCapitalize="words"
+              />
+              <TextInput
+                style={[styles.apiKeyInput, { minHeight: 60, textAlignVertical: 'top' }]}
+                value={cloneDesc}
+                onChangeText={setCloneDesc}
+                placeholder="Описание (необязательно)"
+                placeholderTextColor={colors.text.tertiary}
+                multiline
+              />
+              <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm }}>
+                <TouchableOpacity
+                  style={[
+                    styles.validateButton,
+                    { flex: 1, paddingVertical: spacing.md },
+                  ]}
+                  onPress={() => setShowCloneModal(false)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.validateButtonText}>Отмена</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.cloneButton,
+                    { flex: 1, paddingVertical: spacing.md },
+                  ]}
+                  onPress={handleConfirmClone}
+                  activeOpacity={0.7}
+                  disabled={!cloneName.trim()}
+                >
+                  <Text style={styles.cloneButtonText}>Создать</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        ) : null}
       </SafeAreaView>
     </LinearGradient>
   );
