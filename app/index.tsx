@@ -1,7 +1,7 @@
 /**
  * @file Hub Screen — Main entry point of MIND MASTERY.
  *
- * Shows a time-of-day greeting, 5 system cards with real practice counts
+ * Shows the MIND MASTERY logo title, 6 system cards with real practice counts
  * and progress from contentStore/progressStore, a FAB for Moment of Power,
  * and a settings gear icon.
  *
@@ -9,7 +9,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -83,15 +83,6 @@ const SYSTEMS: readonly SystemDef[] = [
   },
 ] as const;
 
-// ─── Helpers ────────────────────────────────────────────────────
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Доброе утро';
-  if (hour < 18) return 'Добрый день';
-  return 'Добрый вечер';
-}
-
 // ─── Styles ─────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
@@ -112,12 +103,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.lg,
   },
-  greetingText: {
-    fontFamily: typography.fontFamily.semibold,
-    fontSize: typography.sizes.title,
-    lineHeight: typography.lineHeights.title,
-    color: colors.text.primary,
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     flex: 1,
+  },
+  logoText: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: 24,
+    lineHeight: 28,
+    color: '#D4A017',
+    fontWeight: '800',
+  },
+  logoImage: {
+    width: 26,
+    height: 26,
+    resizeMode: 'contain',
   },
   headerActions: {
     flexDirection: 'row',
@@ -130,13 +132,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.tertiary,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  subtitleText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.md,
-    lineHeight: typography.lineHeights.md,
-    color: colors.text.secondary,
-    marginBottom: spacing.xl,
   },
   statsRow: {
     flexDirection: 'row',
@@ -199,8 +194,6 @@ export default function HubScreen() {
   const getPracticesBySystem = useContentStore((s) => s.getPracticesBySystem);
   const getSystemProgress = useProgressStore((s) => s.getSystemProgress);
 
-  const greeting = useMemo(() => getGreeting(), []);
-
   // Compute total stats
   const stats = useMemo(() => {
     if (!loaded) return { totalPractices: 0, totalUnlocked: 0, totalMin: 0 };
@@ -253,9 +246,11 @@ export default function HubScreen() {
         >
           {/* Header */}
           <View style={styles.headerRow}>
-            <Text style={styles.greetingText} numberOfLines={1}>
-              {greeting}
-            </Text>
+            <View style={styles.logoRow}>
+              <Text style={styles.logoText}>MIND</Text>
+              <Image source={require('../../assets/images/splash.png')} style={styles.logoImage} />
+              <Text style={styles.logoText}>MASTERY</Text>
+            </View>
             <View style={styles.headerActions}>
               <TouchableOpacity
                 style={styles.settingsButton}
@@ -275,8 +270,6 @@ export default function HubScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
-          <Text style={styles.subtitleText}>Выберите систему для практики</Text>
 
           {/* Global stats */}
           <View style={styles.statsRow}>

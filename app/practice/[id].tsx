@@ -16,6 +16,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useContentStore } from '@/store/contentStore';
+import { getSystemPhysics } from '@/content/systemPhysics';
+import type { SystemPhysics } from '@/content/systemPhysics';
 import { useProgressStore } from '@/store/progressStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { colors, typography, spacing, radii } from '@/ui/theme';
@@ -243,6 +245,66 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.sm,
   },
+  physicsSection: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.lg,
+  },
+  physicsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.md,
+    backgroundColor: colors.background.tertiary,
+    borderRadius: radii.md,
+    paddingHorizontal: spacing.md,
+  },
+  physicsHeaderText: {
+    fontFamily: typography.fontFamily.semibold,
+    fontSize: typography.sizes.md,
+    lineHeight: typography.lineHeights.md,
+    color: colors.text.primary,
+  },
+  physicsCard: {
+    backgroundColor: colors.background.tertiary,
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+  },
+  physicsSubtitle: {
+    fontFamily: typography.fontFamily.semibold,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm,
+    color: colors.accent.primary,
+    marginBottom: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  physicsText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm + 4,
+    color: colors.text.secondary,
+    marginBottom: spacing.sm,
+  },
+  physicsResultItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  physicsResultBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.accent.success,
+    marginTop: 6,
+  },
+  physicsResultText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm + 2,
+    color: colors.text.secondary,
+    flex: 1,
+  },
   notFoundText: {
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.sizes.md,
@@ -259,6 +321,7 @@ export default function PracticeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [selectedLength, setSelectedLength] = useState<SessionLength | null>(null);
+  const [physicsExpanded, setPhysicsExpanded] = useState(false);
 
   const practice = useContentStore((s) => s.getPractice(id ?? ''));
   const loaded = useContentStore((s) => s.loaded);
@@ -270,6 +333,11 @@ export default function PracticeDetailScreen() {
     if (!practice) return colors.accent.primary;
     const theme = getSystemTheme(practice.systemId);
     return theme.gradientColors[0];
+  }, [practice]);
+
+  const physics = useMemo((): SystemPhysics | null => {
+    if (!practice) return null;
+    return getSystemPhysics(practice.systemId);
   }, [practice]);
 
   // Effective session length (user selection or default)
@@ -456,6 +524,52 @@ export default function PracticeDetailScreen() {
                 ))}
               </View>
             </>
+          ) : null}
+
+          {/* Physics panel */}
+          {physics ? (
+            <View style={styles.physicsSection}>
+              <TouchableOpacity
+                style={styles.physicsHeader}
+                onPress={() => setPhysicsExpanded(!physicsExpanded)}
+                activeOpacity={0.7}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+                  <Ionicons name="scan-outline" size={18} color={systemColor} />
+                  <Text style={styles.physicsHeaderText}>Физика процесса</Text>
+                </View>
+                <Ionicons
+                  name="chevron-down-outline"
+                  size={20}
+                  color={colors.text.tertiary}
+                  style={{ transform: [{ rotate: physicsExpanded ? '180deg' : '0deg' }] }}
+                />
+              </TouchableOpacity>
+
+              {physicsExpanded ? (
+                <View style={styles.physicsCard}>
+                  <Text style={styles.physicsSubtitle}>Суть метода</Text>
+                  <Text style={styles.physicsText}>{physics.essence}</Text>
+
+                  <Text style={styles.physicsSubtitle}>Как это работает</Text>
+                  <Text style={styles.physicsText}>{physics.physics}</Text>
+
+                  <Text style={styles.physicsSubtitle}>Нейробиологическое обоснование</Text>
+                  <Text style={styles.physicsText}>{physics.neuroscience}</Text>
+
+                  <Text style={styles.physicsSubtitle}>Механика практики</Text>
+                  <Text style={styles.physicsText}>{physics.practiceMechanics}</Text>
+
+                  <Text style={styles.physicsSubtitle}>Ожидаемые результаты</Text>
+                  {physics.expectedResults.map((result, i) => (
+                    <View key={i} style={styles.physicsResultItem}>
+                      <View style={styles.physicsResultBullet} />
+                      <Text style={styles.physicsResultText}>{result}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
+            </View>
           ) : null}
 
           {/* Session timeline */}

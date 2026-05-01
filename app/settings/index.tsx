@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, typography, spacing, radii } from '@/ui/theme';
 import { logger } from '@/utils/logger';
+import { useSettingsStore } from '@/store/settingsStore';
 
 // ─── Settings sections ──────────────────────────────────────────
 
@@ -35,6 +36,12 @@ const SECTIONS: readonly SettingsSection[] = [
     title: 'Аудио',
     icon: 'volume-high-outline',
     route: '/settings/audio',
+  },
+  {
+    id: 'music',
+    title: 'Музыка',
+    icon: 'musical-notes-outline',
+    route: '/settings/music',
   },
   {
     id: 'voice',
@@ -131,6 +138,8 @@ const styles = StyleSheet.create({
 
 function SettingsItem({ section }: { readonly section: SettingsSection }) {
   const router = useRouter();
+  const notifications = useSettingsStore((s) => s.notifications);
+  const hasActiveAlarm = notifications.dailyReminderEnabled || notifications.streakReminderEnabled;
 
   const handlePress = useCallback(() => {
     logger.info('[settings]', `Navigate to ${section.id}`);
@@ -149,6 +158,10 @@ function SettingsItem({ section }: { readonly section: SettingsSection }) {
         <Ionicons name={section.icon} size={20} color={colors.accent.primary} />
       </View>
       <Text style={styles.sectionTitle}>{section.title}</Text>
+      {/* Alarm indicator for notifications */}
+      {section.id === 'notifications' && hasActiveAlarm ? (
+        <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent.success, marginRight: 4 }} />
+      ) : null}
       <Ionicons name="chevron-forward" size={20} style={styles.chevron} />
     </TouchableOpacity>
   );

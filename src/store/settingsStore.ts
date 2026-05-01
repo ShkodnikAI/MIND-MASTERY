@@ -61,6 +61,20 @@ const DEFAULT_LIGHT: LightConfig = {
 
 // ─── State Interface ────────────────────────────────────────────
 
+// ─── TTS Settings ───────────────────────────────────────────
+
+export interface TTSSettings {
+  readonly apiKey: string;
+  readonly selectedVoice: string;
+  readonly clonedVoices: readonly { voice_id: string; name: string }[];
+}
+
+const DEFAULT_TTS: TTSSettings = {
+  apiKey: '2031325794852152128',
+  selectedVoice: 'male-qn-qingse',
+  clonedVoices: [],
+};
+
 interface SettingsState {
   // App settings
   onboarded: boolean;
@@ -73,6 +87,7 @@ interface SettingsState {
   voice: VoiceSettings;
   light: LightConfig;
   notifications: NotificationSettings;
+  tts: TTSSettings;
 
   // Actions
   setOnboarded: (value: boolean) => void;
@@ -85,6 +100,7 @@ interface SettingsState {
   updateLight: (partial: Partial<LightConfig>) => void;
   updateNotifications: (partial: Partial<NotificationSettings>) => void;
   setNotificationPermission: (granted: boolean) => void;
+  updateTTS: (partial: Partial<TTSSettings>) => void;
   resetSettings: () => void;
 }
 
@@ -104,6 +120,7 @@ export const useSettingsStore = create<SettingsState>()(
       voice: { ...DEFAULT_VOICE },
       light: { ...DEFAULT_LIGHT },
       notifications: { ...DEFAULT_NOTIFICATIONS },
+      tts: { ...DEFAULT_TTS },
 
       // ── Actions ──────────────────────────────────────────────
 
@@ -162,6 +179,11 @@ export const useSettingsStore = create<SettingsState>()(
           notifications: { ...state.notifications, permissionGranted: granted },
         })),
 
+      updateTTS: (partial: Partial<TTSSettings>) =>
+        set((state) => ({
+          tts: { ...state.tts, ...partial },
+        })),
+
       resetSettings: () =>
         set({
           onboarded: false,
@@ -172,6 +194,7 @@ export const useSettingsStore = create<SettingsState>()(
           voice: { ...DEFAULT_VOICE },
           light: { ...DEFAULT_LIGHT },
           notifications: { ...DEFAULT_NOTIFICATIONS },
+          tts: { ...DEFAULT_TTS },
         }),
     }),
     {

@@ -448,6 +448,10 @@ export default function NotificationSettingsScreen() {
               <Ionicons name="arrow-back" size={22} color={colors.text.secondary} />
             </TouchableOpacity>
             <Text style={styles.titleText}>Уведомления</Text>
+            {/* Alarm indicator dot */}
+            {notifications.dailyReminderEnabled || notifications.streakReminderEnabled ? (
+              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: colors.accent.success }} />
+            ) : null}
           </View>
 
           {/* Permission banner */}

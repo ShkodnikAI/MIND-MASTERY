@@ -12,10 +12,11 @@
 /**
  * Available voice delivery modes.
  * - `system` — use the device's built-in TTS engine.
+ * - `minimax` — use the Minimax cloud TTS API for high-quality voice.
  * - `piper` — use the Piper local TTS engine for offline, high-quality voice.
  * - `prerecorded` — play bundled audio files recorded by a professional narrator.
  */
-export type VoiceMode = 'system' | 'piper' | 'prerecorded';
+export type VoiceMode = 'system' | 'minimax' | 'piper' | 'prerecorded';
 
 /**
  * Configures how narrated text is delivered during a session.
