@@ -348,6 +348,14 @@ export async function validateApiKey(
     );
 
     if (response.ok) {
+      // Minimax returns 200 even on auth errors — check body
+      const body = await response.json();
+      const code = body?.base_resp?.status_code;
+      if (code && code !== 0) {
+        const msg = body?.base_resp?.status_msg ?? 'Ошибка авторизации';
+        logger.warn('[minimaxTTS]', `Проверка ключа: code=${code}, msg=${msg}`);
+        return { valid: false, error: `Ошибка: ${msg} (код ${code})` };
+      }
       logger.info('[minimaxTTS]', 'API-ключ валиден');
       return { valid: true };
     }

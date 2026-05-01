@@ -96,17 +96,18 @@ const styles = StyleSheet.create({
 
 export function SystemTabContent({ systemId, title, icon, onPracticePress }: SystemTabContentProps) {
 
-  // Read raw practices data and filter in-place with useRef cache to avoid
-  // creating a new array reference on every render (Zustand + useSyncExternalStore).
-  const practicesRaw = useContentStore((s) => s.practices);
+  // Read raw practices count as a trigger + loaded flag
+  const practicesCount = useContentStore((s) => Object.keys(s.practices).length);
   const loaded = useContentStore((s) => s.loaded);
 
+  // Re-derive practices list from store (stable because useMemo depends on count)
   const practices = useMemo(() => {
-    if (!practicesRaw) return [];
-    return Object.values(practicesRaw)
+    const raw = useContentStore.getState().practices;
+    if (!raw || Object.keys(raw).length === 0) return [];
+    return Object.values(raw)
       .filter((p) => p.systemId === systemId)
       .sort((a, b) => a.requiredLevel - b.requiredLevel);
-  }, [practicesRaw, systemId]);
+  }, [practicesCount, systemId]);
 
   const getPracticeProgress = useProgressStore((s) => s.getPracticeProgress);
   const getSystemProgress = useProgressStore((s) => s.getSystemProgress);
