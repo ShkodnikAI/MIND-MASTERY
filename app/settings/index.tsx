@@ -136,20 +136,20 @@ const styles = StyleSheet.create({
 
 // ─── Component ──────────────────────────────────────────────────
 
-function SettingsItem({ section }: { readonly section: SettingsSection }) {
-  const router = useRouter();
-  const notifications = useSettingsStore((s) => s.notifications);
-  const hasActiveAlarm = notifications.dailyReminderEnabled || notifications.streakReminderEnabled;
-
-  const handlePress = useCallback(() => {
-    logger.info('[settings]', `Navigate to ${section.id}`);
-    router.push(section.route as any);
-  }, [router, section.id, section.route]);
+function SettingsItem({
+  section,
+  onPress,
+  hasAlarm,
+}: {
+  readonly section: SettingsSection;
+  readonly onPress: () => void;
+  readonly hasAlarm: boolean;
+}) {
 
   return (
     <TouchableOpacity
       style={styles.sectionCard}
-      onPress={handlePress}
+      onPress={onPress}
       activeOpacity={0.7}
       accessibilityLabel={section.title}
       accessibilityRole="button"
@@ -159,7 +159,7 @@ function SettingsItem({ section }: { readonly section: SettingsSection }) {
       </View>
       <Text style={styles.sectionTitle}>{section.title}</Text>
       {/* Alarm indicator for notifications */}
-      {section.id === 'notifications' && hasActiveAlarm ? (
+      {section.id === 'notifications' && hasAlarm ? (
         <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent.success, marginRight: 4 }} />
       ) : null}
       <Ionicons name="chevron-forward" size={20} style={styles.chevron} />
@@ -168,6 +168,18 @@ function SettingsItem({ section }: { readonly section: SettingsSection }) {
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
+  const notifications = useSettingsStore((s) => s.notifications);
+  const hasActiveAlarm = notifications.dailyReminderEnabled || notifications.streakReminderEnabled;
+
+  const handlePress = useCallback(
+    (section: SettingsSection) => {
+      logger.info('[settings]', `Navigate to ${section.id}`);
+      router.push(section.route as any);
+    },
+    [router],
+  );
+
   return (
     <LinearGradient
       colors={[colors.background.primary, colors.background.secondary]}
@@ -180,7 +192,13 @@ export default function SettingsScreen() {
           <FlatList
             data={SECTIONS}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <SettingsItem section={item} />}
+            renderItem={({ item }) => (
+              <SettingsItem
+                section={item}
+                onPress={() => handlePress(item)}
+                hasAlarm={item.id === 'notifications' && hasActiveAlarm}
+              />
+            )}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
           />
