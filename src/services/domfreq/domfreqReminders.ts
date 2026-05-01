@@ -66,6 +66,14 @@ export async function ensureDomfreqReminders(): Promise<number> {
       return 0;
     }
 
+    // Check if we have room (limit is 10 total)
+    const existingCount = useReminderStore.getState().reminders?.length ?? 0;
+    const availableSlots = 10 - existingCount;
+    if (availableSlots <= 0) {
+      logger.info('[dfpReminders]', `No reminder slots available (${existingCount}/10 used)`);
+      return 0;
+    }
+
     // Request permission
     const granted = await requestNotificationPermission();
     if (!granted) {
@@ -74,8 +82,10 @@ export async function ensureDomfreqReminders(): Promise<number> {
     }
 
     let createdCount = 0;
+    // Only create as many as we have slots for
+    const hoursToCreate = DFP_REMINDER_HOURS.slice(0, availableSlots);
 
-    for (const hour of DFP_REMINDER_HOURS) {
+    for (const hour of hoursToCreate) {
       try {
         const label = DFP_REMINDER_LABELS[hour];
 

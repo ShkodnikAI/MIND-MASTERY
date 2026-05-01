@@ -96,13 +96,18 @@ const styles = StyleSheet.create({
 
 export function SystemTabContent({ systemId, title, icon, onPracticePress }: SystemTabContentProps) {
 
-  // Memoize the selector so Zustand sees a stable reference
-  const practicesSelector = useMemo(
-    () => (s: any) => s.getPracticesBySystem(systemId),
-    [systemId],
-  );
-  const practices = useContentStore(practicesSelector);
+  // Read raw practices data and filter in-place with useRef cache to avoid
+  // creating a new array reference on every render (Zustand + useSyncExternalStore).
+  const practicesRaw = useContentStore((s) => s.practices);
   const loaded = useContentStore((s) => s.loaded);
+
+  const practices = useMemo(() => {
+    if (!practicesRaw) return [];
+    return Object.values(practicesRaw)
+      .filter((p) => p.systemId === systemId)
+      .sort((a, b) => a.requiredLevel - b.requiredLevel);
+  }, [practicesRaw, systemId]);
+
   const getPracticeProgress = useProgressStore((s) => s.getPracticeProgress);
   const getSystemProgress = useProgressStore((s) => s.getSystemProgress);
 
