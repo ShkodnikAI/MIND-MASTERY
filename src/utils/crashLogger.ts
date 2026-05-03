@@ -63,25 +63,21 @@ export function initCrashLogger(): void {
     addLog('warn', args.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' '));
   };
 
-  // Catch unhandled errors
-  if (typeof global !== 'undefined') {
-    const originalHandler =
-      (global as any).ErrorUtils?.getGlobalHandler?.() || null;
+  // Catch unhandled errors via global.ErrorUtils (RN 0.81+ compatible)
+  if (typeof global !== 'undefined' && typeof (global as any).ErrorUtils !== 'undefined') {
+    const errorUtils = (global as any).ErrorUtils;
+    const originalHandler = errorUtils.getGlobalHandler?.() || null;
     try {
-      const ErrorUtils =
-        require('react-native/Libraries/Utilities/ErrorUtils') as any;
-      if (ErrorUtils && ErrorUtils.setGlobalHandler) {
-        ErrorUtils.setGlobalHandler(
-          (error: Error, isFatal: boolean) => {
-            addLog(
-              'error',
-              `Unhandled ${isFatal ? 'FATAL' : 'error'}: ${error.message}`,
-              error.stack,
-            );
-            if (originalHandler) originalHandler(error, isFatal);
-          },
-        );
-      }
+      errorUtils.setGlobalHandler(
+        (error: Error, isFatal: boolean) => {
+          addLog(
+            'error',
+            `Unhandled ${isFatal ? 'FATAL' : 'error'}: ${error.message}`,
+            error.stack,
+          );
+          if (originalHandler) originalHandler(error, isFatal);
+        },
+      );
     } catch {
       // ErrorUtils may not be available in all environments (e.g. Expo Go)
     }

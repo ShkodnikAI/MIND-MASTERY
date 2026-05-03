@@ -96,9 +96,12 @@ const styles = StyleSheet.create({
 
 export function SystemTabContent({ systemId, title, icon, onPracticePress }: SystemTabContentProps) {
 
-  // Read raw practices count as a trigger + loaded flag
+  // Read raw practices count as a trigger + practicesLoaded flag
+  // NOTE: We check practicesLoaded, NOT loaded. The 'loaded' flag requires
+  // both practices AND texts to be loaded, but texts are loaded lazily.
+  // Practices can be displayed independently of texts.
   const practicesCount = useContentStore((s) => Object.keys(s.practices).length);
-  const loaded = useContentStore((s) => s.loaded);
+  const practicesLoaded = useContentStore((s) => s.practicesLoaded);
 
   // Re-derive practices list from store (stable because useMemo depends on count)
   const practices = useMemo(() => {
@@ -116,7 +119,7 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
 
   // Build system progress snapshot for unlock checking
   const systemProgressSnapshot = useMemo((): SystemProgressSnapshot | null => {
-    if (!loaded) return null;
+    if (!practicesLoaded) return null;
     const sysProgress = getSystemProgress(systemId);
     // Get progression rules from content registry
     const system = useContentStore.getState().systems[systemId];
@@ -139,7 +142,7 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
           : 0,
       progressionRules: rules,
     };
-  }, [loaded, systemId, practices, getSystemProgress, getPracticeProgress]);
+  }, [practicesLoaded, systemId, practices, getSystemProgress, getPracticeProgress]);
 
 
 
@@ -164,7 +167,7 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
   );
 
   // Loading state
-  if (!loaded) {
+  if (!practicesLoaded) {
     return (
       <View style={styles.content}>
         <View style={styles.headerContainer}>

@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useContentStore } from '@/store/contentStore';
 import { initializeDatabase, registerAppStateListener } from '@/db/lifecycle';
+import { loadAllTexts } from '@/services/content/textLoader';
 import { colors } from '@/ui/theme';
 import { logger } from '@/utils/logger';
 
@@ -55,9 +56,14 @@ export default function RootLayout() {
         unsubscribe = registerAppStateListener();
         logger.info('[root]', 'App-state listener registered');
 
-        // 3. Hydrate content store (INV-3)
+        // 3. Hydrate content store — practices (INV-3)
         await loadPractices();
-        logger.info('[root]', 'Content store hydrated');
+        logger.info('[root]', 'Content store hydrated (practices)');
+
+        // 4. Load practice texts from bundled JSON files
+        const texts = loadAllTexts('ru');
+        useContentStore.getState().loadTexts(texts);
+        logger.info('[root]', `Content store hydrated (${texts.length} texts)`);
       } catch (error) {
         logger.error('[root]', 'Initialization failed', error);
       }
