@@ -32,6 +32,14 @@ export interface AudioEngineUIState {
   readonly binaural: AudioLayerState;
   readonly voice: AudioLayerState;
 
+  // Mute toggles (user-controlled, independent of engine state)
+  readonly musicMuted: boolean;
+  readonly binauralMuted: boolean;
+  readonly voiceMuted: boolean;
+
+  // Current narration text (for UI display)
+  readonly narrationText: string | null;
+
   // Errors
   readonly error: string | null;
 }
@@ -48,6 +56,14 @@ interface AudioStateActions {
   // -- Layer state --
   setLayerState: (layer: 'music' | 'binaural' | 'voice', update: Partial<AudioLayerState>) => void;
   setLayerVolume: (layer: 'music' | 'binaural' | 'voice', volume: number) => void;
+
+  // -- Mute toggles --
+  toggleMusicMute: () => void;
+  toggleBinauralMute: () => void;
+  toggleVoiceMute: () => void;
+
+  // -- Narration text --
+  setNarrationText: (text: string | null) => void;
 
   // -- Errors --
   setError: (error: string | null) => void;
@@ -75,6 +91,10 @@ const INITIAL_STATE: AudioEngineUIState = {
   music: { ...DEFAULT_LAYER },
   binaural: { ...DEFAULT_LAYER },
   voice: { ...DEFAULT_LAYER },
+  musicMuted: false,
+  binauralMuted: false,
+  voiceMuted: false,
+  narrationText: null,
   error: null,
 };
 
@@ -108,6 +128,18 @@ export const useAudioStateStore = create<AudioEngineUIState & AudioStateActions>
     set((state) => ({
       [layer]: { ...state[layer], volume },
     })),
+
+  // -- Mute toggles ------------------------------------------------------
+
+  toggleMusicMute: () => set((s) => ({ musicMuted: !s.musicMuted })),
+
+  toggleBinauralMute: () => set((s) => ({ binauralMuted: !s.binauralMuted })),
+
+  toggleVoiceMute: () => set((s) => ({ voiceMuted: !s.voiceMuted })),
+
+  // -- Narration text -----------------------------------------------------
+
+  setNarrationText: (text) => set({ narrationText: text }),
 
   // -- Errors ------------------------------------------------------------
 

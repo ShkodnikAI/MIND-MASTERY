@@ -172,24 +172,56 @@ const styles = StyleSheet.create({
   layerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: spacing.xl,
+    gap: spacing.lg,
     marginVertical: spacing.lg,
   },
-  layerItem: {
+  layerToggle: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
+    backgroundColor: colors.background.tertiary,
+    borderRadius: radii.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  layerDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.text.tertiary,
+  layerToggleActive: {
+    borderColor: colors.accent.success,
+    backgroundColor: 'rgba(74, 222, 128, 0.1)',
   },
-  layerLabel: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs,
+  layerToggleMuted: {
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    opacity: 0.5,
+  },
+  layerIcon: {
+    fontSize: 18,
+  },
+  layerLabelText: {
+    fontFamily: typography.fontFamily.medium,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm,
+    color: colors.text.secondary,
+  },
+  layerLabelMuted: {
     color: colors.text.tertiary,
+  },
+
+  // ── Narration text ──────────────────────────────────────────
+  narrationContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginHorizontal: spacing.sm,
+    marginVertical: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  narrationText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm + 4,
+    color: colors.text.secondary,
   },
 
   // ── Progress bar ──────────────────────────────────────────────
@@ -400,6 +432,13 @@ export default function PlayerScreen() {
   const binauralState = useAudioStateStore((s) => s.binaural);
   const voiceState = useAudioStateStore((s) => s.voice);
   const audioError = useAudioStateStore((s) => s.error);
+  const musicMuted = useAudioStateStore((s) => s.musicMuted);
+  const binauralMuted = useAudioStateStore((s) => s.binauralMuted);
+  const voiceMuted = useAudioStateStore((s) => s.voiceMuted);
+  const narrationText = useAudioStateStore((s) => s.narrationText);
+  const toggleMusicMute = useAudioStateStore((s) => s.toggleMusicMute);
+  const toggleBinauralMute = useAudioStateStore((s) => s.toggleBinauralMute);
+  const toggleVoiceMute = useAudioStateStore((s) => s.toggleVoiceMute);
 
   // ── System theme ──────────────────────────────────────────────
   const systemTheme = useMemo(() => {
@@ -612,60 +651,83 @@ export default function PlayerScreen() {
             </ProgressRing>
           </View>
 
-          {/* ── Layer indicators ─────────────────────────────── */}
+          {/* ── Layer toggle buttons ──────────────────────────── */}
           <View style={styles.layerRow}>
-            {/* Music */}
-            <View style={styles.layerItem}>
-              <View
-                style={[
-                  styles.layerDot,
-                  {
-                    backgroundColor:
-                      musicState.status === 'playing'
-                        ? systemColor
-                        : musicState.status === 'error'
-                          ? colors.accent.error
-                          : colors.text.tertiary,
-                  },
-                ]}
+            {/* Music toggle */}
+            <TouchableOpacity
+              style={[
+                styles.layerToggle,
+                !musicMuted && musicState.status === 'playing' && styles.layerToggleActive,
+                musicMuted && styles.layerToggleMuted,
+              ]}
+              onPress={toggleMusicMute}
+              activeOpacity={0.7}
+              accessibilityLabel={musicMuted ? 'Включить музыку' : 'Выключить музыку'}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name={musicMuted ? 'musical-notes-outline' : 'musical-notes'}
+                size={18}
+                color={musicMuted ? colors.text.tertiary : colors.accent.success}
               />
-              <Text style={styles.layerLabel}>Музыка</Text>
-            </View>
-            {/* Binaural */}
-            <View style={styles.layerItem}>
-              <View
-                style={[
-                  styles.layerDot,
-                  {
-                    backgroundColor:
-                      binauralState.status === 'playing'
-                        ? systemColor
-                        : binauralState.status === 'error'
-                          ? colors.accent.error
-                          : colors.text.tertiary,
-                  },
-                ]}
+              <Text style={[styles.layerLabelText, musicMuted && styles.layerLabelMuted]}>
+                Музыка
+              </Text>
+            </TouchableOpacity>
+
+            {/* Binaural toggle */}
+            <TouchableOpacity
+              style={[
+                styles.layerToggle,
+                !binauralMuted && binauralState.status === 'playing' && styles.layerToggleActive,
+                binauralMuted && styles.layerToggleMuted,
+              ]}
+              onPress={toggleBinauralMute}
+              activeOpacity={0.7}
+              accessibilityLabel={binauralMuted ? 'Включить бинауральные биения' : 'Выключить бинауральные биения'}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name={binauralMuted ? 'headphones-outline' : 'headphones'}
+                size={18}
+                color={binauralMuted ? colors.text.tertiary : colors.accent.success}
               />
-              <Text style={styles.layerLabel}>Бинаур.</Text>
-            </View>
-            {/* Voice */}
-            <View style={styles.layerItem}>
-              <View
-                style={[
-                  styles.layerDot,
-                  {
-                    backgroundColor:
-                      voiceState.status === 'playing'
-                        ? systemColor
-                        : voiceState.status === 'error'
-                          ? colors.accent.error
-                          : colors.text.tertiary,
-                  },
-                ]}
+              <Text style={[styles.layerLabelText, binauralMuted && styles.layerLabelMuted]}>
+                Бинаур.
+              </Text>
+            </TouchableOpacity>
+
+            {/* Voice toggle */}
+            <TouchableOpacity
+              style={[
+                styles.layerToggle,
+                !voiceMuted && voiceState.status === 'playing' && styles.layerToggleActive,
+                voiceMuted && styles.layerToggleMuted,
+              ]}
+              onPress={toggleVoiceMute}
+              activeOpacity={0.7}
+              accessibilityLabel={voiceMuted ? 'Включить озвучку' : 'Выключить озвучку'}
+              accessibilityRole="button"
+            >
+              <Ionicons
+                name={voiceMuted ? 'mic-outline' : 'mic'}
+                size={18}
+                color={voiceMuted ? colors.text.tertiary : colors.accent.success}
               />
-              <Text style={styles.layerLabel}>Голос</Text>
-            </View>
+              <Text style={[styles.layerLabelText, voiceMuted && styles.layerLabelMuted]}>
+                Голос
+              </Text>
+            </TouchableOpacity>
           </View>
+
+          {/* ── Narration text ────────────────────────────────── */}
+          {narrationText ? (
+            <View style={styles.narrationContainer}>
+              <Text style={styles.narrationText} numberOfLines={6}>
+                {narrationText}
+              </Text>
+            </View>
+          ) : null}
 
           {/* ── Progress bar ─────────────────────────────────── */}
           <View style={styles.progressTrack}>

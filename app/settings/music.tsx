@@ -223,10 +223,13 @@ export default function MusicSettingsScreen() {
   const previewPlayer = useAudioPlayer();
   const [previewTrackId, setPreviewTrackId] = useState<string | null>(null);
 
-  // Stop preview on unmount
+  // Stop preview on unmount — mute + pause to ensure no lingering audio
   useEffect(() => {
     return () => {
-      try { previewPlayer.pause(); } catch { /* noop */ }
+      try {
+        previewPlayer.volume = 0;
+        previewPlayer.pause();
+      } catch { /* noop */ }
     };
   }, [previewPlayer]);
 
@@ -239,21 +242,30 @@ export default function MusicSettingsScreen() {
     async (trackId: string) => {
       try {
         if (previewTrackId === trackId) {
-          // Stop preview
+          // Stop preview — mute first to avoid lingering audio
+          previewPlayer.volume = 0;
           previewPlayer.pause();
           setPreviewTrackId(null);
         } else {
-          // Stop previous if any
+          // Fully stop previous preview before starting new one
+          previewPlayer.volume = 0;
           try { previewPlayer.pause(); } catch { /* noop */ }
 
           // Resolve asset URI
           const { resolveMusicUri } = require('@/audio/assetResolver');
           const uri = resolveMusicUri(trackId);
 
+          // If URI not found, still update selection but skip preview
           if (!uri) {
-            return; // track not found
+            setPreviewTrackId(null);
+            updateAudio({ selectedMusicTrack: trackId });
+            return;
           }
 
+          // Small delay to ensure previous audio fully stops
+          await new Promise<void>((r) => setTimeout(r, 50));
+
+          // Replace source and play new track
           previewPlayer.replace({ uri });
           previewPlayer.volume = Math.max(0.3, audio.musicVolume);
           previewPlayer.play();
@@ -263,7 +275,8 @@ export default function MusicSettingsScreen() {
           updateAudio({ selectedMusicTrack: trackId });
         }
       } catch {
-        // ignore preview errors
+        // ignore preview errors — ensure we reset state
+        setPreviewTrackId(null);
       }
     },
     [previewTrackId, previewPlayer, audio.musicVolume, updateAudio],

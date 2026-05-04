@@ -108,7 +108,13 @@ export function useAudioEngine(): AudioEngineControls {
   const setLayerState = useAudioStateStore((s) => s.setLayerState);
   const setLayerVolume = useAudioStateStore((s) => s.setLayerVolume);
   const setAudioError = useAudioStateStore((s) => s.setError);
+  const setNarrationText = useAudioStateStore((s) => s.setNarrationText);
   const resetAudioState = useAudioStateStore((s) => s.reset);
+
+  // Mute state (for reactive volume control)
+  const musicMuted = useAudioStateStore((s) => s.musicMuted);
+  const binauralMuted = useAudioStateStore((s) => s.binauralMuted);
+  const voiceMuted = useAudioStateStore((s) => s.voiceMuted);
 
   // -- Engine singleton -------------------------------------------------
   const engineRef = useRef<AudioEngine | null>(null);
@@ -125,7 +131,6 @@ export function useAudioEngine(): AudioEngineControls {
       if (dotIndex === -1) return textKey; // fallback: return raw key
 
       const practiceId = textKey.substring(0, dotIndex);
-      const sectionKey = textKey.substring(dotIndex + 1);
 
       const practiceText = getText(practiceId);
       if (!practiceText) {
@@ -133,13 +138,21 @@ export function useAudioEngine(): AudioEngineControls {
         return null;
       }
 
-      // PracticeTextSchema.segments is Record<string, string>
-      // The textKey suffix maps directly to segment keys
-      const text = practiceText.segments[sectionKey];
+      // PracticeTextSchema.segments keys are FULL textKeys: "breath_diaphragmatic.preparation"
+      // Try the full textKey first, then fall back to just the section part
+      let text = practiceText.segments[textKey];
       if (typeof text === 'string' && text.length > 0) {
         return text;
       }
 
+      // Fallback: try section-only key (e.g. "preparation") for compatibility
+      const sectionKey = textKey.substring(dotIndex + 1);
+      text = practiceText.segments[sectionKey];
+      if (typeof text === 'string' && text.length > 0) {
+        return text;
+      }
+
+      logger.warn('[useAudioEngine]', `Text not found for key "${textKey}" in practice "${practiceId}"`);
       return null;
     },
     [getText],
@@ -210,28 +223,34 @@ export function useAudioEngine(): AudioEngineControls {
           }
 
           setLayerState('voice', { status: 'playing' });
+          setNarrationText(text);
 
           const voiceVol = effectiveVolume(audio.masterVolume, audio.voiceVolume);
           setLayerVolume('voice', voiceVol);
 
-          Speech.speak(text, {
-            language: 'ru-RU',
-            rate: voice.speed,
-            pitch: voice.pitch,
-            onDone: () => {
-              setLayerState('voice', { status: 'idle' });
-            },
-            onError: () => {
-              setLayerState('voice', { status: 'error' });
-              engineRef.current?.reportError(`TTS error for "${event.textKey}"`);
-            },
-          });
+          if (!voiceMuted) {
+            Speech.speak(text, {
+              language: 'ru-RU',
+              rate: voice.speed,
+              pitch: voice.pitch,
+              onDone: () => {
+                setLayerState('voice', { status: 'idle' });
+                setNarrationText(null);
+              },
+              onError: () => {
+                setLayerState('voice', { status: 'error' });
+                setNarrationText(null);
+                engineRef.current?.reportError(`TTS error for "${event.textKey}"`);
+              },
+            });
+          }
           break;
         }
 
         case 'stopVoice': {
           Speech.stop();
           setLayerState('voice', { status: 'idle' });
+          setNarrationText(null);
           break;
         }
 
@@ -429,6 +448,7 @@ export function useAudioEngine(): AudioEngineControls {
     [
       audio,
       voice,
+      voiceMuted,
       resolveText,
       setEngineState,
       setPhase,
@@ -437,6 +457,7 @@ export function useAudioEngine(): AudioEngineControls {
       setLayerState,
       setLayerVolume,
       setAudioError,
+      setNarrationText,
       updateSessionStatus,
       updateSessionPhase,
       updateSessionProgress,
@@ -471,6 +492,25 @@ export function useAudioEngine(): AudioEngineControls {
       resetAudioState();
     };
   }, [handleEngineEvent, musicPlayer, binauralPlayer, resetAudioState]);
+
+  // -- React to mute toggles ---------------------------------------------
+  useEffect(() => {
+    try {
+      musicPlayer.volume = musicMuted ? 0 : useAudioStateStore.getState().music.volume;
+    } catch { /* noop */ }
+  }, [musicMuted, musicPlayer]);
+
+  useEffect(() => {
+    try {
+      binauralPlayer.volume = binauralMuted ? 0 : useAudioStateStore.getState().binaural.volume;
+    } catch { /* noop */ }
+  }, [binauralMuted, binauralPlayer]);
+
+  useEffect(() => {
+    if (voiceMuted) {
+      Speech.stop();
+    }
+  }, [voiceMuted]);
 
   // -- Controls ---------------------------------------------------------
 
