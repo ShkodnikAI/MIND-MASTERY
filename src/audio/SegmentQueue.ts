@@ -113,11 +113,9 @@ function extractPhase(segment: Segment): SessionPhase | null {
 /**
  * Build a conventional track identifier for a binaural beat.
  *
- * Convention: `{baseHz}hz-{beatHz}hz.wav`
- *
- * Pre-rendered binaural WAV files should follow this naming pattern
- * in the `assets/audio/binaural/` directory.
+ * Convention: `{baseHz}hz-{beatHz}hz` (no extension — assetResolver
+ * maps this key to the bundled .wav file).
  */
 function binauralTrackId(baseHz: number, beatHz: number): string {
-  return `${baseHz}hz-${beatHz}hz.wav`;
+  return `${baseHz}hz-${beatHz}hz`;
 }
