@@ -46,7 +46,6 @@
     "expo-sqlite": "~55.0.15",
     "expo-updates": "~55.0.21",
     "i18next": "^23.0.0",
-    "lottie-react-native": "7.2.2",
     "react": "19.0.0",
     "react-i18next": "^15.0.0",
     "react-native": "0.83.6",
