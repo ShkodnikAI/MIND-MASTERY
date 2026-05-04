@@ -16,6 +16,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useContentStore } from '@/store/contentStore';
 import { initializeDatabase, registerAppStateListener } from '@/db/lifecycle';
 import { loadAllTexts } from '@/services/content/textLoader';
+import { preloadAudioAssets } from '@/audio/assetResolver';
 import { colors } from '@/ui/theme';
 import { logger } from '@/utils/logger';
 
@@ -64,6 +65,10 @@ export default function RootLayout() {
         const texts = loadAllTexts('ru');
         useContentStore.getState().loadTexts(texts);
         logger.info('[root]', `Content store hydrated (${texts.length} texts)`);
+
+        // 5. Pre-load audio assets (music + binaural WAVs)
+        await preloadAudioAssets();
+        logger.info('[root]', 'Audio assets pre-loaded');
       } catch (error) {
         logger.error('[root]', 'Initialization failed', error);
       }

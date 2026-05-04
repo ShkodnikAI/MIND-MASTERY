@@ -168,60 +168,59 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 
-  // ── Layer indicators ──────────────────────────────────────────
+  // ── Layer toggle buttons ─────────────────────────────────────
   layerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: spacing.lg,
     marginVertical: spacing.lg,
   },
-  layerToggle: {
-    flexDirection: 'row',
+  layerButton: {
     alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.background.tertiary,
-    borderRadius: radii.lg,
-    paddingHorizontal: spacing.md,
+    gap: spacing.xs,
     paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.md,
+    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  layerToggleActive: {
-    borderColor: colors.accent.success,
-    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+  layerButtonActive: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.12)',
   },
-  layerToggleMuted: {
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    opacity: 0.5,
+  layerButtonMuted: {
+    opacity: 0.4,
   },
   layerIcon: {
-    fontSize: 18,
+    fontSize: 20,
   },
-  layerLabelText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm,
-    color: colors.text.secondary,
-  },
-  layerLabelMuted: {
+  layerLabel: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.xs,
+    lineHeight: typography.lineHeights.xs,
     color: colors.text.tertiary,
   },
 
-  // ── Narration text ──────────────────────────────────────────
-  narrationContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  // ── Narration text ────────────────────────────────────────────
+  narrationCard: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: radii.md,
-    padding: spacing.md,
-    marginHorizontal: spacing.sm,
-    marginVertical: spacing.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: 'rgba(255,255,255,0.08)',
+    padding: spacing.md,
+    marginVertical: spacing.md,
+    minHeight: 80,
+    maxWidth: 500,
+    alignSelf: 'center',
+    width: '100%',
   },
   narrationText: {
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm + 4,
+    lineHeight: typography.lineHeights.md,
     color: colors.text.secondary,
+    textAlign: 'center',
   },
 
   // ── Progress bar ──────────────────────────────────────────────
@@ -421,7 +420,7 @@ export default function PlayerScreen() {
   const loaded = useContentStore((s) => s.loaded);
 
   // ── Audio engine controls (INV-2: single owner) ───────────────
-  const { startSession, pause, resume, stop, isActive, isPlaying } = useAudioEngine();
+  const { startSession, pause, resume, stop, toggleMute, isActive, isPlaying } = useAudioEngine();
 
   // ── Real-time audio state (INV-3: memory-only reads) ──────────
   const engineState = useAudioStateStore((s) => s.engineState);
@@ -432,13 +431,8 @@ export default function PlayerScreen() {
   const binauralState = useAudioStateStore((s) => s.binaural);
   const voiceState = useAudioStateStore((s) => s.voice);
   const audioError = useAudioStateStore((s) => s.error);
-  const musicMuted = useAudioStateStore((s) => s.musicMuted);
-  const binauralMuted = useAudioStateStore((s) => s.binauralMuted);
-  const voiceMuted = useAudioStateStore((s) => s.voiceMuted);
-  const narrationText = useAudioStateStore((s) => s.narrationText);
-  const toggleMusicMute = useAudioStateStore((s) => s.toggleMusicMute);
-  const toggleBinauralMute = useAudioStateStore((s) => s.toggleBinauralMute);
-  const toggleVoiceMute = useAudioStateStore((s) => s.toggleVoiceMute);
+  const currentNarrationText = useAudioStateStore((s) => s.currentNarrationText);
+  const mutedLayers = useAudioStateStore((s) => s.mutedLayers);
 
   // ── System theme ──────────────────────────────────────────────
   const systemTheme = useMemo(() => {
@@ -651,26 +645,31 @@ export default function PlayerScreen() {
             </ProgressRing>
           </View>
 
-          {/* ── Layer toggle buttons ──────────────────────────── */}
+          {/* ── Layer toggle buttons ─────────────────────────── */}
           <View style={styles.layerRow}>
             {/* Music toggle */}
             <TouchableOpacity
               style={[
-                styles.layerToggle,
-                !musicMuted && musicState.status === 'playing' && styles.layerToggleActive,
-                musicMuted && styles.layerToggleMuted,
+                styles.layerButton,
+                musicState.status === 'playing' && styles.layerButtonActive,
+                mutedLayers.music && styles.layerButtonMuted,
               ]}
-              onPress={toggleMusicMute}
-              activeOpacity={0.7}
-              accessibilityLabel={musicMuted ? 'Включить музыку' : 'Выключить музыку'}
+              onPress={() => toggleMute('music')}
+              accessibilityLabel={mutedLayers.music ? 'Включить музыку' : 'Выключить музыку'}
               accessibilityRole="button"
             >
               <Ionicons
-                name={musicMuted ? 'musical-notes-outline' : 'musical-notes'}
-                size={18}
-                color={musicMuted ? colors.text.tertiary : colors.accent.success}
+                name={mutedLayers.music ? 'musical-notes-outline' : 'musical-notes'}
+                size={styles.layerIcon.fontSize}
+                color={
+                  musicState.status === 'error'
+                    ? colors.accent.error
+                    : mutedLayers.music
+                      ? colors.text.tertiary
+                      : systemColor
+                }
               />
-              <Text style={[styles.layerLabelText, musicMuted && styles.layerLabelMuted]}>
+              <Text style={[styles.layerLabel, !mutedLayers.music && musicState.status === 'playing' && { color: systemColor }]}>
                 Музыка
               </Text>
             </TouchableOpacity>
@@ -678,21 +677,26 @@ export default function PlayerScreen() {
             {/* Binaural toggle */}
             <TouchableOpacity
               style={[
-                styles.layerToggle,
-                !binauralMuted && binauralState.status === 'playing' && styles.layerToggleActive,
-                binauralMuted && styles.layerToggleMuted,
+                styles.layerButton,
+                binauralState.status === 'playing' && styles.layerButtonActive,
+                mutedLayers.binaural && styles.layerButtonMuted,
               ]}
-              onPress={toggleBinauralMute}
-              activeOpacity={0.7}
-              accessibilityLabel={binauralMuted ? 'Включить бинауральные биения' : 'Выключить бинауральные биения'}
+              onPress={() => toggleMute('binaural')}
+              accessibilityLabel={mutedLayers.binaural ? 'Включить бинауральные ритмы' : 'Выключить бинауральные ритмы'}
               accessibilityRole="button"
             >
               <Ionicons
-                name={binauralMuted ? 'pulse-outline' : 'pulse'}
-                size={18}
-                color={binauralMuted ? colors.text.tertiary : colors.accent.success}
+                name={mutedLayers.binaural ? 'pulse-outline' : 'pulse'}
+                size={styles.layerIcon.fontSize}
+                color={
+                  binauralState.status === 'error'
+                    ? colors.accent.error
+                    : mutedLayers.binaural
+                      ? colors.text.tertiary
+                      : systemColor
+                }
               />
-              <Text style={[styles.layerLabelText, binauralMuted && styles.layerLabelMuted]}>
+              <Text style={[styles.layerLabel, !mutedLayers.binaural && binauralState.status === 'playing' && { color: systemColor }]}>
                 Бинаур.
               </Text>
             </TouchableOpacity>
@@ -700,32 +704,35 @@ export default function PlayerScreen() {
             {/* Voice toggle */}
             <TouchableOpacity
               style={[
-                styles.layerToggle,
-                !voiceMuted && voiceState.status === 'playing' && styles.layerToggleActive,
-                voiceMuted && styles.layerToggleMuted,
+                styles.layerButton,
+                voiceState.status === 'playing' && styles.layerButtonActive,
+                mutedLayers.voice && styles.layerButtonMuted,
               ]}
-              onPress={toggleVoiceMute}
-              activeOpacity={0.7}
-              accessibilityLabel={voiceMuted ? 'Включить озвучку' : 'Выключить озвучку'}
+              onPress={() => toggleMute('voice')}
+              accessibilityLabel={mutedLayers.voice ? 'Включить голос' : 'Выключить голос'}
               accessibilityRole="button"
             >
               <Ionicons
-                name={voiceMuted ? 'mic-outline' : 'mic'}
-                size={18}
-                color={voiceMuted ? colors.text.tertiary : colors.accent.success}
+                name={mutedLayers.voice ? 'mic-outline' : 'mic'}
+                size={styles.layerIcon.fontSize}
+                color={
+                  voiceState.status === 'error'
+                    ? colors.accent.error
+                    : mutedLayers.voice
+                      ? colors.text.tertiary
+                      : systemColor
+                }
               />
-              <Text style={[styles.layerLabelText, voiceMuted && styles.layerLabelMuted]}>
+              <Text style={[styles.layerLabel, !mutedLayers.voice && voiceState.status === 'playing' && { color: systemColor }]}>
                 Голос
               </Text>
             </TouchableOpacity>
           </View>
 
-          {/* ── Narration text ────────────────────────────────── */}
-          {narrationText ? (
-            <View style={styles.narrationContainer}>
-              <Text style={styles.narrationText} numberOfLines={6}>
-                {narrationText}
-              </Text>
+          {/* ── Narration text ─────────────────────────────────── */}
+          {currentNarrationText ? (
+            <View style={styles.narrationCard}>
+              <Text style={styles.narrationText}>{currentNarrationText}</Text>
             </View>
           ) : null}
 

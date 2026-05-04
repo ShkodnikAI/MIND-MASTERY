@@ -11,9 +11,12 @@
 
 /**
  * Available voice delivery modes.
- * - `system` — use the device's built-in TTS engine (expo-speech).
+ * - `system` — use the device's built-in TTS engine.
+ * - `minimax` — use the Minimax cloud TTS API for high-quality voice.
+ * - `piper` — use the Piper local TTS engine for offline, high-quality voice.
+ * - `prerecorded` — play bundled audio files recorded by a professional narrator.
  */
-export type VoiceMode = 'system';
+export type VoiceMode = 'system' | 'minimax' | 'piper' | 'prerecorded';
 
 /**
  * Configures how narrated text is delivered during a session.
@@ -56,7 +59,7 @@ export interface AudioSettings {
   readonly errorPolicy: AudioErrorPolicy;
   /** Whether audio continues playing when the app is backgrounded. */
   readonly backgroundPlayback: boolean;
-  /** Currently selected background music track ID. */
+  /** Identifier of the selected background music track (e.g. 'space', 'ocean'). */
   readonly selectedMusicTrack: string;
 }
 
