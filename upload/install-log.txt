@@ -1,0 +1,665 @@
+﻿[09:31:18] [ OK ] Directory cleared
+[09:31:18] 
+[09:31:18] ========================================
+[09:31:18]   STEP 2: CLONING REPOSITORY
+[09:31:18] ========================================
+[09:31:18] [INFO] Cloning https://github.com/jamiepine/voicebox.git ...
+[09:31:18] [INFO]   Cloning into 'D:\AI_projectS\Voicebox\voicebox'...
+[09:31:36] [ OK ] Repository cloned successfully
+[09:31:36] [INFO] Working dir: D:\AI_projectS\Voicebox\voicebox
+[09:31:36] [INFO] Repository contents:
+[09:31:36] [INFO]   .agents
+[09:31:36] [INFO]   .github
+[09:31:36] [INFO]   app
+[09:31:36] [INFO]   backend
+[09:31:36] [INFO]   data
+[09:31:36] [INFO]   docs
+[09:31:36] [INFO]   landing
+[09:31:36] [INFO]   scripts
+[09:31:36] [INFO]   tauri
+[09:31:36] [INFO]   web
+[09:31:36] [INFO]   .biomeignore
+[09:31:36] [INFO]   .bumpversion.cfg
+[09:31:36] [INFO]   .dockerignore
+[09:31:36] [INFO]   .gitignore
+[09:31:36] [INFO]   .mcp.json
+[09:31:36] [INFO]   .npmrc
+[09:31:36] [INFO]   biome.json
+[09:31:36] [INFO]   bun.lock
+[09:31:36] [INFO]   CHANGELOG.md
+[09:31:36] [INFO]   CONTRIBUTING.md
+[09:31:36] [INFO]   docker-compose.yml
+[09:31:36] [INFO]   Dockerfile
+[09:31:36] [INFO]   justfile
+[09:31:36] [INFO]   LICENSE
+[09:31:36] [INFO]   package.json
+[09:31:36] [INFO]   README.md
+[09:31:36] [INFO]   requirements.txt
+[09:31:36] [INFO]   SECURITY.md
+[09:31:36] 
+[09:31:36] ========================================
+[09:31:36]   STEP 3: CONFIGURATION
+[09:31:36] ========================================
+[09:31:36] [ OK ] .env created (minimal)
+[09:31:36] [ OK ] Found compose file: docker-compose.yml
+[09:31:36] [INFO] Compose file content (first 50 lines):
+[09:31:36] [INFO]   services:
+[09:31:36] [INFO]     voicebox:
+[09:31:36] [INFO]       build: .
+[09:31:36] [INFO]       container_name: voicebox
+[09:31:36] [INFO]       restart: unless-stopped
+[09:31:36] [INFO]   
+[09:31:36] [INFO]       ports:
+[09:31:36] [INFO]         # Bind to localhost only for security
+[09:31:36] [INFO]         - "127.0.0.1:17493:17493"
+[09:31:36] [INFO]   
+[09:31:36] [INFO]       volumes:
+[09:31:36] [INFO]         # Bind-mount for generated audio (customize the host path as needed)
+[09:31:36] [INFO]         # Host side:      ./output/
+[09:31:37] [INFO]         # Container side: /app/data/generations/
+[09:31:37] [INFO]         - ./output:/app/data/generations
+[09:31:37] [INFO]   
+[09:31:37] [INFO]         # Named volume for profiles, DB, cache (persists across container restarts)
+[09:31:37] [INFO]         - voicebox-data:/app/data
+[09:31:37] [INFO]   
+[09:31:37] [INFO]         # HuggingFace model cache (so models aren't re-downloaded on rebuild)
+[09:31:37] [INFO]         - huggingface-cache:/home/voicebox/.cache/huggingface
+[09:31:37] [INFO]   
+[09:31:37] [INFO]       environment:
+[09:31:37] [INFO]         - LOG_LEVEL=info
+[09:31:37] [INFO]         - NUMBA_CACHE_DIR=/tmp/numba_cache
+[09:31:37] [INFO]   
+[09:31:37] [INFO]       networks:
+[09:31:37] [INFO]         - voicebox-net
+[09:31:37] [INFO]   
+[09:31:37] [INFO]       deploy:
+[09:31:37] [INFO]         resources:
+[09:31:37] [INFO]           limits:
+[09:31:37] [INFO]             cpus: '4'
+[09:31:37] [INFO]             memory: 8G
+[09:31:37] [INFO]   
+[09:31:37] [INFO]   networks:
+[09:31:37] [INFO]     voicebox-net:
+[09:31:37] [INFO]       driver: bridge
+[09:31:37] [INFO]   
+[09:31:37] [INFO]   volumes:
+[09:31:37] [INFO]     voicebox-data:
+[09:31:37] [INFO]     huggingface-cache:
+[09:31:37] 
+[09:31:37] ========================================
+[09:31:37]   STEP 4: LAUNCHING VOICEBOX
+[09:31:37] ========================================
+[09:31:37] 
+[09:31:37] !!! FIRST RUN: models download ~10-20 GB, takes 10-30 min !!!
+[09:31:37] 
+[09:31:54] [INFO] Running: docker compose -f D:\AI_projectS\Voicebox\voicebox\docker-compose.yml up -d --build
+[09:31:54] [INFO] See detailed log: D:\AI_projectS\Voicebox\compose-log.txt
+[09:32:46] [INFO] [COMPOSE]  Image voicebox-voicebox Building 
+[09:32:46] [INFO] [COMPOSE] #1 [internal] load local bake definitions
+[09:32:46] [INFO] [COMPOSE] #1 reading from stdin 533B 0.0s done
+[09:32:46] [INFO] [COMPOSE] #1 DONE 0.0s
+[09:32:46] [INFO] [COMPOSE] 
+[09:32:46] [INFO] [COMPOSE] #2 [internal] load build definition from Dockerfile
+[09:32:46] [INFO] [COMPOSE] #2 transferring dockerfile:
+[09:32:46] [INFO] [COMPOSE] #2 transferring dockerfile: 2.68kB 0.0s done
+[09:32:46] [INFO] [COMPOSE] #2 DONE 0.2s
+[09:32:46] [INFO] [COMPOSE] 
+[09:32:46] [INFO] [COMPOSE] #3 [internal] load metadata for docker.io/oven/bun:1
+[09:32:46] [INFO] [COMPOSE] #3 DONE 2.1s
+[09:32:46] [INFO] [COMPOSE] 
+[09:32:46] [INFO] [COMPOSE] #4 [internal] load metadata for docker.io/library/python:3.11-slim
+[09:32:46] [INFO] [COMPOSE] #4 DONE 2.1s
+[09:32:46] [INFO] [COMPOSE] 
+[09:32:46] [INFO] [COMPOSE] #5 [internal] load .dockerignore
+[09:32:46] [INFO] [COMPOSE] #5 transferring context:
+[09:32:46] [INFO] [COMPOSE] #5 transferring context: 613B 0.0s done
+[09:32:46] [INFO] [COMPOSE] #5 DONE 0.1s
+[09:32:46] [INFO] [COMPOSE] 
+[09:32:46] [INFO] [COMPOSE] #6 [internal] load build context
+[09:32:46] [INFO] [COMPOSE] #6 DONE 0.0s
+[09:32:47] [INFO] [COMPOSE] 
+[09:32:47] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:47] [INFO] [COMPOSE] #7 resolve docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:47] [INFO] [COMPOSE] #7 resolve docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e 0.1s done
+[09:32:47] [INFO] [COMPOSE] #7 DONE 0.1s
+[09:32:47] [INFO] [COMPOSE] 
+[09:32:47] [INFO] [COMPOSE] #6 [internal] load build context
+[09:32:47] [INFO] [COMPOSE] #6 ...
+[09:32:47] [INFO] [COMPOSE] 
+[09:32:47] [INFO] [COMPOSE] #8 [backend-builder 1/9] FROM docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2
+[09:32:47] [INFO] [COMPOSE] #8 resolve docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2 0.1s done
+[09:32:47] [INFO] [COMPOSE] #8 DONE 1.2s
+[09:32:47] [INFO] [COMPOSE] 
+[09:32:47] [INFO] [COMPOSE] #6 [internal] load build context
+[09:32:47] [INFO] [COMPOSE] #6 ...
+[09:32:47] [INFO] [COMPOSE] 
+[09:32:47] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:47] [INFO] [COMPOSE] #7 DONE 1.9s
+[09:32:47] [INFO] [COMPOSE] 
+[09:32:47] [INFO] [COMPOSE] #6 [internal] load build context
+[09:32:47] [INFO] [COMPOSE] #6 transferring context: 6.55MB 3.3s done
+[09:32:47] [INFO] [COMPOSE] #6 DONE 3.6s
+[09:32:47] [INFO] [COMPOSE] 
+[09:32:47] [INFO] [COMPOSE] #8 [backend-builder 1/9] FROM docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2
+[09:32:47] [INFO] [COMPOSE] #8 sha256:7ccd73948dde4b7f1623ac6bf9b58706fb83d0a363d765d7c799d46035ceb563 249B / 249B 0.4s done
+[09:32:47] [INFO] [COMPOSE] #8 sha256:91ff8760033c3b9bc9c3a3bcc6ff66c113ec9e13f94fa2f12ae4b221aae996b9 1.29MB / 1.29MB 1.7s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 3.15MB / 14.37MB 2.3s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 2.10MB / 29.78MB 2.1s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 4.19MB / 14.37MB 2.4s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 4.19MB / 29.78MB 2.7s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 5.24MB / 14.37MB 2.9s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 6.29MB / 14.37MB 3.2s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 7.34MB / 14.37MB 3.5s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 6.29MB / 29.78MB 3.5s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 8.39MB / 14.37MB 3.8s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 8.39MB / 29.78MB 3.9s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 9.44MB / 14.37MB 4.2s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 10.49MB / 29.78MB 4.5s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 12.58MB / 29.78MB 5.1s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 10.49MB / 14.37MB 5.4s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 11.53MB / 14.37MB 5.9s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 14.68MB / 29.78MB 5.7s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 12.58MB / 14.37MB 6.3s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 16.78MB / 29.78MB 6.3s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 18.87MB / 29.78MB 6.9s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 20.97MB / 29.78MB 7.5s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 13.63MB / 14.37MB 7.8s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 14.37MB / 14.37MB 8.1s
+[09:32:47] [INFO] [COMPOSE] #8 sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 14.37MB / 14.37MB 8.1s done
+[09:32:48] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 23.07MB / 29.78MB 8.1s
+[09:32:48] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 25.17MB / 29.78MB 8.7s
+[09:32:48] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 27.26MB / 29.78MB 9.5s
+[09:32:48] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 29.36MB / 29.78MB 9.9s
+[09:32:48] [INFO] [COMPOSE] #8 sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 29.78MB / 29.78MB 10.2s done
+[09:32:48] [INFO] [COMPOSE] #8 DONE 11.8s
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:48] [INFO] [COMPOSE] #7 sha256:5b531c0f03faa601b21ffba074576367135fd009dc1659ac7eed7be40c0d98b7 138B / 138B 0.9s done
+[09:32:48] [INFO] [COMPOSE] #7 sha256:d0826a5f7ef4c217928112a6da2c38eebe143508df148f719971cec8916e7d2f 3.40kB / 3.40kB 0.4s done
+[09:32:48] [INFO] [COMPOSE] #7 sha256:959552c2c430f9e81630bf5ef35f3567e59fcdd0d429271376bd53c5640b47e5 185B / 185B 0.3s done
+[09:32:48] [INFO] [COMPOSE] #7 sha256:3d46424f016660c963f2436f10337209f5b80a9444c9b839ba874c627e482d7b 29.36MB / 39.94MB 8.4s
+[09:32:48] [INFO] [COMPOSE] #7 sha256:a7730063fcfe708b222d34c4f07d633dfe087a28c05c4daaab2fa9943854c155 24.12MB / 49.30MB 8.3s
+[09:32:48] [INFO] [COMPOSE] #7 sha256:f255ba90d9deba7052e81e2afb76bbd781e8fedade86b8163fb3c1d1d175e135 294B / 294B 0.5s done
+[09:32:48] [INFO] [COMPOSE] #7 ...
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #8 [backend-builder 1/9] FROM docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2
+[09:32:48] [INFO] [COMPOSE] #8 extracting sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd
+[09:32:48] [INFO] [COMPOSE] #8 extracting sha256:3531af2bc2a9c8883754652783cf96207d53189db279c9637b7157d034de7ecd 4.3s done
+[09:32:48] [INFO] [COMPOSE] #8 extracting sha256:91ff8760033c3b9bc9c3a3bcc6ff66c113ec9e13f94fa2f12ae4b221aae996b9
+[09:32:48] [INFO] [COMPOSE] #8 extracting sha256:91ff8760033c3b9bc9c3a3bcc6ff66c113ec9e13f94fa2f12ae4b221aae996b9 0.3s done
+[09:32:48] [INFO] [COMPOSE] #8 DONE 16.4s
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:48] [INFO] [COMPOSE] #7 sha256:3d46424f016660c963f2436f10337209f5b80a9444c9b839ba874c627e482d7b 39.94MB / 39.94MB 11.1s done
+[09:32:48] [INFO] [COMPOSE] #7 sha256:a7730063fcfe708b222d34c4f07d633dfe087a28c05c4daaab2fa9943854c155 49.30MB / 49.30MB 12.6s done
+[09:32:48] [INFO] [COMPOSE] #7 extracting sha256:a7730063fcfe708b222d34c4f07d633dfe087a28c05c4daaab2fa9943854c155
+[09:32:48] [INFO] [COMPOSE] #7 ...
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #8 [backend-builder 1/9] FROM docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2
+[09:32:48] [INFO] [COMPOSE] #8 extracting sha256:f3ba2250c52436e41e9f2f3830af92de466fcacc2d848264e1f9fdc76975d803 1.7s done
+[09:32:48] [INFO] [COMPOSE] #8 DONE 18.1s
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #8 [backend-builder 1/9] FROM docker.io/library/python:3.11-slim@sha256:6d85378d88a19cd4d76079817532d62232be95757cb45945a99fec8e8084b9c2
+[09:32:48] [INFO] [COMPOSE] #8 extracting sha256:7ccd73948dde4b7f1623ac6bf9b58706fb83d0a363d765d7c799d46035ceb563 0.1s done
+[09:32:48] [INFO] [COMPOSE] #8 DONE 18.2s
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #9 [stage-2 2/8] RUN groupadd -r voicebox &&     useradd -r -g voicebox -m -s /bin/bash voicebox
+[09:32:48] [INFO] [COMPOSE] #9 ...
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #10 [backend-builder 2/9] WORKDIR /build
+[09:32:48] [INFO] [COMPOSE] #10 DONE 2.4s
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:48] [INFO] [COMPOSE] #11 ...
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #9 [stage-2 2/8] RUN groupadd -r voicebox &&     useradd -r -g voicebox -m -s /bin/bash voicebox
+[09:32:48] [INFO] [COMPOSE] #9 DONE 3.3s
+[09:32:48] [INFO] [COMPOSE] 
+[09:32:48] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:a7730063fcfe708b222d34c4f07d633dfe087a28c05c4daaab2fa9943854c155 5.5s done
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:f255ba90d9deba7052e81e2afb76bbd781e8fedade86b8163fb3c1d1d175e135
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:f255ba90d9deba7052e81e2afb76bbd781e8fedade86b8163fb3c1d1d175e135 0.2s done
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:3d46424f016660c963f2436f10337209f5b80a9444c9b839ba874c627e482d7b
+[09:32:49] [INFO] [COMPOSE] #7 ...
+[09:32:49] [INFO] [COMPOSE] 
+[09:32:49] [INFO] [COMPOSE] #12 [stage-2 3/8] WORKDIR /app
+[09:32:49] [INFO] [COMPOSE] #12 DONE 0.6s
+[09:32:49] [INFO] [COMPOSE] 
+[09:32:49] [INFO] [COMPOSE] #13 [stage-2 4/8] RUN apt-get update && apt-get install -y --no-install-recommends     ffmpeg     curl     && rm -rf /var/lib/apt/lists/*
+[09:32:49] [INFO] [COMPOSE] #13 1.053 Hit:1 http://deb.debian.org/debian trixie InRelease
+[09:32:49] [INFO] [COMPOSE] #13 1.053 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+[09:32:49] [INFO] [COMPOSE] #13 1.096 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+[09:32:49] [INFO] [COMPOSE] #13 1.160 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
+[09:32:49] [INFO] [COMPOSE] #13 ...
+[09:32:49] [INFO] [COMPOSE] 
+[09:32:49] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:3d46424f016660c963f2436f10337209f5b80a9444c9b839ba874c627e482d7b 3.0s done
+[09:32:49] [INFO] [COMPOSE] #7 DONE 24.8s
+[09:32:49] [INFO] [COMPOSE] 
+[09:32:49] [INFO] [COMPOSE] #13 [stage-2 4/8] RUN apt-get update && apt-get install -y --no-install-recommends     ffmpeg     curl     && rm -rf /var/lib/apt/lists/*
+[09:32:49] [INFO] [COMPOSE] #13 2.736 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
+[09:32:49] [INFO] [COMPOSE] #13 2.787 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [130 kB]
+[09:32:49] [INFO] [COMPOSE] #13 ...
+[09:32:49] [INFO] [COMPOSE] 
+[09:32:49] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:959552c2c430f9e81630bf5ef35f3567e59fcdd0d429271376bd53c5640b47e5 0.2s done
+[09:32:49] [INFO] [COMPOSE] #7 DONE 25.0s
+[09:32:49] [INFO] [COMPOSE] 
+[09:32:49] [INFO] [COMPOSE] #7 [frontend 1/8] FROM docker.io/oven/bun:1@sha256:87416c977a612a204eb54ab9f3927023c2a3c971f4f345a01da08ea6262ae30e
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:d0826a5f7ef4c217928112a6da2c38eebe143508df148f719971cec8916e7d2f 0.1s done
+[09:32:49] [INFO] [COMPOSE] #7 extracting sha256:5b531c0f03faa601b21ffba074576367135fd009dc1659ac7eed7be40c0d98b7 0.1s done
+[09:32:49] [INFO] [COMPOSE] #7 DONE 25.2s
+[09:32:49] [INFO] [COMPOSE] 
+[09:32:49] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:49] [INFO] [COMPOSE] #11 1.143 Hit:1 http://deb.debian.org/debian trixie InRelease
+[09:32:49] [INFO] [COMPOSE] #11 1.143 Get:2 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+[09:32:49] [INFO] [COMPOSE] #11 1.164 Get:3 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+[09:32:49] [INFO] [COMPOSE] #11 1.219 Get:4 http://deb.debian.org/debian trixie/main amd64 Packages [9671 kB]
+[09:32:49] [INFO] [COMPOSE] #11 3.121 Get:5 http://deb.debian.org/debian trixie-updates/main amd64 Packages [5412 B]
+[09:32:49] [INFO] [COMPOSE] #11 3.129 Get:6 http://deb.debian.org/debian-security trixie-security/main amd64 Packages [130 kB]
+[09:32:49] [INFO] [COMPOSE] #11 5.003 Fetched 9897 kB in 4s (2459 kB/s)
+[09:32:50] [INFO] [COMPOSE] #11 5.003 Reading package lists...
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #11 ...
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #14 [frontend 2/8] WORKDIR /build
+[09:32:50] [INFO] [COMPOSE] #14 DONE 1.8s
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:50] [INFO] [COMPOSE] #11 6.267 Reading package lists...
+[09:32:50] [INFO] [COMPOSE] #11 ...
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #15 [frontend 3/8] COPY package.json bun.lock CHANGELOG.md ./
+[09:32:50] [INFO] [COMPOSE] #15 DONE 0.4s
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #13 [stage-2 4/8] RUN apt-get update && apt-get install -y --no-install-recommends     ffmpeg     curl     && rm -rf /var/lib/apt/lists/*
+[09:32:50] [INFO] [COMPOSE] #13 4.153 Fetched 9897 kB in 3s (3063 kB/s)
+[09:32:50] [INFO] [COMPOSE] #13 4.153 Reading package lists...
+[09:32:50] [INFO] [COMPOSE] #13 5.455 Reading package lists...
+[09:32:50] [INFO] [COMPOSE] #13 ...
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #16 [frontend 4/8] COPY app/ ./app/
+[09:32:50] [INFO] [COMPOSE] #16 DONE 0.4s
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #17 [frontend 5/8] COPY web/ ./web/
+[09:32:50] [INFO] [COMPOSE] #17 DONE 0.2s
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:50] [INFO] [COMPOSE] #11 6.267 Reading package lists...
+[09:32:50] [INFO] [COMPOSE] #11 ...
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #18 [frontend 6/8] RUN sed -i '/"tauri"/d; /"landing"/d' package.json &&     sed -i -z 's/,\n  ]/\n  ]/' package.json
+[09:32:50] [INFO] [COMPOSE] #18 DONE 0.6s
+[09:32:50] [INFO] [COMPOSE] 
+[09:32:50] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:50] [INFO] [COMPOSE] #11 6.267 Reading package lists...
+[09:32:50] [INFO] [COMPOSE] #11 7.584 Building dependency tree...
+[09:32:50] [INFO] [COMPOSE] #11 7.867 Reading state information...
+[09:32:50] [INFO] [COMPOSE] #11 8.635 The following additional packages will be installed:
+[09:32:50] [INFO] [COMPOSE] #11 8.635   binutils binutils-common binutils-x86-64-linux-gnu bzip2 cpp cpp-14
+[09:32:50] [INFO] [COMPOSE] #11 8.635   cpp-14-x86-64-linux-gnu cpp-x86-64-linux-gnu dpkg-dev g++ g++-14
+[09:32:50] [INFO] [COMPOSE] #11 8.635   g++-14-x86-64-linux-gnu g++-x86-64-linux-gnu gcc gcc-14
+[09:32:51] [INFO] [COMPOSE] #11 8.636   gcc-14-x86-64-linux-gnu gcc-x86-64-linux-gnu git-man libasan8 libatomic1
+[09:32:51] [INFO] [COMPOSE] #11 8.636   libbinutils libbrotli1 libc-dev-bin libc6-dev libcc1-0 libcom-err2
+[09:32:51] [INFO] [COMPOSE] #11 8.636   libcrypt-dev libctf-nobfd0 libctf0 libcurl3t64-gnutls libdpkg-perl
+[09:32:51] [INFO] [COMPOSE] #11 8.636   liberror-perl libexpat1 libgcc-14-dev libgdbm-compat4t64 libgnutls30t64
+[09:32:51] [INFO] [COMPOSE] #11 8.636   libgomp1 libgprofng0 libgssapi-krb5-2 libhwasan0 libidn2-0 libisl23 libitm1
+[09:32:51] [INFO] [COMPOSE] #11 8.636   libjansson4 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap2
+[09:32:51] [INFO] [COMPOSE] #11 8.636   liblsan0 libmpc3 libmpfr6 libnghttp2-14 libnghttp3-9 libngtcp2-16
+[09:32:51] [INFO] [COMPOSE] #11 8.637   libngtcp2-crypto-gnutls8 libp11-kit0 libperl5.40 libpsl5t64 libquadmath0
+[09:32:51] [INFO] [COMPOSE] #11 8.639   librtmp1 libsasl2-2 libsasl2-modules-db libsframe1 libssh2-1t64
+[09:32:51] [INFO] [COMPOSE] #11 8.639   libstdc++-14-dev libtasn1-6 libtsan2 libubsan1 libunistring5 linux-libc-dev
+[09:32:51] [INFO] [COMPOSE] #11 8.641   make patch perl perl-modules-5.40 rpcsvc-proto xz-utils
+[09:32:51] [INFO] [COMPOSE] #11 8.648 Suggested packages:
+[09:32:51] [INFO] [COMPOSE] #11 8.654   binutils-doc gprofng-gui binutils-gold bzip2-doc cpp-doc gcc-14-locales
+[09:32:51] [INFO] [COMPOSE] #11 8.654   cpp-14-doc debian-keyring debian-tag2upload-keyring g++-multilib
+[09:32:51] [INFO] [COMPOSE] #11 8.654   g++-14-multilib gcc-14-doc gcc-multilib manpages-dev autoconf automake
+[09:32:51] [INFO] [COMPOSE] #11 8.654   libtool flex bison gdb gcc-doc gcc-14-multilib gdb-x86-64-linux-gnu
+[09:32:51] [INFO] [COMPOSE] #11 8.654   gettext-base git-doc git-email git-gui gitk gitweb git-cvs git-mediawiki
+[09:32:51] [INFO] [COMPOSE] #11 8.654   git-svn libc-devtools glibc-doc sq | sqop | rsop | gosop | pgpainless-cli
+[09:32:51] [INFO] [COMPOSE] #11 8.654   | gpg-sq | gnupg sensible-utils bzr gnutls-bin krb5-doc krb5-user
+[09:32:51] [INFO] [COMPOSE] #11 8.654   libstdc++-14-doc make-doc ed diffutils-doc perl-doc
+[09:32:51] [INFO] [COMPOSE] #11 8.654   libterm-readline-gnu-perl | libterm-readline-perl-perl
+[09:32:51] [INFO] [COMPOSE] #11 8.654   libtap-harness-archive-perl
+[09:32:51] [INFO] [COMPOSE] #11 8.654 Recommended packages:
+[09:32:51] [INFO] [COMPOSE] #11 8.654   fakeroot sq | sqop | rsop | gosop | pgpainless-cli | gpg-sq | gnupg
+[09:32:51] [INFO] [COMPOSE] #11 8.654   libalgorithm-merge-perl less ssh-client manpages manpages-dev
+[09:32:51] [INFO] [COMPOSE] #11 8.654   libfile-fcntllock-perl liblocale-gettext-perl krb5-locales libldap-common
+[09:32:51] [INFO] [COMPOSE] #11 8.654   publicsuffix libsasl2-modules
+[09:32:51] [INFO] [COMPOSE] #11 10.28 The following NEW packages will be installed:
+[09:32:51] [INFO] [COMPOSE] #11 10.28   binutils binutils-common binutils-x86-64-linux-gnu build-essential bzip2 cpp
+[09:32:51] [INFO] [COMPOSE] #11 10.28   cpp-14 cpp-14-x86-64-linux-gnu cpp-x86-64-linux-gnu dpkg-dev g++ g++-14
+[09:32:51] [INFO] [COMPOSE] #11 10.28   g++-14-x86-64-linux-gnu g++-x86-64-linux-gnu gcc gcc-14
+[09:32:51] [INFO] [COMPOSE] #11 10.28   gcc-14-x86-64-linux-gnu gcc-x86-64-linux-gnu git git-man libasan8 libatomic1
+[09:32:51] [INFO] [COMPOSE] #11 10.28   libbinutils libbrotli1 libc-dev-bin libc6-dev libcc1-0 libcom-err2
+[09:32:51] [INFO] [COMPOSE] #11 10.28   libcrypt-dev libctf-nobfd0 libctf0 libcurl3t64-gnutls libdpkg-perl
+[09:32:51] [INFO] [COMPOSE] #11 10.29   liberror-perl libexpat1 libgcc-14-dev libgdbm-compat4t64 libgnutls30t64
+[09:32:51] [INFO] [COMPOSE] #11 10.29   libgomp1 libgprofng0 libgssapi-krb5-2 libhwasan0 libidn2-0 libisl23 libitm1
+[09:32:51] [INFO] [COMPOSE] #11 10.29   libjansson4 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 libldap2
+[09:32:51] [INFO] [COMPOSE] #11 10.29   liblsan0 libmpc3 libmpfr6 libnghttp2-14 libnghttp3-9 libngtcp2-16
+[09:32:51] [INFO] [COMPOSE] #11 10.29   libngtcp2-crypto-gnutls8 libp11-kit0 libperl5.40 libpsl5t64 libquadmath0
+[09:32:51] [INFO] [COMPOSE] #11 10.29   librtmp1 libsasl2-2 libsasl2-modules-db libsframe1 libssh2-1t64
+[09:32:51] [INFO] [COMPOSE] #11 10.29   libstdc++-14-dev libtasn1-6 libtsan2 libubsan1 libunistring5 linux-libc-dev
+[09:32:51] [INFO] [COMPOSE] #11 10.29   make patch perl perl-modules-5.40 rpcsvc-proto xz-utils
+[09:32:51] [INFO] [COMPOSE] #11 11.68 0 upgraded, 79 newly installed, 0 to remove and 0 not upgraded.
+[09:32:51] [INFO] [COMPOSE] #11 11.68 Need to get 98.4 MB of archives.
+[09:32:51] [INFO] [COMPOSE] #11 11.68 After this operation, 404 MB of additional disk space will be used.
+[09:32:51] [INFO] [COMPOSE] #11 11.68 Get:1 http://deb.debian.org/debian trixie/main amd64 libexpat1 amd64 2.7.1-2 [108 kB]
+[09:32:51] [INFO] [COMPOSE] #11 12.28 Get:2 http://deb.debian.org/debian trixie/main amd64 bzip2 amd64 1.0.8-6 [40.5 kB]
+[09:32:51] [INFO] [COMPOSE] #11 12.35 Get:3 http://deb.debian.org/debian trixie/main amd64 perl-modules-5.40 all 5.40.1-6 [3019 kB]
+[09:32:52] [INFO] [COMPOSE] #11 13.85 Get:4 http://deb.debian.org/debian trixie/main amd64 libgdbm-compat4t64 amd64 1.24-2 [50.3 kB]
+[09:32:52] [INFO] [COMPOSE] #11 13.86 Get:5 http://deb.debian.org/debian trixie/main amd64 libperl5.40 amd64 5.40.1-6 [4341 kB]
+[09:32:52] [INFO] [COMPOSE] #11 15.10 Get:6 http://deb.debian.org/debian trixie/main amd64 perl amd64 5.40.1-6 [267 kB]
+[09:32:52] [INFO] [COMPOSE] #11 15.18 Get:7 http://deb.debian.org/debian trixie/main amd64 xz-utils amd64 5.8.1-1 [660 kB]
+[09:32:52] [INFO] [COMPOSE] #11 15.39 Get:8 http://deb.debian.org/debian trixie/main amd64 libsframe1 amd64 2.44-3 [78.4 kB]
+[09:32:52] [INFO] [COMPOSE] #11 15.42 Get:9 http://deb.debian.org/debian trixie/main amd64 binutils-common amd64 2.44-3 [2509 kB]
+[09:32:52] [INFO] [COMPOSE] #11 ...
+[09:32:52] [INFO] [COMPOSE] 
+[09:32:52] [INFO] [COMPOSE] #13 [stage-2 4/8] RUN apt-get update && apt-get install -y --no-install-recommends     ffmpeg     curl     && rm -rf /var/lib/apt/lists/*
+[09:32:52] [INFO] [COMPOSE] #13 5.455 Reading package lists...
+[09:32:52] [INFO] [COMPOSE] #13 7.031 Building dependency tree...
+[09:32:52] [INFO] [COMPOSE] #13 7.638 Reading state information...
+[09:32:52] [INFO] [COMPOSE] #13 9.400 The following additional packages will be installed:
+[09:32:52] [INFO] [COMPOSE] #13 9.400   fontconfig fontconfig-config fonts-dejavu-core fonts-dejavu-mono libaom3
+[09:32:52] [INFO] [COMPOSE] #13 9.400   libasound2-data libasound2t64 libass9 libasyncns0 libatomic1 libavc1394-0
+[09:32:52] [INFO] [COMPOSE] #13 9.400   libavcodec61 libavdevice61 libavfilter10 libavformat61 libavutil59 libblas3
+[09:32:52] [INFO] [COMPOSE] #13 9.400   libbluray2 libbrotli1 libbs2b0 libcaca0 libcairo-gobject2 libcairo2
+[09:32:52] [INFO] [COMPOSE] #13 9.401   libcdio-cdda2t64 libcdio-paranoia2t64 libcdio19t64 libchromaprint1 libcjson1
+[09:32:52] [INFO] [COMPOSE] #13 9.402   libcodec2-1.2 libcom-err2 libcurl4t64 libdatrie1 libdav1d7 libdbus-1-3
+[09:32:52] [INFO] [COMPOSE] #13 9.402   libdc1394-25 libdecor-0-0 libdeflate0 libdrm-amdgpu1 libdrm-common
+[09:32:52] [INFO] [COMPOSE] #13 9.402   libdrm-intel1 libdrm2 libdvdnav4 libdvdread8t64 libedit2 libelf1t64
+[09:32:52] [INFO] [COMPOSE] #13 9.402   libexpat1 libfftw3-double3 libflac14 libflite1 libfontconfig1 libfreetype6
+[09:32:52] [INFO] [COMPOSE] #13 9.402   libfribidi0 libgbm1 libgdk-pixbuf-2.0-0 libgdk-pixbuf2.0-common libgfortran5
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libgl1 libgl1-mesa-dri libglib2.0-0t64 libglvnd0 libglx-mesa0 libglx0
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libgme0 libgnutls30t64 libgomp1 libgraphite2-3 libgsm1 libgssapi-krb5-2
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libharfbuzz0b libhwy1t64 libidn2-0 libiec61883-0 libjack-jackd2-0 libjbig0
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libjpeg62-turbo libjxl0.11 libk5crypto3 libkeyutils1 libkrb5-3
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libkrb5support0 liblapack3 liblcms2-2 libldap2 liblerc4 liblilv-0-0
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libllvm19 libmbedcrypto16 libmp3lame0 libmpg123-0t64 libmysofa1
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libnghttp2-14 libnghttp3-9 libnorm1t64 libnuma1 libogg0 libopenal-data
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libopenal1 libopenjp2-7 libopenmpt0t64 libopus0 libp11-kit0 libpango-1.0-0
+[09:32:52] [INFO] [COMPOSE] #13 9.403   libpangocairo-1.0-0 libpangoft2-1.0-0 libpciaccess0 libpgm-5.3-0t64
+[09:32:52] [INFO] [COMPOSE] #13 9.404   libpixman-1-0 libplacebo349 libpng16-16t64 libpocketsphinx3 libpostproc58
+[09:32:52] [INFO] [COMPOSE] #13 9.404   libpsl5t64 libpulse0 librabbitmq4 librav1e0.7 libraw1394-11 librist4
+[09:32:52] [INFO] [COMPOSE] #13 9.405   librsvg2-2 librtmp1 librubberband2 libsamplerate0 libsasl2-2
+[09:32:52] [INFO] [COMPOSE] #13 9.405   libsasl2-modules-db libsdl2-2.0-0 libsensors-config libsensors5 libserd-0-0
+[09:32:52] [INFO] [COMPOSE] #13 9.405   libsharpyuv0 libshine3 libslang2 libsnappy1v5 libsndfile1 libsodium23
+[09:32:53] [INFO] [COMPOSE] #13 9.405   libsord-0-0 libsoxr0 libspeex1 libsphinxbase3t64 libsratom-0-0
+[09:32:53] [INFO] [COMPOSE] #13 9.405   libsrt1.5-gnutls libssh-4 libssh2-1t64 libsvtav1enc2 libswresample5
+[09:32:53] [INFO] [COMPOSE] #13 9.405   libswscale8 libtasn1-6 libthai-data libthai0 libtheoradec1 libtheoraenc1
+[09:32:53] [INFO] [COMPOSE] #13 9.405   libtiff6 libtwolame0 libudfread0 libunibreak6 libunistring5 libusb-1.0-0
+[09:32:53] [INFO] [COMPOSE] #13 9.406   libva-drm2 libva-x11-2 libva2 libvdpau1 libvidstab1.1 libvorbis0a
+[09:32:53] [INFO] [COMPOSE] #13 9.406   libvorbisenc2 libvorbisfile3 libvpl2 libvpx9 libvulkan1 libwayland-client0
+[09:32:53] [INFO] [COMPOSE] #13 9.408   libwayland-cursor0 libwayland-egl1 libwayland-server0 libwebp7 libwebpmux3
+[09:32:53] [INFO] [COMPOSE] #13 9.409   libx11-6 libx11-data libx11-xcb1 libx264-164 libx265-215 libxau6
+[09:32:53] [INFO] [COMPOSE] #13 9.411   libxcb-dri3-0 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-render0
+[09:32:53] [INFO] [COMPOSE] #13 9.411   libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-xfixes0 libxcb1 libxcursor1
+[09:32:53] [INFO] [COMPOSE] #13 9.411   libxdmcp6 libxext6 libxfixes3 libxi6 libxkbcommon0 libxml2 libxrandr2
+[09:32:53] [INFO] [COMPOSE] #13 9.411   libxrender1 libxshmfence1 libxss1 libxv1 libxvidcore4 libxxf86vm1 libz3-4
+[09:32:53] [INFO] [COMPOSE] #13 9.411   libzimg2 libzix-0-0 libzmq5 libzvbi-common libzvbi0t64 mesa-libgallium
+[09:32:53] [INFO] [COMPOSE] #13 9.418   ocl-icd-libopencl1 shared-mime-info x11-common xkb-data
+[09:32:53] [INFO] [COMPOSE] #13 9.431 Suggested packages:
+[09:32:53] [INFO] [COMPOSE] #13 9.431   ffmpeg-doc alsa-utils libasound2-plugins libcuda1 libnvcuvid1
+[09:32:53] [INFO] [COMPOSE] #13 9.431   libnvidia-encode1 libbluray-bdj libdvdcss2 libfftw3-bin libfftw3-dev
+[09:32:53] [INFO] [COMPOSE] #13 9.431   low-memory-monitor gnutls-bin krb5-doc krb5-user jackd2 liblcms2-utils
+[09:32:53] [INFO] [COMPOSE] #13 9.431   libportaudio2 libsndio7.0 opus-tools pciutils pulseaudio libraw1394-doc
+[09:32:53] [INFO] [COMPOSE] #13 9.431   librsvg2-bin xdg-utils lm-sensors serdi sordi speex opencl-icd
+[09:32:53] [INFO] [COMPOSE] #13 9.431 Recommended packages:
+[09:32:53] [INFO] [COMPOSE] #13 9.431   bash-completion alsa-ucm-conf alsa-topology-conf libaacs0 dbus
+[09:32:53] [INFO] [COMPOSE] #13 9.431   default-libdecor-0-plugin-1 | libdecor-0-plugin-1 libgdk-pixbuf2.0-bin
+[09:32:53] [INFO] [COMPOSE] #13 9.431   libglib2.0-data xdg-user-dirs krb5-locales libldap-common pocketsphinx-en-us
+[09:32:53] [INFO] [COMPOSE] #13 9.431   publicsuffix librsvg2-common libsasl2-modules va-driver-all | va-driver
+[09:32:53] [INFO] [COMPOSE] #13 9.431   vdpau-driver-all | vdpau-driver mesa-vulkan-drivers | vulkan-icd
+[09:32:53] [INFO] [COMPOSE] #13 13.71 The following NEW packages will be installed:
+[09:32:53] [INFO] [COMPOSE] #13 13.71   curl ffmpeg fontconfig fontconfig-config fonts-dejavu-core fonts-dejavu-mono
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libaom3 libasound2-data libasound2t64 libass9 libasyncns0 libatomic1
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libavc1394-0 libavcodec61 libavdevice61 libavfilter10 libavformat61
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libavutil59 libblas3 libbluray2 libbrotli1 libbs2b0 libcaca0
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libcairo-gobject2 libcairo2 libcdio-cdda2t64 libcdio-paranoia2t64
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libcdio19t64 libchromaprint1 libcjson1 libcodec2-1.2 libcom-err2 libcurl4t64
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libdatrie1 libdav1d7 libdbus-1-3 libdc1394-25 libdecor-0-0 libdeflate0
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libdrm-amdgpu1 libdrm-common libdrm-intel1 libdrm2 libdvdnav4 libdvdread8t64
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libedit2 libelf1t64 libexpat1 libfftw3-double3 libflac14 libflite1
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libfontconfig1 libfreetype6 libfribidi0 libgbm1 libgdk-pixbuf-2.0-0
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libgdk-pixbuf2.0-common libgfortran5 libgl1 libgl1-mesa-dri libglib2.0-0t64
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libglvnd0 libglx-mesa0 libglx0 libgme0 libgnutls30t64 libgomp1
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libgraphite2-3 libgsm1 libgssapi-krb5-2 libharfbuzz0b libhwy1t64 libidn2-0
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libiec61883-0 libjack-jackd2-0 libjbig0 libjpeg62-turbo libjxl0.11
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0 liblapack3 liblcms2-2
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libldap2 liblerc4 liblilv-0-0 libllvm19 libmbedcrypto16 libmp3lame0
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libmpg123-0t64 libmysofa1 libnghttp2-14 libnghttp3-9 libnorm1t64 libnuma1
+[09:32:53] [INFO] [COMPOSE] #13 13.71   libogg0 libopenal-data libopenal1 libopenjp2-7 libopenmpt0t64 libopus0
+[09:32:54] [INFO] [COMPOSE] #13 13.71   libp11-kit0 libpango-1.0-0 libpangocairo-1.0-0 libpangoft2-1.0-0
+[09:32:54] [INFO] [COMPOSE] #13 13.71   libpciaccess0 libpgm-5.3-0t64 libpixman-1-0 libplacebo349 libpng16-16t64
+[09:32:54] [INFO] [COMPOSE] #13 13.71   libpocketsphinx3 libpostproc58 libpsl5t64 libpulse0 librabbitmq4 librav1e0.7
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libraw1394-11 librist4 librsvg2-2 librtmp1 librubberband2 libsamplerate0
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libsasl2-2 libsasl2-modules-db libsdl2-2.0-0 libsensors-config libsensors5
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libserd-0-0 libsharpyuv0 libshine3 libslang2 libsnappy1v5 libsndfile1
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libsodium23 libsord-0-0 libsoxr0 libspeex1 libsphinxbase3t64 libsratom-0-0
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libsrt1.5-gnutls libssh-4 libssh2-1t64 libsvtav1enc2 libswresample5
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libswscale8 libtasn1-6 libthai-data libthai0 libtheoradec1 libtheoraenc1
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libtiff6 libtwolame0 libudfread0 libunibreak6 libunistring5 libusb-1.0-0
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libva-drm2 libva-x11-2 libva2 libvdpau1 libvidstab1.1 libvorbis0a
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libvorbisenc2 libvorbisfile3 libvpl2 libvpx9 libvulkan1 libwayland-client0
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libwayland-cursor0 libwayland-egl1 libwayland-server0 libwebp7 libwebpmux3
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libx11-6 libx11-data libx11-xcb1 libx264-164 libx265-215 libxau6
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libxcb-dri3-0 libxcb-glx0 libxcb-present0 libxcb-randr0 libxcb-render0
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libxcb-shape0 libxcb-shm0 libxcb-sync1 libxcb-xfixes0 libxcb1 libxcursor1
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libxdmcp6 libxext6 libxfixes3 libxi6 libxkbcommon0 libxml2 libxrandr2
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libxrender1 libxshmfence1 libxss1 libxv1 libxvidcore4 libxxf86vm1 libz3-4
+[09:32:54] [INFO] [COMPOSE] #13 13.72   libzimg2 libzix-0-0 libzmq5 libzvbi-common libzvbi0t64 mesa-libgallium
+[09:32:54] [INFO] [COMPOSE] #13 13.72   ocl-icd-libopencl1 shared-mime-info x11-common xkb-data
+[09:32:54] [INFO] [COMPOSE] #13 14.03 0 upgraded, 215 newly installed, 0 to remove and 0 not upgraded.
+[09:32:54] [INFO] [COMPOSE] #13 14.03 Need to get 135 MB of archives.
+[09:32:54] [INFO] [COMPOSE] #13 14.03 After this operation, 470 MB of additional disk space will be used.
+[09:32:54] [INFO] [COMPOSE] #13 14.03 Get:1 http://deb.debian.org/debian trixie/main amd64 libexpat1 amd64 2.7.1-2 [108 kB]
+[09:32:54] [INFO] [COMPOSE] #13 14.17 Get:2 http://deb.debian.org/debian trixie/main amd64 libbrotli1 amd64 1.1.0-2+b7 [307 kB]
+[09:32:54] [INFO] [COMPOSE] #13 14.42 Get:3 http://deb.debian.org/debian trixie/main amd64 libkrb5support0 amd64 1.21.3-5 [33.0 kB]
+[09:32:54] [INFO] [COMPOSE] #13 14.43 Get:4 http://deb.debian.org/debian trixie/main amd64 libcom-err2 amd64 1.47.2-3+b10 [25.0 kB]
+[09:32:54] [INFO] [COMPOSE] #13 14.44 Get:5 http://deb.debian.org/debian trixie/main amd64 libk5crypto3 amd64 1.21.3-5 [81.5 kB]
+[09:32:54] [INFO] [COMPOSE] #13 14.49 Get:6 http://deb.debian.org/debian trixie/main amd64 libkeyutils1 amd64 1.6.3-6 [9456 B]
+[09:32:54] [INFO] [COMPOSE] #13 14.50 Get:7 http://deb.debian.org/debian trixie/main amd64 libkrb5-3 amd64 1.21.3-5 [326 kB]
+[09:32:54] [INFO] [COMPOSE] #13 14.74 Get:8 http://deb.debian.org/debian trixie/main amd64 libgssapi-krb5-2 amd64 1.21.3-5 [138 kB]
+[09:32:54] [INFO] [COMPOSE] #13 14.82 Get:9 http://deb.debian.org/debian trixie/main amd64 libunistring5 amd64 1.3-2 [477 kB]
+[09:32:54] [INFO] [COMPOSE] #13 15.09 Get:10 http://deb.debian.org/debian trixie/main amd64 libidn2-0 amd64 2.3.8-2 [109 kB]
+[09:32:54] [INFO] [COMPOSE] #13 15.15 Get:11 http://deb.debian.org/debian trixie/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg1-9 [19.8 kB]
+[09:32:54] [INFO] [COMPOSE] #13 15.17 Get:12 http://deb.debian.org/debian trixie/main amd64 libsasl2-2 amd64 2.1.28+dfsg1-9 [57.5 kB]
+[09:32:54] [INFO] [COMPOSE] #13 15.20 Get:13 http://deb.debian.org/debian trixie/main amd64 libldap2 amd64 2.6.10+dfsg-1 [194 kB]
+[09:32:54] [INFO] [COMPOSE] #13 15.31 Get:14 http://deb.debian.org/debian trixie/main amd64 libnghttp2-14 amd64 1.64.0-1.1 [76.0 kB]
+[09:32:54] [INFO] [COMPOSE] #13 ...
+[09:32:54] [INFO] [COMPOSE] 
+[09:32:54] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:54] [INFO] [COMPOSE] #11 16.72 Get:10 http://deb.debian.org/debian trixie/main amd64 libbinutils amd64 2.44-3 [534 kB]
+[09:32:54] [INFO] [COMPOSE] #11 17.07 Get:11 http://deb.debian.org/debian trixie/main amd64 libgprofng0 amd64 2.44-3 [808 kB]
+[09:32:54] [INFO] [COMPOSE] #11 17.51 Get:12 http://deb.debian.org/debian trixie/main amd64 libctf-nobfd0 amd64 2.44-3 [156 kB]
+[09:32:54] [INFO] [COMPOSE] #11 17.57 Get:13 http://deb.debian.org/debian trixie/main amd64 libctf0 amd64 2.44-3 [88.6 kB]
+[09:32:55] [INFO] [COMPOSE] #11 17.61 Get:14 http://deb.debian.org/debian trixie/main amd64 libjansson4 amd64 2.14-2+b3 [39.8 kB]
+[09:32:55] [INFO] [COMPOSE] #11 17.63 Get:15 http://deb.debian.org/debian trixie/main amd64 binutils-x86-64-linux-gnu amd64 2.44-3 [1014 kB]
+[09:32:55] [INFO] [COMPOSE] #11 ...
+[09:32:55] [INFO] [COMPOSE] 
+[09:32:55] [INFO] [COMPOSE] #19 [frontend 7/8] RUN bun install --no-save
+[09:32:55] [INFO] [COMPOSE] #19 0.492 bun install v1.3.13 (bf2e2cec)
+[09:32:55] [INFO] [COMPOSE] #19 ...
+[09:32:55] [INFO] [COMPOSE] 
+[09:32:55] [INFO] [COMPOSE] #13 [stage-2 4/8] RUN apt-get update && apt-get install -y --no-install-recommends     ffmpeg     curl     && rm -rf /var/lib/apt/lists/*
+[09:32:55] [INFO] [COMPOSE] #13 15.34 Get:15 http://deb.debian.org/debian trixie/main amd64 libnghttp3-9 amd64 1.8.0-1 [67.7 kB]
+[09:32:55] [INFO] [COMPOSE] #13 15.37 Get:16 http://deb.debian.org/debian trixie/main amd64 libpsl5t64 amd64 0.21.2-1.1+b1 [57.2 kB]
+[09:32:55] [INFO] [COMPOSE] #13 15.40 Get:17 http://deb.debian.org/debian trixie/main amd64 libp11-kit0 amd64 0.25.5-3 [425 kB]
+[09:32:55] [INFO] [COMPOSE] #13 15.62 Get:18 http://deb.debian.org/debian trixie/main amd64 libtasn1-6 amd64 4.20.0-2 [49.9 kB]
+[09:32:55] [INFO] [COMPOSE] #13 15.64 Get:19 http://deb.debian.org/debian trixie/main amd64 libgnutls30t64 amd64 3.8.9-3+deb13u2 [1468 kB]
+[09:32:55] [INFO] [COMPOSE] #13 16.26 Get:20 http://deb.debian.org/debian trixie/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2+b5 [58.8 kB]
+[09:32:55] [INFO] [COMPOSE] #13 16.29 Get:21 http://deb.debian.org/debian trixie/main amd64 libssh2-1t64 amd64 1.11.1-1 [245 kB]
+[09:32:55] [INFO] [COMPOSE] #13 16.36 Get:22 http://deb.debian.org/debian trixie/main amd64 libcurl4t64 amd64 8.14.1-2+deb13u2 [391 kB]
+[09:32:55] [INFO] [COMPOSE] #13 16.53 Get:23 http://deb.debian.org/debian trixie/main amd64 curl amd64 8.14.1-2+deb13u2 [270 kB]
+[09:32:55] [INFO] [COMPOSE] #13 16.64 Get:24 http://deb.debian.org/debian trixie/main amd64 libaom3 amd64 3.12.1-1 [1871 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.17 Get:25 http://deb.debian.org/debian trixie/main amd64 libdrm-common all 2.4.124-2 [8288 B]
+[09:32:55] [INFO] [COMPOSE] #13 17.17 Get:26 http://deb.debian.org/debian trixie/main amd64 libdrm2 amd64 2.4.124-2 [39.0 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.18 Get:27 http://deb.debian.org/debian trixie/main amd64 libva2 amd64 2.22.0-3 [79.4 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.21 Get:28 http://deb.debian.org/debian trixie/main amd64 libva-drm2 amd64 2.22.0-3 [18.3 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.21 Get:29 http://deb.debian.org/debian trixie/main amd64 libxau6 amd64 1:1.0.11-1 [20.4 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.23 Get:30 http://deb.debian.org/debian trixie/main amd64 libxdmcp6 amd64 1:1.1.5-1 [27.8 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.24 Get:31 http://deb.debian.org/debian trixie/main amd64 libxcb1 amd64 1.17.0-2+b1 [144 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.27 Get:32 http://deb.debian.org/debian trixie/main amd64 libx11-data all 2:1.8.12-1 [343 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.38 Get:33 http://deb.debian.org/debian trixie/main amd64 libx11-6 amd64 2:1.8.12-1 [815 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.64 Get:34 http://deb.debian.org/debian trixie/main amd64 libx11-xcb1 amd64 2:1.8.12-1 [247 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.72 Get:35 http://deb.debian.org/debian trixie/main amd64 libxcb-dri3-0 amd64 1.17.0-2+b1 [107 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.74 Get:36 http://deb.debian.org/debian trixie/main amd64 libxext6 amd64 2:1.3.4-1+b3 [50.4 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.76 Get:37 http://deb.debian.org/debian trixie/main amd64 libxfixes3 amd64 1:6.0.0-2+b4 [20.2 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.76 Get:38 http://deb.debian.org/debian trixie/main amd64 libva-x11-2 amd64 2.22.0-3 [23.1 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.77 Get:39 http://deb.debian.org/debian trixie/main amd64 libvdpau1 amd64 1.5-3+b1 [27.2 kB]
+[09:32:55] [INFO] [COMPOSE] #13 17.80 Get:40 http://deb.debian.org/debian trixie/main amd64 libvpl2 amd64 1:2.14.0-1+b1 [129 kB]
+[09:32:56] [INFO] [COMPOSE] #13 17.82 Get:41 http://deb.debian.org/debian trixie/main amd64 ocl-icd-libopencl1 amd64 2.3.3-1 [42.9 kB]
+[09:32:56] [INFO] [COMPOSE] #13 17.83 Get:42 http://deb.debian.org/debian trixie/main amd64 libavutil59 amd64 7:7.1.3-0+deb13u1 [417 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.16 Get:43 http://deb.debian.org/debian-security trixie-security/main amd64 libpng16-16t64 amd64 1.6.48-1+deb13u4 [283 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.41 Get:44 http://deb.debian.org/debian-security trixie-security/main amd64 libfreetype6 amd64 2.13.3+dfsg-1+deb13u1 [452 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.43 Get:45 http://deb.debian.org/debian trixie/main amd64 fonts-dejavu-mono all 2.37-8 [489 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.69 Get:46 http://deb.debian.org/debian trixie/main amd64 fonts-dejavu-core all 2.37-8 [840 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.71 Get:47 http://deb.debian.org/debian trixie/main amd64 fontconfig-config amd64 2.15.0-2.3 [318 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.78 Get:48 http://deb.debian.org/debian trixie/main amd64 libfontconfig1 amd64 2.15.0-2.3 [392 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.79 Get:49 http://deb.debian.org/debian trixie/main amd64 libpixman-1-0 amd64 0.44.0-3 [248 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.80 Get:50 http://deb.debian.org/debian trixie/main amd64 libxcb-render0 amd64 1.17.0-2+b1 [115 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.82 Get:51 http://deb.debian.org/debian trixie/main amd64 libxcb-shm0 amd64 1.17.0-2+b1 [105 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.87 Get:52 http://deb.debian.org/debian trixie/main amd64 libxrender1 amd64 1:0.9.12-1 [27.9 kB]
+[09:32:56] [INFO] [COMPOSE] #13 18.87 Get:53 http://deb.debian.org/debian trixie/main amd64 libcairo2 amd64 1.18.4-1+b1 [538 kB]
+[09:32:56] [INFO] [COMPOSE] #13 19.06 Get:54 http://deb.debian.org/debian trixie/main amd64 libcodec2-1.2 amd64 1.2.0-3 [8170 kB]
+[09:32:56] [INFO] [COMPOSE] #13 ...
+[09:32:56] [INFO] [COMPOSE] 
+[09:32:56] [INFO] [COMPOSE] #19 [frontend 7/8] RUN bun install --no-save
+[09:32:56] [INFO] [COMPOSE] #19 10.57 
+[09:32:56] [INFO] [COMPOSE] #19 10.57 + @biomejs/biome@2.3.12
+[09:32:56] [INFO] [COMPOSE] #19 10.57 + @types/node@20.19.30
+[09:32:56] [INFO] [COMPOSE] #19 10.57 + tailwindcss@4.1.18
+[09:32:56] [INFO] [COMPOSE] #19 10.57 + typescript@5.9.3
+[09:32:56] [INFO] [COMPOSE] #19 10.57 + loaders.css@0.1.2
+[09:32:56] [INFO] [COMPOSE] #19 10.57 + react-loaders@3.0.1
+[09:32:56] [INFO] [COMPOSE] #19 10.57 
+[09:32:56] [INFO] [COMPOSE] #19 10.57 656 packages installed [10.08s]
+[09:32:56] [INFO] [COMPOSE] #19 10.57 Removed: 2
+[09:32:56] [INFO] [COMPOSE] #19 DONE 14.8s
+[09:32:57] [INFO] [COMPOSE] 
+[09:32:57] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:57] [INFO] [COMPOSE] #11 18.06 Get:16 http://deb.debian.org/debian trixie/main amd64 binutils amd64 2.44-3 [265 kB]
+[09:32:57] [INFO] [COMPOSE] #11 18.17 Get:17 http://deb.debian.org/debian trixie/main amd64 libc-dev-bin amd64 2.41-12+deb13u2 [59.4 kB]
+[09:32:57] [INFO] [COMPOSE] #11 18.18 Get:18 http://deb.debian.org/debian-security trixie-security/main amd64 linux-libc-dev all 6.12.85-1 [2802 kB]
+[09:32:57] [INFO] [COMPOSE] #11 18.99 Get:19 http://deb.debian.org/debian trixie/main amd64 libcrypt-dev amd64 1:4.4.38-1 [119 kB]
+[09:32:57] [INFO] [COMPOSE] #11 19.01 Get:20 http://deb.debian.org/debian trixie/main amd64 rpcsvc-proto amd64 1.4.3-1 [63.3 kB]
+[09:32:57] [INFO] [COMPOSE] #11 19.04 Get:21 http://deb.debian.org/debian trixie/main amd64 libc6-dev amd64 2.41-12+deb13u2 [1996 kB]
+[09:32:57] [INFO] [COMPOSE] #11 19.61 Get:22 http://deb.debian.org/debian trixie/main amd64 libisl23 amd64 0.27-1 [659 kB]
+[09:32:57] [INFO] [COMPOSE] #11 19.86 Get:23 http://deb.debian.org/debian trixie/main amd64 libmpfr6 amd64 4.2.2-1 [729 kB]
+[09:32:57] [INFO] [COMPOSE] #11 20.13 Get:24 http://deb.debian.org/debian trixie/main amd64 libmpc3 amd64 1.3.1-1+b3 [52.2 kB]
+[09:32:57] [INFO] [COMPOSE] #11 20.14 Get:25 http://deb.debian.org/debian trixie/main amd64 cpp-14-x86-64-linux-gnu amd64 14.2.0-19 [11.0 MB]
+[09:32:57] [INFO] [COMPOSE] #11 23.42 Get:26 http://deb.debian.org/debian trixie/main amd64 cpp-14 amd64 14.2.0-19 [1280 B]
+[09:32:57] [INFO] [COMPOSE] #11 23.42 Get:27 http://deb.debian.org/debian trixie/main amd64 cpp-x86-64-linux-gnu amd64 4:14.2.0-1 [4840 B]
+[09:32:57] [INFO] [COMPOSE] #11 23.42 Get:28 http://deb.debian.org/debian trixie/main amd64 cpp amd64 4:14.2.0-1 [1568 B]
+[09:32:57] [INFO] [COMPOSE] #11 23.42 Get:29 http://deb.debian.org/debian trixie/main amd64 libcc1-0 amd64 14.2.0-19 [42.8 kB]
+[09:32:57] [INFO] [COMPOSE] #11 23.42 Get:30 http://deb.debian.org/debian trixie/main amd64 libgomp1 amd64 14.2.0-19 [137 kB]
+[09:32:57] [INFO] [COMPOSE] #11 23.46 Get:31 http://deb.debian.org/debian trixie/main amd64 libitm1 amd64 14.2.0-19 [26.0 kB]
+[09:32:57] [INFO] [COMPOSE] #11 23.47 Get:32 http://deb.debian.org/debian trixie/main amd64 libatomic1 amd64 14.2.0-19 [9308 B]
+[09:32:57] [INFO] [COMPOSE] #11 23.47 Get:33 http://deb.debian.org/debian trixie/main amd64 libasan8 amd64 14.2.0-19 [2725 kB]
+[09:32:57] [INFO] [COMPOSE] #11 24.10 Get:34 http://deb.debian.org/debian trixie/main amd64 liblsan0 amd64 14.2.0-19 [1204 kB]
+[09:32:57] [INFO] [COMPOSE] #11 24.35 Get:35 http://deb.debian.org/debian trixie/main amd64 libtsan2 amd64 14.2.0-19 [2460 kB]
+[09:32:57] [INFO] [COMPOSE] #11 25.04 Get:36 http://deb.debian.org/debian trixie/main amd64 libubsan1 amd64 14.2.0-19 [1074 kB]
+[09:32:57] [INFO] [COMPOSE] #11 ...
+[09:32:57] [INFO] [COMPOSE] 
+[09:32:57] [INFO] [COMPOSE] #13 [stage-2 4/8] RUN apt-get update && apt-get install -y --no-install-recommends     ffmpeg     curl     && rm -rf /var/lib/apt/lists/*
+[09:32:57] [INFO] [COMPOSE] #13 21.58 Get:55 http://deb.debian.org/debian trixie/main amd64 libdav1d7 amd64 1.5.1-1 [559 kB]
+[09:32:57] [INFO] [COMPOSE] #13 21.73 Get:56 http://deb.debian.org/debian trixie/main amd64 libatomic1 amd64 14.2.0-19 [9308 B]
+[09:32:57] [INFO] [COMPOSE] #13 21.73 Get:57 http://deb.debian.org/debian trixie/main amd64 libglib2.0-0t64 amd64 2.84.4-3~deb13u2 [1518 kB]
+[09:32:57] [INFO] [COMPOSE] #13 22.09 Get:58 http://deb.debian.org/debian trixie/main amd64 libgsm1 amd64 1.0.22-1+b2 [29.3 kB]
+[09:32:57] [INFO] [COMPOSE] #13 22.10 Get:59 http://deb.debian.org/debian trixie/main amd64 libhwy1t64 amd64 1.2.0-2+b2 [676 kB]
+[09:32:57] [INFO] [COMPOSE] #13 22.30 Get:60 http://deb.debian.org/debian trixie/main amd64 liblcms2-2 amd64 2.16-2 [160 kB]
+[09:32:57] [INFO] [COMPOSE] #13 22.34 Get:61 http://deb.debian.org/debian trixie/main amd64 libjxl0.11 amd64 0.11.1-4 [1132 kB]
+[09:32:58] [INFO] [COMPOSE] #13 22.60 Get:62 http://deb.debian.org/debian trixie/main amd64 libmp3lame0 amd64 3.100-6+b3 [363 kB]
+[09:32:58] [INFO] [COMPOSE] #13 22.73 Get:63 http://deb.debian.org/debian trixie/main amd64 libopenjp2-7 amd64 2.5.3-2.1~deb13u1 [205 kB]
+[09:32:58] [INFO] [COMPOSE] #13 22.79 Get:64 http://deb.debian.org/debian trixie/main amd64 libopus0 amd64 1.5.2-2 [2852 kB]
+[09:32:58] [INFO] [COMPOSE] #13 23.52 Get:65 http://deb.debian.org/debian trixie/main amd64 librav1e0.7 amd64 0.7.1-9+b2 [946 kB]
+[09:32:58] [INFO] [COMPOSE] #13 23.74 Get:66 http://deb.debian.org/debian trixie/main amd64 libcairo-gobject2 amd64 1.18.4-1+b1 [130 kB]
+[09:32:58] [INFO] [COMPOSE] #13 23.77 Get:67 http://deb.debian.org/debian-security trixie-security/main amd64 libgdk-pixbuf2.0-common all 2.42.12+dfsg-4+deb13u1 [312 kB]
+[09:32:58] [INFO] [COMPOSE] #13 23.86 Get:68 http://deb.debian.org/debian trixie/main amd64 libxml2 amd64 2.12.7+dfsg+really2.9.14-2.1+deb13u2 [698 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.02 Get:69 http://deb.debian.org/debian trixie/main amd64 shared-mime-info amd64 2.4-5+b2 [760 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.17 Get:70 http://deb.debian.org/debian trixie/main amd64 libjpeg62-turbo amd64 1:2.1.5-4 [168 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.22 Get:71 http://deb.debian.org/debian trixie/main amd64 libdeflate0 amd64 1.23-2 [47.3 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.24 Get:72 http://deb.debian.org/debian trixie/main amd64 libjbig0 amd64 2.1-6.1+b2 [32.1 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.24 Get:73 http://deb.debian.org/debian trixie/main amd64 liblerc4 amd64 4.0.0+ds-5 [183 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.29 Get:74 http://deb.debian.org/debian trixie/main amd64 libsharpyuv0 amd64 1.5.0-0.1 [116 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.30 Get:75 http://deb.debian.org/debian trixie/main amd64 libwebp7 amd64 1.5.0-0.1 [318 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.40 Get:76 http://deb.debian.org/debian-security trixie-security/main amd64 libtiff6 amd64 4.7.0-3+deb13u2 [345 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.51 Get:77 http://deb.debian.org/debian-security trixie-security/main amd64 libgdk-pixbuf-2.0-0 amd64 2.42.12+dfsg-4+deb13u1 [141 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.55 Get:78 http://deb.debian.org/debian trixie/main amd64 fontconfig amd64 2.15.0-2.3 [463 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.68 Get:79 http://deb.debian.org/debian trixie/main amd64 libfribidi0 amd64 1.0.16-1 [26.5 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.68 Get:80 http://deb.debian.org/debian trixie/main amd64 libgraphite2-3 amd64 1.3.14-2+b1 [75.4 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.71 Get:81 http://deb.debian.org/debian trixie/main amd64 libharfbuzz0b amd64 10.2.0-1+b1 [479 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.80 Get:82 http://deb.debian.org/debian trixie/main amd64 libthai-data all 0.1.29-2 [168 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.84 Get:83 http://deb.debian.org/debian trixie/main amd64 libdatrie1 amd64 0.2.13-3+b1 [38.1 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.85 Get:84 http://deb.debian.org/debian trixie/main amd64 libthai0 amd64 0.1.29-2+b1 [49.4 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.87 Get:85 http://deb.debian.org/debian trixie/main amd64 libpango-1.0-0 amd64 1.56.3-1 [226 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.91 Get:86 http://deb.debian.org/debian trixie/main amd64 libpangoft2-1.0-0 amd64 1.56.3-1 [55.6 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.93 Get:87 http://deb.debian.org/debian trixie/main amd64 libpangocairo-1.0-0 amd64 1.56.3-1 [35.7 kB]
+[09:32:58] [INFO] [COMPOSE] #13 24.94 Get:88 http://deb.debian.org/debian trixie/main amd64 librsvg2-2 amd64 2.60.0+dfsg-1 [1789 kB]
+[09:32:58] [INFO] [COMPOSE] #13 ...
+[09:32:58] [INFO] [COMPOSE] 
+[09:32:58] [INFO] [COMPOSE] #20 [frontend 8/8] RUN cd web && bunx --bun vite build
+[09:32:58] [INFO] [COMPOSE] #20 3.781 тЬШ [ERROR] JSON does not support trailing commas
+[09:32:58] [INFO] [COMPOSE] #20 3.781 
+[09:32:59] [INFO] [COMPOSE] #20 3.781     ../package.json:7:9:
+[09:32:59] [INFO] [COMPOSE] #20 3.781       7 тФВ     "web",
+[09:32:59] [INFO] [COMPOSE] #20 3.781         тХ╡          ^
+[09:32:59] [INFO] [COMPOSE] #20 3.781 
+[09:32:59] [INFO] [COMPOSE] #20 3.822 failed to load config from /build/web/vite.config.ts
+[09:32:59] [INFO] [COMPOSE] #20 3.822 error during build:
+[09:32:59] [INFO] [COMPOSE] #20 3.822 Error: Build failed with 1 error:
+[09:32:59] [INFO] [COMPOSE] #20 3.822 ../package.json:7:9: ERROR: JSON does not support trailing commas
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at failureErrorWithLog (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:1472:19)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at <anonymous> (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:945:25)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at buildResponseToResult (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:943:7)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at <anonymous> (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:622:9)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at handleIncomingPacket (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:677:12)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at readFromStdout (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:600:7)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at emit (node:events:95:22)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at addChunk (internal:streams/readable:264:47)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at readableAddChunkPushByteMode (internal:streams/readable:242:18)
+[09:32:59] [INFO] [COMPOSE] #20 3.822     at handleNumberResult (internal:streams/native-readable:69:18)
+[09:32:59] [INFO] [COMPOSE] #20 ERROR: process "/bin/sh -c cd web && bunx --bun vite build" did not complete successfully: exit code: 1
+[09:32:59] [INFO] [COMPOSE] 
+[09:32:59] [INFO] [COMPOSE] #11 [backend-builder 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     git     build-essential     && rm -rf /var/lib/apt/lists/*
+[09:32:59] [INFO] [COMPOSE] #11 25.36 Get:37 http://deb.debian.org/debian trixie/main amd64 libhwasan0 amd64 14.2.0-19 [1488 kB]
+[09:32:59] [INFO] [COMPOSE] #11 25.68 Get:38 http://deb.debian.org/debian trixie/main amd64 libquadmath0 amd64 14.2.0-19 [145 kB]
+[09:32:59] [INFO] [COMPOSE] #11 25.71 Get:39 http://deb.debian.org/debian trixie/main amd64 libgcc-14-dev amd64 14.2.0-19 [2672 kB]
+[09:32:59] [INFO] [COMPOSE] #11 26.40 Get:40 http://deb.debian.org/debian trixie/main amd64 gcc-14-x86-64-linux-gnu amd64 14.2.0-19 [21.4 MB]
+[09:32:59] [INFO] [COMPOSE] #11 CANCELED
+[09:32:59] [INFO] [COMPOSE] 
+[09:32:59] [INFO] [COMPOSE] #13 [stage-2 4/8] RUN apt-get update && apt-get install -y --no-install-recommends     ffmpeg     curl     && rm -rf /var/lib/apt/lists/*
+[09:32:59] [INFO] [COMPOSE] #13 CANCELED
+[09:32:59] [INFO] [COMPOSE] ------
+[09:32:59] [INFO] [COMPOSE]  > [frontend 8/8] RUN cd web && bunx --bun vite build:
+[09:32:59] [INFO] [COMPOSE] 3.822     at failureErrorWithLog (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:1472:19)
+[09:32:59] [INFO] [COMPOSE] 3.822     at <anonymous> (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:945:25)
+[09:32:59] [INFO] [COMPOSE] 3.822     at buildResponseToResult (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:943:7)
+[09:32:59] [INFO] [COMPOSE] 3.822     at <anonymous> (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:622:9)
+[09:32:59] [INFO] [COMPOSE] 3.822     at handleIncomingPacket (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:677:12)
+[09:32:59] [INFO] [COMPOSE] 3.822     at readFromStdout (/build/node_modules/.bun/esbuild@0.21.5/node_modules/esbuild/lib/main.js:600:7)
+[09:33:00] [INFO] [COMPOSE] 3.822     at emit (node:events:95:22)
+[09:33:00] [INFO] [COMPOSE] 3.822     at addChunk (internal:streams/readable:264:47)
+[09:33:00] [INFO] [COMPOSE] 3.822     at readableAddChunkPushByteMode (internal:streams/readable:242:18)
+[09:33:00] [INFO] [COMPOSE] 3.822     at handleNumberResult (internal:streams/native-readable:69:18)
+[09:33:00] [INFO] [COMPOSE] ------
+[09:33:00] [INFO] [COMPOSE] Dockerfile:21
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE] --------------------
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE]   19 |     RUN bun install --no-save
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE]   20 |     # Build frontend (skip tsc тАФ upstream has pre-existing type errors)
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE]   21 | >>> RUN cd web && bunx --bun vite build
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE]   22 |     
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE]   23 |     
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE] --------------------
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [INFO] [COMPOSE] failed to solve: process "/bin/sh -c cd web && bunx --bun vite build" did not complete successfully: exit code: 1
+[09:33:00] [INFO] [COMPOSE] System.Management.Automation.RemoteException
+[09:33:00] [ERR ] Docker compose exited with code 1
+[09:33:00] [INFO] Check logs: docker compose logs --tail 100
