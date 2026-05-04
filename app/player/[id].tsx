@@ -688,7 +688,7 @@ export default function PlayerScreen() {
               accessibilityRole="button"
             >
               <Ionicons
-                name={binauralMuted ? 'headphones-outline' : 'headphones'}
+                name={binauralMuted ? 'pulse-outline' : 'pulse'}
                 size={18}
                 color={binauralMuted ? colors.text.tertiary : colors.accent.success}
               />

@@ -56,6 +56,8 @@ export interface AudioSettings {
   readonly errorPolicy: AudioErrorPolicy;
   /** Whether audio continues playing when the app is backgrounded. */
   readonly backgroundPlayback: boolean;
+  /** Currently selected background music track ID. */
+  readonly selectedMusicTrack: string;
 }
 
 // ---------------------------------------------------------------------------

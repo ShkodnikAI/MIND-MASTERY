@@ -29,6 +29,7 @@ const DEFAULT_AUDIO: AudioSettings = {
   masterVolume: 0.8,
   errorPolicy: 'skip' as AudioErrorPolicy,
   backgroundPlayback: true,
+  selectedMusicTrack: 'space',
 };
 
 const DEFAULT_VOICE: VoiceSettings = {
