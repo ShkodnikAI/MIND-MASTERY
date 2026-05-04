@@ -2,18 +2,19 @@
  * @file Settings — Music screen.
  *
  * Background music selection for meditation sessions.
- * Built-in ambient track cards with play/pause placeholder,
+ * Built-in ambient track cards with play/pause preview,
  * custom music section (coming soon), and volume slider.
- * Wired to settingsStore.audio.musicVolume.
+ * Wired to settingsStore.audio.musicVolume and settingsStore.audio.selectedMusicTrack.
  *
  * INV-A3: All styles via StyleSheet.create.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useAudioPlayer } from 'expo-audio';
 import { useSettingsStore } from '@/store/settingsStore';
 import { SettingsSlider } from '@/ui/components/SettingsSlider';
 import { colors, typography, spacing, radii } from '@/ui/theme';
@@ -25,7 +26,6 @@ interface MusicTrack {
   readonly emoji: string;
   readonly name: string;
   readonly description: string;
-  readonly duration: string;
 }
 
 const BUILTIN_TRACKS: readonly MusicTrack[] = [
@@ -34,42 +34,36 @@ const BUILTIN_TRACKS: readonly MusicTrack[] = [
     emoji: '🫧',
     name: 'Пространство',
     description: 'Ambient, космическая атмосфера',
-    duration: '—',
   },
   {
     id: 'ocean',
     emoji: '🌊',
     name: 'Океан',
     description: 'Звуки волн и воды',
-    duration: '—',
   },
   {
     id: 'forest',
     emoji: '🌲',
     name: 'Лес',
     description: 'Природные звуки леса',
-    duration: '—',
   },
   {
     id: 'meditation',
     emoji: '🎵',
     name: 'Медитация',
     description: 'Мягкие мелодии для медитации',
-    duration: '—',
   },
   {
     id: 'fireplace',
     emoji: '🔥',
     name: 'Камин',
     description: 'Уютный звук камина',
-    duration: '—',
   },
   {
     id: 'winter',
     emoji: '❄️',
     name: 'Зима',
     description: 'Зимняя атмосфера',
-    duration: '—',
   },
 ];
 
@@ -161,12 +155,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: 4,
   },
-  trackDuration: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs,
-    color: colors.text.tertiary,
-  },
   playButton: {
     width: 36,
     height: 36,
@@ -225,78 +213,61 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeights.xs,
     color: colors.accent.warning,
   },
-  emptyStateContainer: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl,
-    gap: spacing.sm,
-  },
-  emptyStateText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-  },
 });
-
-// ─── Track Card Component ────────────────────────────────────────
-
-function TrackCard({ track, isActive, onToggle }: {
-  readonly track: MusicTrack;
-  readonly isActive: boolean;
-  readonly onToggle: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      style={[styles.trackCard, isActive && styles.trackCardActive]}
-      onPress={onToggle}
-      activeOpacity={0.7}
-    >
-      <View style={styles.trackEmoji}>
-        <Text>{track.emoji}</Text>
-      </View>
-      <View style={styles.trackInfo}>
-        <View style={styles.trackNameRow}>
-          <Text style={[styles.trackName, isActive && styles.trackNameActive]}>
-            {track.name}
-          </Text>
-        </View>
-        <Text style={styles.trackDescription} numberOfLines={1}>
-          {track.description}
-        </Text>
-      </View>
-      <View style={styles.trackMeta}>
-        <Text style={styles.trackDuration}>{track.duration}</Text>
-        <TouchableOpacity
-          style={[styles.playButton, isActive && styles.playButtonActive]}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name={isActive ? 'pause' : 'play'}
-            size={16}
-            color={isActive ? colors.accent.primary : colors.text.secondary}
-          />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
-}
 
 // ─── Component ───────────────────────────────────────────────────
 
 export default function MusicSettingsScreen() {
   const audio = useSettingsStore((s) => s.audio);
   const updateAudio = useSettingsStore((s) => s.updateAudio);
-  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const previewPlayer = useAudioPlayer();
+  const [previewTrackId, setPreviewTrackId] = useState<string | null>(null);
+
+  // Stop preview on unmount
+  useEffect(() => {
+    return () => {
+      try { previewPlayer.pause(); } catch { /* noop */ }
+    };
+  }, [previewPlayer]);
 
   const handleMusicVolume = useCallback(
     (v: number) => updateAudio({ musicVolume: v }),
     [updateAudio],
   );
 
-  const handleTrackToggle = useCallback((trackId: string) => {
-    setActiveTrackId((prev) => (prev === trackId ? null : trackId));
-  }, []);
+  const handleTrackToggle = useCallback(
+    async (trackId: string) => {
+      try {
+        if (previewTrackId === trackId) {
+          // Stop preview
+          previewPlayer.pause();
+          setPreviewTrackId(null);
+        } else {
+          // Stop previous if any
+          try { previewPlayer.pause(); } catch { /* noop */ }
+
+          // Resolve asset URI
+          const { resolveMusicUri } = require('@/audio/assetResolver');
+          const uri = resolveMusicUri(trackId);
+
+          if (!uri) {
+            return; // track not found
+          }
+
+          previewPlayer.replace({ uri });
+          previewPlayer.volume = Math.max(0.3, audio.musicVolume);
+          previewPlayer.play();
+          setPreviewTrackId(trackId);
+
+          // Save selected track to settings
+          updateAudio({ selectedMusicTrack: trackId });
+        }
+      } catch {
+        // ignore preview errors
+      }
+    },
+    [previewTrackId, previewPlayer, audio.musicVolume, updateAudio],
+  );
 
   return (
     <LinearGradient
@@ -307,25 +278,53 @@ export default function MusicSettingsScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Text style={styles.titleText}>Музыка</Text>
           <Text style={styles.descriptionText}>
-            Выберите фоновую музыку для медитаций и практик.
+            Выберите фоновую музыку для медитаций и практик. Нажмите для прослушивания.
           </Text>
 
           {/* Built-in tracks */}
           <Text style={styles.sectionTitle}>Встроенные треки</Text>
-          {BUILTIN_TRACKS.map((track) => (
-            <TrackCard
-              key={track.id}
-              track={track}
-              isActive={activeTrackId === track.id}
-              onToggle={() => handleTrackToggle(track.id)}
-            />
-          ))}
+          {BUILTIN_TRACKS.map((track) => {
+            const isActive = audio.selectedMusicTrack === track.id;
+            const isPreviewing = previewTrackId === track.id;
 
-          <View style={styles.emptyStateContainer}>
-            <Text style={styles.emptyStateText}>
-              Аудиофайлы пока не загружены.{'\n'}Запустите генерацию TTS, чтобы добавить треки.
-            </Text>
-          </View>
+            return (
+              <TouchableOpacity
+                key={track.id}
+                style={[styles.trackCard, isActive && styles.trackCardActive]}
+                onPress={() => handleTrackToggle(track.id)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.trackEmoji}>
+                  <Text>{track.emoji}</Text>
+                </View>
+                <View style={styles.trackInfo}>
+                  <View style={styles.trackNameRow}>
+                    <Text style={[styles.trackName, isActive && styles.trackNameActive]}>
+                      {track.name}
+                    </Text>
+                    {isActive && (
+                      <Ionicons name="checkmark-circle" size={16} color={colors.accent.primary} />
+                    )}
+                  </View>
+                  <Text style={styles.trackDescription} numberOfLines={1}>
+                    {track.description}
+                  </Text>
+                </View>
+                <View style={styles.trackMeta}>
+                  <TouchableOpacity
+                    style={[styles.playButton, isPreviewing && styles.playButtonActive]}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name={isPreviewing ? 'pause' : 'play'}
+                      size={16}
+                      color={isPreviewing ? colors.accent.primary : colors.text.secondary}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
 
           {/* Custom music */}
           <Text style={styles.sectionTitle}>Своя музыка</Text>

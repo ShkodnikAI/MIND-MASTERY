@@ -29,6 +29,7 @@ import { AudioEngine } from '@/audio/AudioEngine';
 import type { EngineEvent } from '@/audio/types';
 import { startFade, effectiveVolume } from '@/audio/FadeController';
 import type { FadeHandle } from '@/audio/FadeController';
+import { resolveMusicUri, resolveBinauralUri } from '@/audio/assetResolver';
 import { useAudioStateStore } from '@/store/audioStateStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useSessionStore } from '@/store/sessionStore';
@@ -214,7 +215,7 @@ export function useAudioEngine(): AudioEngineControls {
           setLayerVolume('voice', voiceVol);
 
           Speech.speak(text, {
-            language: voice.language,
+            language: 'ru-RU',
             rate: voice.speed,
             pitch: voice.pitch,
             onDone: () => {
@@ -239,6 +240,12 @@ export function useAudioEngine(): AudioEngineControls {
             const musicVol = effectiveVolume(audio.masterVolume, audio.musicVolume);
             const targetVol = musicVol * event.volume;
 
+            // Resolve track ID to actual asset URI
+            let trackUri = resolveMusicUri(event.trackId);
+            if (!trackUri) {
+              trackUri = event.trackId; // fallback: treat as direct URI
+            }
+
             setLayerState('music', {
               status: 'playing',
               currentTrackId: event.trackId,
@@ -246,7 +253,7 @@ export function useAudioEngine(): AudioEngineControls {
             });
 
             // expo-audio: use replace() to change source
-            musicPlayer.replace({ uri: event.trackId });
+            musicPlayer.replace({ uri: trackUri });
             musicPlayer.volume = 0;
 
             // Fade in
@@ -308,6 +315,12 @@ export function useAudioEngine(): AudioEngineControls {
             const binVol = effectiveVolume(audio.masterVolume, audio.binauralVolume);
             const targetVol = binVol * event.volume;
 
+            // Resolve track ID to actual asset URI
+            let trackUri = resolveBinauralUri(event.trackId);
+            if (!trackUri) {
+              trackUri = event.trackId; // fallback: treat as direct URI
+            }
+
             setLayerState('binaural', {
               status: 'playing',
               currentTrackId: event.trackId,
@@ -315,7 +328,7 @@ export function useAudioEngine(): AudioEngineControls {
             });
 
             // expo-audio: use replace() to change source
-            binauralPlayer.replace({ uri: event.trackId });
+            binauralPlayer.replace({ uri: trackUri });
             binauralPlayer.volume = 0;
 
             // Fade in
