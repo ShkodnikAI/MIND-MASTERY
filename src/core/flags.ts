@@ -5,7 +5,6 @@
  */
 
 export const flags = {
-  piperTts: false, // Enable Piper TTS (Stage 5.2)
   nativeBinaural: true, // Enable native binaural module
   // skiaVisuals removed: @shopify/react-native-skia incompatible with RN 0.79 + React 18
   entrainment: true, // Enable light entrainment
