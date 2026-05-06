@@ -8,8 +8,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useContentStore } from '@/store/contentStore';
 import { useProgressStore } from '@/store/progressStore';
 import { PracticeCard } from '@/ui/components/PracticeCard';
@@ -41,6 +42,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     marginBottom: spacing.lg,
+  },
+  homeButton: {
+    width: 40,
+    height: 40,
+    borderRadius: radii.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconContainer: {
     width: 48,
@@ -95,6 +104,11 @@ const styles = StyleSheet.create({
 // ─── Component ───────────────────────────────────────────────────
 
 export function SystemTabContent({ systemId, title, icon, onPracticePress }: SystemTabContentProps) {
+  const router = useRouter();
+
+  const handleHomePress = useCallback(() => {
+    router.back();
+  }, [router]);
 
   // Read raw practices count as a trigger + practicesLoaded flag
   // NOTE: We check practicesLoaded, NOT loaded. The 'loaded' flag requires
@@ -171,6 +185,14 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
     return (
       <View style={styles.content}>
         <View style={styles.headerContainer}>
+          <TouchableOpacity
+            style={styles.homeButton}
+            onPress={handleHomePress}
+            accessibilityLabel="На главную"
+            accessibilityRole="button"
+          >
+            <Ionicons name="home-outline" size={20} color={colors.text.secondary} />
+          </TouchableOpacity>
           <View style={styles.iconContainer}>
             <Ionicons name={icon as any} size={24} color={colors.text.primary} />
           </View>
@@ -186,6 +208,14 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
   return (
     <View style={styles.content}>
       <View style={styles.headerContainer}>
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={handleHomePress}
+          accessibilityLabel="На главную"
+          accessibilityRole="button"
+        >
+          <Ionicons name="home-outline" size={20} color={colors.text.secondary} />
+        </TouchableOpacity>
         <View style={styles.iconContainer}>
           <Ionicons name={icon as any} size={24} color={colors.text.primary} />
         </View>
