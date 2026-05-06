@@ -191,7 +191,7 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
             accessibilityLabel="На главную"
             accessibilityRole="button"
           >
-            <Ionicons name="home-outline" size={20} color={colors.text.secondary} />
+            <Ionicons name="arrow-back" size={22} color={colors.text.secondary} />
           </TouchableOpacity>
           <View style={styles.iconContainer}>
             <Ionicons name={icon as any} size={24} color={colors.text.primary} />
@@ -214,7 +214,7 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
           accessibilityLabel="На главную"
           accessibilityRole="button"
         >
-          <Ionicons name="home-outline" size={20} color={colors.text.secondary} />
+          <Ionicons name="arrow-back" size={22} color={colors.text.secondary} />
         </TouchableOpacity>
         <View style={styles.iconContainer}>
           <Ionicons name={icon as any} size={24} color={colors.text.primary} />
