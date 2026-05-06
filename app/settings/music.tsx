@@ -350,7 +350,7 @@ export default function MusicSettingsScreen() {
         uri: asset.uri,
       };
 
-      const updatedTracks = [...audio.customMusicTracks, newTrack];
+      const updatedTracks = [...(audio.customMusicTracks ?? []), newTrack];
       updateAudio({ customMusicTracks: updatedTracks });
     } catch (err) {
       Alert.alert(
@@ -366,7 +366,7 @@ export default function MusicSettingsScreen() {
       if (audio.selectedMusicTrack === trackId) {
         updateAudio({ selectedMusicTrack: 'space' });
       }
-      const updatedTracks = audio.customMusicTracks.filter((t) => t.id !== trackId);
+      const updatedTracks = (audio.customMusicTracks ?? []).filter((t) => t.id !== trackId);
       updateAudio({ customMusicTracks: updatedTracks });
       if (previewTrackId === trackId) {
         stopPreview();
@@ -375,7 +375,7 @@ export default function MusicSettingsScreen() {
     [audio.selectedMusicTrack, audio.customMusicTracks, previewTrackId, updateAudio, stopPreview],
   );
 
-  const customTracks = audio.customMusicTracks;
+  const customTracks = audio.customMusicTracks ?? [];
 
   return (
     <LinearGradient

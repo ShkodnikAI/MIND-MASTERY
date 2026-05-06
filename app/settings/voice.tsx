@@ -2,9 +2,7 @@
  * @file Settings -- Voice screen.
  *
  * System TTS (expo-speech) with advanced settings:
- * - Voice selection from available system voices
- * - Speed and pitch sliders
- * - Volume control
+ * - Speed, pitch and volume sliders
  * - Voice test with selected voice
  * - Offline mode: browse and preview preloaded practice narration texts
  *
@@ -22,7 +20,6 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
-  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -58,12 +55,6 @@ const VOICE_MODES: readonly VoiceModeOption[] = [
     title: 'Предзагруженные тексты',
     description: 'Просмотр и прослушивание текстов озвучки для каждой практики.',
     icon: 'download-outline',
-  },
-  {
-    id: 'piper',
-    title: 'Piper (скоро)',
-    description: 'Офлайн TTS с высоким качеством голоса. Требует загрузки модели.',
-    icon: 'hardware-chip-outline',
   },
 ];
 
@@ -123,9 +114,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(108, 92, 231, 0.15)',
     borderColor: colors.accent.primary,
   },
-  modeCardDisabled: {
-    opacity: 0.45,
-  },
   modeIcon: {
     width: 40,
     height: 40,
@@ -149,59 +137,6 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.xs,
     lineHeight: typography.lineHeights.xs,
     color: colors.text.tertiary,
-  },
-  modeBadge: {
-    backgroundColor: 'rgba(253, 203, 110, 0.2)',
-    borderRadius: radii.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-  },
-  modeBadgeText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs,
-    color: colors.accent.warning,
-  },
-
-  // ── Voice selector ──
-  voiceCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background.tertiary,
-    borderRadius: radii.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    gap: spacing.md,
-  },
-  voiceCardActive: {
-    backgroundColor: 'rgba(108, 92, 231, 0.15)',
-    borderColor: colors.accent.primary,
-  },
-  voiceInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  voiceName: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm,
-    color: colors.text.primary,
-  },
-  voiceLang: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs,
-    color: colors.text.tertiary,
-  },
-  loadingText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    paddingVertical: spacing.md,
   },
 
   // ── Info card ──
@@ -319,15 +254,19 @@ const styles = StyleSheet.create({
   listenButtonActiveText: {
     color: colors.text.inverse,
   },
+  segmentsScrollView: {
+    paddingLeft: spacing.md,
+    maxHeight: 400,
+  },
+  loadingText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
+  },
 });
-
-// ─── Types for system voices ─────────────────────────────────────
-
-interface SystemVoice {
-  id: string;
-  name: string;
-  language: string;
-}
 
 // ─── Component ───────────────────────────────────────────────────
 
@@ -337,49 +276,12 @@ export default function VoiceSettingsScreen() {
   const audio = useSettingsStore((s) => s.audio);
   const updateAudio = useSettingsStore((s) => s.updateAudio);
   const [testingVoice, setTestingVoice] = useState(false);
-  const [availableVoices, setAvailableVoices] = useState<SystemVoice[]>([]);
-  const [voicesLoaded, setVoicesLoaded] = useState(false);
   const [listeningTextKey, setListeningTextKey] = useState<string | null>(null);
   const [offlineExpanded, setOfflineExpanded] = useState<string | null>(null);
 
   const systems = useContentStore((s) => s.systems);
   const allTexts = useContentStore((s) => s.getAllTexts());
   const loaded = useContentStore((s) => s.loaded);
-
-  // Load available system voices on mount
-  useEffect(() => {
-    (async () => {
-      try {
-        const voices = await Speech.getAvailableVoicesAsync();
-        // Filter for Russian voices and a few common ones
-        const ruVoices: SystemVoice[] = voices
-          .filter((v) => v.language.startsWith('ru'))
-          .map((v) => ({
-            id: v.identifier,
-            name: v.name,
-            language: v.language,
-          }));
-
-        // If no Russian voices found, show all available
-        if (ruVoices.length === 0) {
-          const allVoices: SystemVoice[] = voices
-            .slice(0, 20)
-            .map((v) => ({
-              id: v.identifier,
-              name: v.name,
-              language: v.language,
-            }));
-          setAvailableVoices(allVoices);
-        } else {
-          setAvailableVoices(ruVoices);
-        }
-      } catch {
-        // If voices can't be loaded, show empty list
-      } finally {
-        setVoicesLoaded(true);
-      }
-    })();
-  }, []);
 
   const handleSpeed = useCallback((v: number) => updateVoice({ speed: v }), [updateVoice]);
   const handlePitch = useCallback((v: number) => updateVoice({ pitch: v }), [updateVoice]);
@@ -390,18 +292,7 @@ export default function VoiceSettingsScreen() {
 
   const handleModeChange = useCallback(
     (mode: VoiceMode) => {
-      if (mode === 'piper') {
-        Alert.alert('Скоро', 'Piper TTS будет доступен в следующем обновлении.');
-        return;
-      }
       updateVoice({ mode });
-    },
-    [updateVoice],
-  );
-
-  const handleVoiceSelect = useCallback(
-    (voiceId: string) => {
-      updateVoice({ voiceId });
     },
     [updateVoice],
   );
@@ -511,7 +402,6 @@ export default function VoiceSettingsScreen() {
           <View style={styles.modeGrid}>
             {VOICE_MODES.map((mode) => {
               const isActive = voice.mode === mode.id;
-              const isDisabled = mode.id === 'piper';
 
               return (
                 <TouchableOpacity
@@ -519,29 +409,20 @@ export default function VoiceSettingsScreen() {
                   style={[
                     styles.modeCard,
                     isActive && styles.modeCardActive,
-                    isDisabled && styles.modeCardDisabled,
                   ]}
                   onPress={() => handleModeChange(mode.id)}
-                  activeOpacity={isDisabled ? 1 : 0.7}
-                  disabled={isDisabled}
+                  activeOpacity={0.7}
                 >
                   <View style={styles.modeIcon}>
                     <Ionicons name={mode.icon as any} size={20} color={isActive ? colors.accent.primary : colors.text.secondary} />
                   </View>
                   <View style={styles.modeInfo}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                      <Text style={[styles.modeTitle, isActive && { color: colors.accent.primary }]}>
-                        {mode.title}
-                      </Text>
-                      {isDisabled && (
-                        <View style={styles.modeBadge}>
-                          <Text style={styles.modeBadgeText}>Скоро</Text>
-                        </View>
-                      )}
-                    </View>
+                    <Text style={[styles.modeTitle, isActive && { color: colors.accent.primary }]}>
+                      {mode.title}
+                    </Text>
                     <Text style={styles.modeDescription}>{mode.description}</Text>
                   </View>
-                  {isActive && !isDisabled && (
+                  {isActive && (
                     <Ionicons name="checkmark-circle" size={20} color={colors.accent.primary} />
                   )}
                 </TouchableOpacity>
@@ -549,57 +430,9 @@ export default function VoiceSettingsScreen() {
             })}
           </View>
 
-          {/* ── System Voice Selection (only in system mode) ── */}
+          {/* ── System TTS Settings (only in system mode) ── */}
           {voice.mode === 'system' && (
             <>
-              <Text style={styles.sectionTitle}>Выбор голоса</Text>
-              {!voicesLoaded ? (
-                <Text style={styles.loadingText}>Загрузка голосов...</Text>
-              ) : availableVoices.length === 0 ? (
-                <View style={styles.infoCard}>
-                  <Text style={styles.infoCardText}>
-                    Не найдено доступных голосов. Убедитесь, что в системе установлен голосовой движок (Google TTS, Samsung TTS и т.д.).
-                  </Text>
-                </View>
-              ) : (
-                <>
-                  {/* Default voice option */}
-                  <TouchableOpacity
-                    style={[styles.voiceCard, !voice.voiceId && styles.voiceCardActive]}
-                    onPress={() => handleVoiceSelect('')}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.voiceInfo}>
-                      <Text style={[styles.voiceName, !voice.voiceId && { color: colors.accent.primary }]}>
-                        По умолчанию
-                      </Text>
-                      <Text style={styles.voiceLang}>Системный голос по умолчанию</Text>
-                    </View>
-                    {!voice.voiceId && (
-                      <Ionicons name="checkmark-circle" size={18} color={colors.accent.primary} />
-                    )}
-                  </TouchableOpacity>
-                  {availableVoices.map((v) => (
-                    <TouchableOpacity
-                      key={v.id}
-                      style={[styles.voiceCard, voice.voiceId === v.id && styles.voiceCardActive]}
-                      onPress={() => handleVoiceSelect(v.id)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={styles.voiceInfo}>
-                        <Text style={[styles.voiceName, voice.voiceId === v.id && { color: colors.accent.primary }]}>
-                          {v.name}
-                        </Text>
-                        <Text style={styles.voiceLang}>{v.language}</Text>
-                      </View>
-                      {voice.voiceId === v.id && (
-                        <Ionicons name="checkmark-circle" size={18} color={colors.accent.primary} />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </>
-              )}
-
               {/* ── Speech Parameters ── */}
               <Text style={styles.sectionTitle}>Параметры речи</Text>
               <SettingsSlider
@@ -698,73 +531,43 @@ export default function VoiceSettingsScreen() {
                       </TouchableOpacity>
 
                       {isExpanded && (
-                        <View style={{ paddingLeft: spacing.md }}>
-                          {/* First segment with listen button */}
-                          <View style={[styles.textItemCard, { borderLeftColor: colors.accent.primary }]}>
-                            <Text style={styles.textItemPreview}>{item.firstSegment}</Text>
-                            <View style={styles.textItemMeta}>
-                              <TouchableOpacity
-                                style={[
-                                  styles.listenButton,
-                                  listeningTextKey === item.firstKey && styles.listenButtonActive,
-                                ]}
-                                onPress={() => handleListenToText(item.firstSegment, item.firstKey)}
-                                activeOpacity={0.7}
-                              >
-                                <Ionicons
-                                  name={listeningTextKey === item.firstKey ? 'pause' : 'play'}
-                                  size={12}
-                                  color={listeningTextKey === item.firstKey ? colors.text.inverse : colors.accent.primary}
-                                />
-                                <Text
-                                  style={[
-                                    styles.listenButtonText,
-                                    listeningTextKey === item.firstKey && styles.listenButtonActiveText,
-                                  ]}
-                                >
-                                  {listeningTextKey === item.firstKey ? 'Стоп' : 'Слушать'}
-                                </Text>
-                              </TouchableOpacity>
-                            </View>
-                          </View>
-
-                          {/* More segments */}
-                          {Object.entries(allTexts[item.practiceId]?.segments ?? {})
-                            .filter(([k]) => k !== item.firstKey)
-                            .slice(0, 3)
-                            .map(([key, val]) => {
-                              const text = typeof val === 'string' ? val : '';
-                              return (
-                                <View key={key} style={styles.textItemCard}>
-                                  <Text style={styles.textItemPreview}>{text.substring(0, 120)}{text.length > 120 ? '...' : ''}</Text>
-                                  <View style={styles.textItemMeta}>
-                                    <TouchableOpacity
+                        <ScrollView
+                          style={styles.segmentsScrollView}
+                          showsVerticalScrollIndicator={true}
+                        >
+                          {Object.entries(allTexts[item.practiceId]?.segments ?? {}).map(([key, val]) => {
+                            const text = typeof val === 'string' ? val : '';
+                            return (
+                              <View key={key} style={[styles.textItemCard, key === item.firstKey && { borderLeftColor: colors.accent.primary }]}>
+                                <Text style={styles.textItemPreview}>{text}</Text>
+                                <View style={styles.textItemMeta}>
+                                  <TouchableOpacity
+                                    style={[
+                                      styles.listenButton,
+                                      listeningTextKey === key && styles.listenButtonActive,
+                                    ]}
+                                    onPress={() => handleListenToText(text, key)}
+                                    activeOpacity={0.7}
+                                  >
+                                    <Ionicons
+                                      name={listeningTextKey === key ? 'pause' : 'play'}
+                                      size={12}
+                                      color={listeningTextKey === key ? colors.text.inverse : colors.accent.primary}
+                                    />
+                                    <Text
                                       style={[
-                                        styles.listenButton,
-                                        listeningTextKey === key && styles.listenButtonActive,
+                                        styles.listenButtonText,
+                                        listeningTextKey === key && styles.listenButtonActiveText,
                                       ]}
-                                      onPress={() => handleListenToText(text, key)}
-                                      activeOpacity={0.7}
                                     >
-                                      <Ionicons
-                                        name={listeningTextKey === key ? 'pause' : 'play'}
-                                        size={12}
-                                        color={listeningTextKey === key ? colors.text.inverse : colors.accent.primary}
-                                      />
-                                      <Text
-                                        style={[
-                                          styles.listenButtonText,
-                                          listeningTextKey === key && styles.listenButtonActiveText,
-                                        ]}
-                                      >
-                                        {listeningTextKey === key ? 'Стоп' : 'Слушать'}
-                                      </Text>
-                                    </TouchableOpacity>
-                                  </View>
+                                      {listeningTextKey === key ? 'Стоп' : 'Слушать'}
+                                    </Text>
+                                  </TouchableOpacity>
                                 </View>
-                              );
-                            })}
-                        </View>
+                              </View>
+                            );
+                          })}
+                        </ScrollView>
                       )}
                     </View>
                   );

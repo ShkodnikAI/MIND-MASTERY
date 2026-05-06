@@ -75,16 +75,11 @@ const DEFAULT_BINAURAL = { baseHz: 200, beatHz: 10 };
 // ---------------------------------------------------------------------------
 
 export function useAudioEngine(): AudioEngineControls {
+  // ── Audio players (stable refs, never recreated) ────────────────
   const musicPlayer = useAudioPlayer();
   const binauralPlayer = useAudioPlayer();
 
-  const audio = useSettingsStore((s) => s.audio);
-  const voice = useSettingsStore((s) => s.voice);
-  const getText = useContentStore((s) => s.getText);
-  const updateSessionStatus = useSessionStore((s) => s.updateStatus);
-  const updateSessionPhase = useSessionStore((s) => s.updatePhase);
-  const updateSessionProgress = useSessionStore((s) => s.updateProgress);
-
+  // ── Store selectors ─────────────────────────────────────────────
   const setEngineState = useAudioStateStore((s) => s.setEngineState);
   const setPhase = useAudioStateStore((s) => s.setPhase);
   const setProgress = useAudioStateStore((s) => s.setProgress);
@@ -93,16 +88,20 @@ export function useAudioEngine(): AudioEngineControls {
   const setLayerVolume = useAudioStateStore((s) => s.setLayerVolume);
   const setAudioError = useAudioStateStore((s) => s.setError);
   const setNarrationText = useAudioStateStore((s) => s.setNarrationText);
-  const mutedLayers = useAudioStateStore((s) => s.mutedLayers);
   const resetAudioState = useAudioStateStore((s) => s.reset);
+
+  const updateSessionStatus = useSessionStore((s) => s.updateStatus);
+  const updateSessionPhase = useSessionStore((s) => s.updatePhase);
+  const updateSessionProgress = useSessionStore((s) => s.updateProgress);
 
   const engineRef = useRef<AudioEngine | null>(null);
   const musicFadeRef = useRef<FadeHandle | null>(null);
   const binauralFadeRef = useRef<FadeHandle | null>(null);
 
-  // ── Text resolver ──────────────────────────────────────────────
+  // ── Text resolver (reads from store at call time, not via closure) ──
   const resolveText = useCallback(
     (textKey: string): string | null => {
+      const getText = useContentStore.getState().getText;
       const dotIndex = textKey.indexOf('.');
       if (dotIndex === -1) return textKey;
       const practiceId = textKey.substring(0, dotIndex);
@@ -111,12 +110,10 @@ export function useAudioEngine(): AudioEngineControls {
         logger.warn('[useAudioEngine]', `No text for practice "${practiceId}"`);
         return null;
       }
-      // Segment keys in JSON are stored as full textKey (e.g. "silva_alpha_entry.preparation")
       const text = practiceText.segments[textKey];
       if (typeof text === 'string' && text.length > 0) {
         return text;
       }
-      // Fallback: try just the section part for forward compatibility
       const sectionKey = textKey.substring(dotIndex + 1);
       const fallback = practiceText.segments[sectionKey];
       if (typeof fallback === 'string' && fallback.length > 0) {
@@ -125,12 +122,17 @@ export function useAudioEngine(): AudioEngineControls {
       logger.warn('[useAudioEngine]', `No text for key "${textKey}" in practice "${practiceId}"`);
       return null;
     },
-    [getText],
+    [],
   );
 
-  // ── Engine event handler ───────────────────────────────────────
+  // ── Engine event handler (reads from stores at event time, NOT via closure) ──
   const handleEngineEvent = useCallback(
     (event: EngineEvent) => {
+      // Read latest values from stores at event time to avoid stale closures
+      const audio = useSettingsStore.getState().audio;
+      const voice = useSettingsStore.getState().voice;
+      const mutedLayers = useAudioStateStore.getState().mutedLayers;
+
       switch (event.type) {
         case 'stateChange': {
           setEngineState(event.state);
@@ -208,7 +210,8 @@ export function useAudioEngine(): AudioEngineControls {
             // Check if this is a custom track (selected by user via document picker)
             let uri = resolveMusicUri(event.trackId);
             if (!uri && event.trackId.startsWith('custom_')) {
-              const customTrack = audio.customMusicTracks.find(
+              const customTracks = audio.customMusicTracks ?? [];
+              const customTrack = customTracks.find(
                 (t) => t.id === event.trackId,
               );
               if (customTrack) {
@@ -244,7 +247,8 @@ export function useAudioEngine(): AudioEngineControls {
         case 'stopMusic': {
           musicFadeRef.current?.cancel();
           if (event.fadeOutMs > 0) {
-            const currentVol = effectiveVolume(audio.masterVolume, audio.musicVolume);
+            const audioNow = useSettingsStore.getState().audio;
+            const currentVol = effectiveVolume(audioNow.masterVolume, audioNow.musicVolume);
             musicFadeRef.current = startFade({
               fromVolume: currentVol, toVolume: 0, durationMs: event.fadeOutMs, curve: 'exponential',
               onVolumeChange: (v) => { musicPlayer.volume = v; setLayerVolume('music', v); },
@@ -290,7 +294,8 @@ export function useAudioEngine(): AudioEngineControls {
         case 'stopBinaural': {
           binauralFadeRef.current?.cancel();
           if (event.fadeOutMs > 0) {
-            const currentVol = effectiveVolume(audio.masterVolume, audio.binauralVolume);
+            const audioNow = useSettingsStore.getState().audio;
+            const currentVol = effectiveVolume(audioNow.masterVolume, audioNow.binauralVolume);
             binauralFadeRef.current = startFade({
               fromVolume: currentVol, toVolume: 0, durationMs: event.fadeOutMs, curve: 'exponential',
               onVolumeChange: (v) => { binauralPlayer.volume = v; setLayerVolume('binaural', v); },
@@ -339,13 +344,14 @@ export function useAudioEngine(): AudioEngineControls {
         }
       }
     },
-    [audio, voice, mutedLayers, resolveText, setEngineState, setPhase, setProgress,
+    // ── Intentionally minimal deps: reads stores at event time ──
+    [resolveText, setEngineState, setPhase, setProgress,
      setTotalDuration, setLayerState, setLayerVolume, setAudioError, setNarrationText,
      updateSessionStatus, updateSessionPhase, updateSessionProgress,
      musicPlayer, binauralPlayer],
   );
 
-  // ── Engine lifecycle ───────────────────────────────────────────
+  // ── Engine lifecycle (subscribe once, stable) ───────────────────
   useEffect(() => {
     const engine = AudioEngine.getInstance();
     engineRef.current = engine;
@@ -364,6 +370,7 @@ export function useAudioEngine(): AudioEngineControls {
   // ── Inject default background layers if missing ────────────────
   const injectBackgroundLayers = useCallback(
     (segments: readonly Segment[], systemId: string): Segment[] => {
+      const audio = useSettingsStore.getState().audio;
       const hasMusic = segments.some((s) => s.kind === 'music');
       const hasBinaural = segments.some((s) => s.kind === 'binaural');
 
@@ -400,7 +407,7 @@ export function useAudioEngine(): AudioEngineControls {
 
       return [...injected, ...segments];
     },
-    [audio.selectedMusicTrack],
+    [],
   );
 
   // ── Session controls ───────────────────────────────────────────
@@ -412,6 +419,8 @@ export function useAudioEngine(): AudioEngineControls {
     length: SessionLength,
     totalDurationMs: number,
   ) => {
+    const audio = useSettingsStore.getState().audio;
+    const voice = useSettingsStore.getState().voice;
     const engine = AudioEngine.getInstance();
     resetAudioState();
     setTotalDuration(totalDurationMs);
@@ -429,7 +438,7 @@ export function useAudioEngine(): AudioEngineControls {
       length,
       resolveText,
     });
-  }, [audio, voice, resolveText, resetAudioState, setTotalDuration, injectBackgroundLayers]);
+  }, [resolveText, resetAudioState, setTotalDuration, injectBackgroundLayers]);
 
   const pause = useCallback(() => { AudioEngine.getInstance().pause(); }, []);
   const resume = useCallback(() => { AudioEngine.getInstance().resume(); }, []);
@@ -438,6 +447,7 @@ export function useAudioEngine(): AudioEngineControls {
   // ── Mute toggle ────────────────────────────────────────────────
   const toggleMute = useCallback(
     (layer: 'music' | 'binaural' | 'voice') => {
+      const audio = useSettingsStore.getState().audio;
       const isCurrentlyMuted = useAudioStateStore.getState().mutedLayers[layer];
       useAudioStateStore.getState().toggleMute(layer);
 
@@ -473,7 +483,7 @@ export function useAudioEngine(): AudioEngineControls {
         // Voice un-mute: next playVoice event will speak normally
       }
     },
-    [audio, musicPlayer, binauralPlayer, setLayerVolume, setLayerState],
+    [musicPlayer, binauralPlayer, setLayerVolume, setLayerState],
   );
 
   // ── Computed state ─────────────────────────────────────────────

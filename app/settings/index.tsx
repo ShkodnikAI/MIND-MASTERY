@@ -187,6 +187,12 @@ export default function SettingsScreen() {
     >
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.content}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: colors.background.tertiary, alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md }}
+          >
+            <Ionicons name="arrow-back" size={22} color={colors.text.secondary} />
+          </TouchableOpacity>
           <Text style={styles.headerText}>Настройки</Text>
 
           <FlatList
