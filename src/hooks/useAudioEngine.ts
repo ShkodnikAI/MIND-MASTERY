@@ -98,6 +98,9 @@ export function useAudioEngine(): AudioEngineControls {
   const musicFadeRef = useRef<FadeHandle | null>(null);
   const binauralFadeRef = useRef<FadeHandle | null>(null);
 
+  // ── Ref to remember the last spoken text for re-speak on un-mute ──
+  const lastVoiceTextRef = useRef<string | null>(null);
+
   // ── Text resolver (reads from store at call time, not via closure) ──
   const resolveText = useCallback(
     (textKey: string): string | null => {
@@ -125,6 +128,35 @@ export function useAudioEngine(): AudioEngineControls {
     [],
   );
 
+  // ── Helper: speak text with current voice settings ──────────────
+  const speakText = useCallback(
+    (text: string) => {
+      const voice = useSettingsStore.getState().voice;
+      const audio = useSettingsStore.getState().audio;
+      const voiceVol = effectiveVolume(audio.masterVolume, audio.voiceVolume);
+      setLayerVolume('voice', voiceVol);
+
+      const speakOptions: Record<string, unknown> = {
+        language: voice.language,
+        rate: voice.speed,
+        pitch: voice.pitch,
+        onDone: () => {
+          setLayerState('voice', { status: 'idle' });
+          lastVoiceTextRef.current = null;
+        },
+        onError: () => {
+          setLayerState('voice', { status: 'error' });
+          lastVoiceTextRef.current = null;
+        },
+      };
+      if (voice.voiceId) {
+        speakOptions.voiceId = voice.voiceId;
+      }
+      Speech.speak(text, speakOptions);
+    },
+    [setLayerVolume, setLayerState],
+  );
+
   // ── Engine event handler (reads from stores at event time, NOT via closure) ──
   const handleEngineEvent = useCallback(
     (event: EngineEvent) => {
@@ -145,6 +177,7 @@ export function useAudioEngine(): AudioEngineControls {
             musicFadeRef.current?.cancel(); musicFadeRef.current = null;
             binauralFadeRef.current?.cancel(); binauralFadeRef.current = null;
             setNarrationText('');
+            lastVoiceTextRef.current = null;
           }
           break;
         }
@@ -159,6 +192,7 @@ export function useAudioEngine(): AudioEngineControls {
         case 'sessionComplete': {
           logger.info('[useAudioEngine]', 'Session complete');
           Speech.stop();
+          lastVoiceTextRef.current = null;
           break;
         }
 
@@ -170,36 +204,21 @@ export function useAudioEngine(): AudioEngineControls {
             break;
           }
           setNarrationText(text);
+          lastVoiceTextRef.current = text;
           setLayerState('voice', { status: 'playing' });
 
-          // Skip TTS if voice is muted
+          // Skip TTS if voice is muted — but remember text for re-speak on un-mute
           if (mutedLayers.voice) {
-            logger.info('[useAudioEngine]', 'Voice muted — skipping TTS');
+            logger.info('[useAudioEngine]', 'Voice muted — skipping TTS (text remembered)');
             break;
           }
 
-          const voiceVol = effectiveVolume(audio.masterVolume, audio.voiceVolume);
-          setLayerVolume('voice', voiceVol);
-          const speakOptions: Record<string, unknown> = {
-            language: voice.language,
-            rate: voice.speed,
-            pitch: voice.pitch,
-            onDone: () => {
-              setLayerState('voice', { status: 'idle' });
-            },
-            onError: () => {
-              setLayerState('voice', { status: 'error' });
-              engineRef.current?.reportError(`TTS error for "${event.textKey}"`);
-            },
-          };
-          if (voice.voiceId) {
-            speakOptions.voiceId = voice.voiceId;
-          }
-          Speech.speak(text, speakOptions);
+          speakText(text);
           break;
         }
         case 'stopVoice': {
           Speech.stop();
+          lastVoiceTextRef.current = null;
           setLayerState('voice', { status: 'idle' });
           break;
         }
@@ -222,9 +241,16 @@ export function useAudioEngine(): AudioEngineControls {
               logger.warn('[useAudioEngine]', `Cannot resolve music: ${event.trackId}`);
               break;
             }
+
+            logger.info('[useAudioEngine]', `Starting music: ${event.trackId}, uri: ${uri?.substring(0, 60)}...`);
+
             const musicVol = effectiveVolume(audio.masterVolume, audio.musicVolume);
             const targetVol = mutedLayers.music ? 0 : musicVol * event.volume;
             setLayerState('music', { status: 'playing', currentTrackId: event.trackId, volume: 0 });
+
+            // Set looping BEFORE replace + play
+            musicPlayer.looping = !!event.loop;
+
             musicPlayer.replace({ uri });
             musicPlayer.volume = 0;
             if (event.fadeInMs > 0 && !mutedLayers.music) {
@@ -269,9 +295,16 @@ export function useAudioEngine(): AudioEngineControls {
               logger.warn('[useAudioEngine]', `Cannot resolve binaural: ${event.trackId}`);
               break;
             }
+
+            logger.info('[useAudioEngine]', `Starting binaural: ${event.trackId}, uri: ${uri?.substring(0, 60)}...`);
+
             const binVol = effectiveVolume(audio.masterVolume, audio.binauralVolume);
             const targetVol = mutedLayers.binaural ? 0 : binVol * event.volume;
             setLayerState('binaural', { status: 'playing', currentTrackId: event.trackId, volume: 0 });
+
+            // Set looping BEFORE replace + play
+            binauralPlayer.looping = true;
+
             binauralPlayer.replace({ uri });
             binauralPlayer.volume = 0;
             if (event.fadeInMs > 0 && !mutedLayers.binaural) {
@@ -345,7 +378,7 @@ export function useAudioEngine(): AudioEngineControls {
       }
     },
     // ── Intentionally minimal deps: reads stores at event time ──
-    [resolveText, setEngineState, setPhase, setProgress,
+    [resolveText, speakText, setEngineState, setPhase, setProgress,
      setTotalDuration, setLayerState, setLayerVolume, setAudioError, setNarrationText,
      updateSessionStatus, updateSessionPhase, updateSessionProgress,
      musicPlayer, binauralPlayer],
@@ -363,6 +396,7 @@ export function useAudioEngine(): AudioEngineControls {
       try { binauralPlayer.pause(); } catch { /* noop */ }
       musicFadeRef.current?.cancel();
       binauralFadeRef.current?.cancel();
+      lastVoiceTextRef.current = null;
       resetAudioState();
     };
   }, [handleEngineEvent, musicPlayer, binauralPlayer, resetAudioState]);
@@ -424,6 +458,7 @@ export function useAudioEngine(): AudioEngineControls {
     const engine = AudioEngine.getInstance();
     resetAudioState();
     setTotalDuration(totalDurationMs);
+    lastVoiceTextRef.current = null;
 
     // Inject default music + binaural if practice doesn't define them
     const enrichedSegments = injectBackgroundLayers(segments, systemId);
@@ -479,11 +514,18 @@ export function useAudioEngine(): AudioEngineControls {
             fromVolume: 0, toVolume: vol * 0.5, durationMs: 1000, curve: 'exponential',
             onVolumeChange: (v) => { binauralPlayer.volume = v; setLayerVolume('binaural', v); },
           });
+        } else if (layer === 'voice') {
+          // Voice un-mute: re-speak the last text if engine is still playing
+          const engineState = useAudioStateStore.getState().engineState;
+          if (engineState === 'playing' && lastVoiceTextRef.current) {
+            logger.info('[useAudioEngine]', 'Voice un-muted — re-speaking last text');
+            setLayerState('voice', { status: 'playing' });
+            speakText(lastVoiceTextRef.current);
+          }
         }
-        // Voice un-mute: next playVoice event will speak normally
       }
     },
-    [musicPlayer, binauralPlayer, setLayerVolume, setLayerState],
+    [musicPlayer, binauralPlayer, speakText, setLayerVolume, setLayerState],
   );
 
   // ── Computed state ─────────────────────────────────────────────

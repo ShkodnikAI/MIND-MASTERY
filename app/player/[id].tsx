@@ -20,7 +20,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, BackHandler } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, BackHandler, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -202,25 +202,27 @@ const styles = StyleSheet.create({
     color: colors.text.tertiary,
   },
 
-  // ── Narration text ────────────────────────────────────────────
+  // ── Narration text (marquee) ─────────────────────────────────
   narrationCard: {
     backgroundColor: 'rgba(255,255,255,0.04)',
     borderRadius: radii.md,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
-    padding: spacing.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.sm,
     marginVertical: spacing.md,
-    minHeight: 80,
+    minHeight: 56,
     maxWidth: 500,
     alignSelf: 'center',
     width: '100%',
+    overflow: 'hidden',
   },
   narrationText: {
     fontFamily: typography.fontFamily.regular,
     fontSize: typography.sizes.sm,
     lineHeight: typography.lineHeights.md,
     color: colors.text.secondary,
-    textAlign: 'center',
+    textAlign: 'left',
   },
 
   // ── Progress bar ──────────────────────────────────────────────
@@ -404,7 +406,104 @@ const styles = StyleSheet.create({
 });
 
 // ---------------------------------------------------------------------------
-// Component
+// Narration Marquee Component (running text)
+// ---------------------------------------------------------------------------
+
+/** Displays narration text as a smooth vertical scrolling marquee. */
+function NarrationMarquee({ text }: { readonly text: string }) {
+  const scrollRef = useRef<Animated.ScrollView>(null);
+  const animRef = useRef<Animated.Value>(new Animated.Value(0));
+  const textHeightRef = useRef(0);
+  const containerHeightRef = useRef(0);
+  const [isLong, setIsLong] = useState(false);
+
+  useEffect(() => {
+    // Reset animation on text change
+    animRef.current.setValue(0);
+  }, [text]);
+
+  const onTextLayout = useCallback(
+    (e: { nativeEvent: { layout: { height: number } } }) => {
+      textHeightRef.current = e.nativeEvent.layout.height;
+      // Trigger on next frame so container height is also measured
+      requestAnimationFrame(() => {
+        setIsLong(textHeightRef.current > containerHeightRef.current);
+      });
+    },
+    [],
+  );
+
+  const onContainerLayout = useCallback(
+    (e: { nativeEvent: { layout: { height: number } } }) => {
+      containerHeightRef.current = e.nativeEvent.layout.height;
+      setIsLong(textHeightRef.current > containerHeightRef.current);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!isLong) return;
+
+    const textH = textHeightRef.current;
+    const containerH = containerHeightRef.current;
+    const scrollDistance = textH - containerH + 16; // padding
+
+    if (scrollDistance <= 0) return;
+
+    // Animate: scroll down, pause, scroll back to top, repeat
+    const anim = animRef.current;
+    const sequence = Animated.sequence([
+      Animated.delay(800), // initial pause
+      Animated.timing(anim, {
+        toValue: scrollDistance,
+        duration: Math.min(8000, scrollDistance * 30), // speed proportional to text length
+        useNativeDriver: true,
+      }),
+      Animated.delay(2000), // pause at bottom
+      Animated.timing(anim, {
+        toValue: 0,
+        duration: Math.min(3000, scrollDistance * 20),
+        useNativeDriver: true,
+      }),
+      Animated.delay(1000), // pause at top
+    ]);
+
+    Animated.loop(sequence).start();
+
+    return () => {
+      anim.stopAnimation();
+      anim.setValue(0);
+    };
+  }, [isLong, text]);
+
+  return (
+    <View
+      style={styles.narrationCard}
+      onLayout={onContainerLayout}
+    >
+      <Animated.ScrollView
+        ref={scrollRef}
+        scrollEnabled={false}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: 2, paddingBottom: 2 }}
+      >
+        <Animated.View
+          style={{ transform: [{ translateY: animRef.current }] }}
+        >
+          <Text
+            style={styles.narrationText}
+            onTextLayout={onTextLayout}
+          >
+            {text}
+          </Text>
+        </Animated.View>
+      </Animated.ScrollView>
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Player Screen Component
 // ---------------------------------------------------------------------------
 
 export default function PlayerScreen() {
@@ -729,11 +828,9 @@ export default function PlayerScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* ── Narration text ─────────────────────────────────── */}
+          {/* ── Narration text (marquee / running line) ────────── */}
           {currentNarrationText ? (
-            <View style={styles.narrationCard}>
-              <Text style={styles.narrationText}>{currentNarrationText}</Text>
-            </View>
+            <NarrationMarquee text={currentNarrationText} />
           ) : null}
 
           {/* ── Progress bar ─────────────────────────────────── */}
