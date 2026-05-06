@@ -106,16 +106,23 @@ export function useAudioEngine(): AudioEngineControls {
       const dotIndex = textKey.indexOf('.');
       if (dotIndex === -1) return textKey;
       const practiceId = textKey.substring(0, dotIndex);
-      const sectionKey = textKey.substring(dotIndex + 1);
       const practiceText = getText(practiceId);
       if (!practiceText) {
         logger.warn('[useAudioEngine]', `No text for practice "${practiceId}"`);
         return null;
       }
-      const text = practiceText.segments[sectionKey];
+      // Segment keys in JSON are stored as full textKey (e.g. "silva_alpha_entry.preparation")
+      const text = practiceText.segments[textKey];
       if (typeof text === 'string' && text.length > 0) {
         return text;
       }
+      // Fallback: try just the section part for forward compatibility
+      const sectionKey = textKey.substring(dotIndex + 1);
+      const fallback = practiceText.segments[sectionKey];
+      if (typeof fallback === 'string' && fallback.length > 0) {
+        return fallback;
+      }
+      logger.warn('[useAudioEngine]', `No text for key "${textKey}" in practice "${practiceId}"`);
       return null;
     },
     [getText],
@@ -171,7 +178,7 @@ export function useAudioEngine(): AudioEngineControls {
 
           const voiceVol = effectiveVolume(audio.masterVolume, audio.voiceVolume);
           setLayerVolume('voice', voiceVol);
-          Speech.speak(text, {
+          const speakOptions: Record<string, unknown> = {
             language: voice.language,
             rate: voice.speed,
             pitch: voice.pitch,
@@ -182,7 +189,11 @@ export function useAudioEngine(): AudioEngineControls {
               setLayerState('voice', { status: 'error' });
               engineRef.current?.reportError(`TTS error for "${event.textKey}"`);
             },
-          });
+          };
+          if (voice.voiceId) {
+            speakOptions.voiceId = voice.voiceId;
+          }
+          Speech.speak(text, speakOptions);
           break;
         }
         case 'stopVoice': {
@@ -194,7 +205,16 @@ export function useAudioEngine(): AudioEngineControls {
         // ── Music playback ───────────────────────────────────────
         case 'startMusic': {
           try {
-            const uri = resolveMusicUri(event.trackId);
+            // Check if this is a custom track (selected by user via document picker)
+            let uri = resolveMusicUri(event.trackId);
+            if (!uri && event.trackId.startsWith('custom_')) {
+              const customTrack = audio.customMusicTracks.find(
+                (t) => t.id === event.trackId,
+              );
+              if (customTrack) {
+                uri = customTrack.uri;
+              }
+            }
             if (!uri) {
               logger.warn('[useAudioEngine]', `Cannot resolve music: ${event.trackId}`);
               break;

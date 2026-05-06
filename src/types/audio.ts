@@ -30,6 +30,8 @@ export interface VoiceSettings {
   readonly speed: number;
   /** Pitch multiplier. Range [0.5, 2.0], default 1.0. */
   readonly pitch: number;
+  /** System TTS voice identifier. Empty string = default voice. */
+  readonly voiceId: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -60,6 +62,8 @@ export interface AudioSettings {
   readonly backgroundPlayback: boolean;
   /** Identifier of the selected background music track (e.g. 'space', 'ocean'). */
   readonly selectedMusicTrack: string;
+  /** User-added custom music tracks (name + file URI). */
+  readonly customMusicTracks: readonly { id: string; name: string; uri: string }[];
 }
 
 // ---------------------------------------------------------------------------

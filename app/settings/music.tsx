@@ -3,18 +3,19 @@
  *
  * Background music selection for meditation sessions.
  * Built-in ambient track cards with play/pause preview,
- * custom music section (coming soon), and volume slider.
+ * custom music upload via document picker, and volume slider.
  * Wired to settingsStore.audio.musicVolume and settingsStore.audio.selectedMusicTrack.
  *
  * INV-A3: All styles via StyleSheet.create.
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer } from 'expo-audio';
+import * as DocumentPicker from 'expo-document-picker';
 import { useSettingsStore } from '@/store/settingsStore';
 import { SettingsSlider } from '@/ui/components/SettingsSlider';
 import { colors, typography, spacing, radii } from '@/ui/theme';
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
-    opacity: 0.5,
+    gap: spacing.md,
   },
   customCardIcon: {
     width: 40,
@@ -186,14 +187,13 @@ const styles = StyleSheet.create({
   },
   customCardInfo: {
     flex: 1,
-    marginLeft: spacing.md,
     gap: 2,
   },
   customCardTitle: {
     fontFamily: typography.fontFamily.medium,
     fontSize: typography.sizes.md,
     lineHeight: typography.lineHeights.md,
-    color: colors.text.secondary,
+    color: colors.text.primary,
   },
   customCardDescription: {
     fontFamily: typography.fontFamily.regular,
@@ -201,17 +201,36 @@ const styles = StyleSheet.create({
     lineHeight: typography.lineHeights.xs,
     color: colors.text.tertiary,
   },
-  comingSoonBadge: {
-    backgroundColor: 'rgba(253, 203, 110, 0.2)',
-    borderRadius: radii.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+  customTrackItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.tertiary,
+    borderRadius: radii.md,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    gap: spacing.md,
   },
-  comingSoonText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs,
-    color: colors.accent.warning,
+  customTrackItemActive: {
+    backgroundColor: 'rgba(108, 92, 231, 0.15)',
+    borderColor: colors.accent.primary,
+  },
+  deleteButton: {
+    width: 32,
+    height: 32,
+    borderRadius: radii.full,
+    backgroundColor: 'rgba(225, 112, 85, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm,
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    paddingVertical: spacing.md,
   },
 });
 
@@ -223,7 +242,7 @@ export default function MusicSettingsScreen() {
   const previewPlayer = useAudioPlayer();
   const [previewTrackId, setPreviewTrackId] = useState<string | null>(null);
 
-  // Stop preview on unmount — mute + pause to ensure no lingering audio
+  // Stop preview on unmount
   useEffect(() => {
     return () => {
       try {
@@ -238,49 +257,125 @@ export default function MusicSettingsScreen() {
     [updateAudio],
   );
 
-  const handleTrackToggle = useCallback(
+  // Stop any current preview
+  const stopPreview = useCallback(() => {
+    try {
+      previewPlayer.volume = 0;
+      previewPlayer.pause();
+    } catch { /* noop */ }
+    setPreviewTrackId(null);
+  }, [previewPlayer]);
+
+  // Select a track (without preview)
+  const handleTrackSelect = useCallback(
+    (trackId: string) => {
+      stopPreview();
+      updateAudio({ selectedMusicTrack: trackId });
+    },
+    [stopPreview, updateAudio],
+  );
+
+  // Toggle preview of a specific track
+  const handlePreviewToggle = useCallback(
     async (trackId: string) => {
       try {
         if (previewTrackId === trackId) {
-          // Stop preview — mute first to avoid lingering audio
-          previewPlayer.volume = 0;
-          previewPlayer.pause();
-          setPreviewTrackId(null);
-        } else {
-          // Fully stop previous preview before starting new one
-          previewPlayer.volume = 0;
-          try { previewPlayer.pause(); } catch { /* noop */ }
-
-          // Resolve asset URI
-          const { resolveMusicUri } = require('@/audio/assetResolver');
-          const uri = resolveMusicUri(trackId);
-
-          // If URI not found, still update selection but skip preview
-          if (!uri) {
-            setPreviewTrackId(null);
-            updateAudio({ selectedMusicTrack: trackId });
-            return;
-          }
-
-          // Small delay to ensure previous audio fully stops
-          await new Promise<void>((r) => setTimeout(r, 50));
-
-          // Replace source and play new track
-          previewPlayer.replace({ uri });
-          previewPlayer.volume = Math.max(0.3, audio.musicVolume);
-          previewPlayer.play();
-          setPreviewTrackId(trackId);
-
-          // Save selected track to settings
-          updateAudio({ selectedMusicTrack: trackId });
+          // Stop preview
+          stopPreview();
+          return;
         }
+
+        // Stop previous
+        stopPreview();
+
+        // Resolve asset URI
+        const { resolveMusicUri } = require('@/audio/assetResolver');
+        const uri = resolveMusicUri(trackId);
+
+        if (!uri) {
+          return;
+        }
+
+        await new Promise<void>((r) => setTimeout(r, 50));
+
+        previewPlayer.replace({ uri });
+        previewPlayer.volume = Math.max(0.3, audio.musicVolume);
+        previewPlayer.play();
+        setPreviewTrackId(trackId);
       } catch {
-        // ignore preview errors — ensure we reset state
         setPreviewTrackId(null);
       }
     },
-    [previewTrackId, previewPlayer, audio.musicVolume, updateAudio],
+    [previewTrackId, previewPlayer, audio.musicVolume, stopPreview],
   );
+
+  // Preview a custom track by URI
+  const handleCustomPreview = useCallback(
+    async (trackId: string, uri: string) => {
+      try {
+        if (previewTrackId === trackId) {
+          stopPreview();
+          return;
+        }
+
+        stopPreview();
+        await new Promise<void>((r) => setTimeout(r, 50));
+
+        previewPlayer.replace({ uri });
+        previewPlayer.volume = Math.max(0.3, audio.musicVolume);
+        previewPlayer.play();
+        setPreviewTrackId(trackId);
+      } catch {
+        setPreviewTrackId(null);
+      }
+    },
+    [previewTrackId, previewPlayer, audio.musicVolume, stopPreview],
+  );
+
+  // Add custom music from file system
+  const handleAddCustomMusic = useCallback(async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['audio/*'],
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) return;
+
+      const asset = result.assets[0];
+      const name = asset.name.replace(/\.[^.]+$/, '') || 'Моя музыка';
+      const newTrack = {
+        id: `custom_${Date.now()}`,
+        name,
+        uri: asset.uri,
+      };
+
+      const updatedTracks = [...audio.customMusicTracks, newTrack];
+      updateAudio({ customMusicTracks: updatedTracks });
+    } catch (err) {
+      Alert.alert(
+        'Ошибка',
+        err instanceof Error ? err.message : 'Не удалось добавить файл',
+      );
+    }
+  }, [audio.customMusicTracks, updateAudio]);
+
+  // Remove custom track
+  const handleRemoveCustomTrack = useCallback(
+    (trackId: string) => {
+      if (audio.selectedMusicTrack === trackId) {
+        updateAudio({ selectedMusicTrack: 'space' });
+      }
+      const updatedTracks = audio.customMusicTracks.filter((t) => t.id !== trackId);
+      updateAudio({ customMusicTracks: updatedTracks });
+      if (previewTrackId === trackId) {
+        stopPreview();
+      }
+    },
+    [audio.selectedMusicTrack, audio.customMusicTracks, previewTrackId, updateAudio, stopPreview],
+  );
+
+  const customTracks = audio.customMusicTracks;
 
   return (
     <LinearGradient
@@ -291,7 +386,7 @@ export default function MusicSettingsScreen() {
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <Text style={styles.titleText}>Музыка</Text>
           <Text style={styles.descriptionText}>
-            Выберите фоновую музыку для медитаций и практик. Нажмите для прослушивания.
+            Выберите фоновую музыку для медитаций и практик. Нажмите на трек для выбора, на кнопку воспроизведения для прослушивания.
           </Text>
 
           {/* Built-in tracks */}
@@ -301,31 +396,33 @@ export default function MusicSettingsScreen() {
             const isPreviewing = previewTrackId === track.id;
 
             return (
-              <TouchableOpacity
-                key={track.id}
-                style={[styles.trackCard, isActive && styles.trackCardActive]}
-                onPress={() => handleTrackToggle(track.id)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.trackEmoji}>
-                  <Text>{track.emoji}</Text>
-                </View>
-                <View style={styles.trackInfo}>
-                  <View style={styles.trackNameRow}>
-                    <Text style={[styles.trackName, isActive && styles.trackNameActive]}>
-                      {track.name}
-                    </Text>
-                    {isActive && (
-                      <Ionicons name="checkmark-circle" size={16} color={colors.accent.primary} />
-                    )}
+              <View key={track.id} style={[styles.trackCard, isActive && styles.trackCardActive]}>
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: spacing.md }}
+                  onPress={() => handleTrackSelect(track.id)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.trackEmoji}>
+                    <Text>{track.emoji}</Text>
                   </View>
-                  <Text style={styles.trackDescription} numberOfLines={1}>
-                    {track.description}
-                  </Text>
-                </View>
+                  <View style={styles.trackInfo}>
+                    <View style={styles.trackNameRow}>
+                      <Text style={[styles.trackName, isActive && styles.trackNameActive]}>
+                        {track.name}
+                      </Text>
+                      {isActive && (
+                        <Ionicons name="checkmark-circle" size={16} color={colors.accent.primary} />
+                      )}
+                    </View>
+                    <Text style={styles.trackDescription} numberOfLines={1}>
+                      {track.description}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
                 <View style={styles.trackMeta}>
                   <TouchableOpacity
                     style={[styles.playButton, isPreviewing && styles.playButtonActive]}
+                    onPress={() => handlePreviewToggle(track.id)}
                     activeOpacity={0.7}
                   >
                     <Ionicons
@@ -335,32 +432,96 @@ export default function MusicSettingsScreen() {
                     />
                   </TouchableOpacity>
                 </View>
-              </TouchableOpacity>
+              </View>
             );
           })}
 
           {/* Custom music */}
           <Text style={styles.sectionTitle}>Своя музыка</Text>
-          <View style={styles.customCard}>
+
+          {/* Add button */}
+          <TouchableOpacity
+            style={styles.customCard}
+            onPress={handleAddCustomMusic}
+            activeOpacity={0.7}
+          >
             <View style={styles.customCardIcon}>
               <Ionicons
                 name="add-outline"
                 size={20}
-                color={colors.text.tertiary}
+                color={colors.accent.primary}
               />
             </View>
             <View style={styles.customCardInfo}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-                <Text style={styles.customCardTitle}>Добавить свою музыку</Text>
-                <View style={styles.comingSoonBadge}>
-                  <Text style={styles.comingSoonText}>Скоро</Text>
-                </View>
-              </View>
+              <Text style={styles.customCardTitle}>Добавить свою музыку</Text>
               <Text style={styles.customCardDescription}>
-                Загрузите MP3 из файловой системы устройства
+                Выберите аудиофайл (MP3, WAV, OGG) из файловой системы
               </Text>
             </View>
-          </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.text.tertiary} />
+          </TouchableOpacity>
+
+          {/* Custom tracks list */}
+          {customTracks.length === 0 ? (
+            <Text style={styles.emptyText}>
+              У вас пока нет добавленных треков
+            </Text>
+          ) : (
+            customTracks.map((track) => {
+              const isActive = audio.selectedMusicTrack === track.id;
+              const isPreviewing = previewTrackId === track.id;
+
+              return (
+                <View
+                  key={track.id}
+                  style={[styles.customTrackItem, isActive && styles.customTrackItemActive]}
+                >
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center', flex: 1, gap: spacing.md }}
+                    onPress={() => handleTrackSelect(track.id)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.trackEmoji}>
+                      <Text>🎵</Text>
+                    </View>
+                    <View style={styles.trackInfo}>
+                      <View style={styles.trackNameRow}>
+                        <Text style={[styles.trackName, isActive && styles.trackNameActive]}>
+                          {track.name}
+                        </Text>
+                        {isActive && (
+                          <Ionicons name="checkmark-circle" size={16} color={colors.accent.primary} />
+                        )}
+                      </View>
+                      <Text style={styles.trackDescription} numberOfLines={1}>
+                        Пользовательский трек
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                  <View style={styles.trackMeta}>
+                    <TouchableOpacity
+                      style={[styles.playButton, isPreviewing && styles.playButtonActive]}
+                      onPress={() => handleCustomPreview(track.id, track.uri)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons
+                        name={isPreviewing ? 'pause' : 'play'}
+                        size={16}
+                        color={isPreviewing ? colors.accent.primary : colors.text.secondary}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleRemoveCustomTrack(track.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="close" size={14} color={colors.accent.error} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              );
+            })
+          )}
 
           {/* Volume */}
           <Text style={styles.sectionTitle}>Громкость музыки</Text>

@@ -30,6 +30,7 @@ const DEFAULT_AUDIO: AudioSettings = {
   errorPolicy: 'skip' as AudioErrorPolicy,
   backgroundPlayback: true,
   selectedMusicTrack: 'space',
+  customMusicTracks: [],
 };
 
 const DEFAULT_VOICE: VoiceSettings = {
@@ -37,6 +38,7 @@ const DEFAULT_VOICE: VoiceSettings = {
   language: 'ru',
   speed: 0.9,
   pitch: 1.0,
+  voiceId: '',
 };
 
 const DEFAULT_NOTIFICATIONS: NotificationSettings = {

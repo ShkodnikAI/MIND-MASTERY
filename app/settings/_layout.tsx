@@ -18,6 +18,7 @@ export default function SettingsLayout() {
         headerShadowVisible: false,
       }}
     >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="audio" options={{ title: 'Звук' }} />
       <Stack.Screen name="music" options={{ title: 'Музыка' }} />
       <Stack.Screen name="voice" options={{ title: 'Голос' }} />
