@@ -141,12 +141,20 @@ export function useAudioEngine(): AudioEngineControls {
         rate: voice.speed,
         pitch: voice.pitch,
         onDone: () => {
+          // Only clear ref if we're not muted (Speech.stop() during mute
+          // triggers onDone — we must keep the text for re-speak on un-mute)
+          const isMuted = useAudioStateStore.getState().mutedLayers.voice;
           setLayerState('voice', { status: 'idle' });
-          lastVoiceTextRef.current = null;
+          if (!isMuted) {
+            lastVoiceTextRef.current = null;
+          }
         },
         onError: () => {
+          const isMuted = useAudioStateStore.getState().mutedLayers.voice;
           setLayerState('voice', { status: 'error' });
-          lastVoiceTextRef.current = null;
+          if (!isMuted) {
+            lastVoiceTextRef.current = null;
+          }
         },
       };
       if (voice.voiceId) {
@@ -262,7 +270,15 @@ export function useAudioEngine(): AudioEngineControls {
               musicPlayer.volume = targetVol;
               setLayerVolume('music', targetVol);
             }
-            musicPlayer.play();
+            // Delay play() to allow native player to load the source after replace()
+            setTimeout(() => {
+              try {
+                musicPlayer.play();
+                logger.info('[useAudioEngine]', 'Music play() called successfully');
+              } catch (playErr) {
+                logger.warn('[useAudioEngine]', 'Music play() failed after delay', playErr);
+              }
+            }, 300);
           } catch (err) {
             logger.warn('[useAudioEngine]', 'Music start failed', err);
             setLayerState('music', { status: 'error' });
@@ -316,7 +332,15 @@ export function useAudioEngine(): AudioEngineControls {
               binauralPlayer.volume = targetVol;
               setLayerVolume('binaural', targetVol);
             }
-            binauralPlayer.play();
+            // Delay play() to allow native player to load the source after replace()
+            setTimeout(() => {
+              try {
+                binauralPlayer.play();
+                logger.info('[useAudioEngine]', 'Binaural play() called successfully');
+              } catch (playErr) {
+                logger.warn('[useAudioEngine]', 'Binaural play() failed after delay', playErr);
+              }
+            }, 300);
           } catch (err) {
             logger.warn('[useAudioEngine]', 'Binaural start failed', err);
             setLayerState('binaural', { status: 'error' });

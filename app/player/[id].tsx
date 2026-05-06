@@ -60,7 +60,7 @@ const PHASE_LABELS: Record<SessionPhase, string> = {
 };
 
 const PHASE_ICONS: Record<SessionPhase, string> = {
-  preparation: 'spa-outline',
+  preparation: 'flower-outline',
   induction: 'water-outline',
   deepening: 'moon-outline',
   work: 'diamond-outline',
@@ -423,9 +423,13 @@ function NarrationMarquee({ text }: { readonly text: string }) {
   }, [text]);
 
   const onTextLayout = useCallback(
-    (e: { nativeEvent: { layout: { height: number } } }) => {
-      textHeightRef.current = e.nativeEvent.layout.height;
-      // Trigger on next frame so container height is also measured
+    (e: { nativeEvent: { lines: ReadonlyArray<{ y: number; height: number }> } }) => {
+      // onTextLayout provides lines array, not layout — calculate total height
+      const lines = e.nativeEvent?.lines;
+      if (lines && lines.length > 0) {
+        const lastLine = lines[lines.length - 1];
+        textHeightRef.current = lastLine.y + lastLine.height;
+      }
       requestAnimationFrame(() => {
         setIsLong(textHeightRef.current > containerHeightRef.current);
       });
@@ -493,6 +497,7 @@ function NarrationMarquee({ text }: { readonly text: string }) {
           <Text
             style={styles.narrationText}
             onTextLayout={onTextLayout}
+            numberOfLines={undefined}
           >
             {text}
           </Text>

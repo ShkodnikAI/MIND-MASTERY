@@ -257,6 +257,8 @@ const styles = StyleSheet.create({
   segmentsScrollView: {
     paddingLeft: spacing.md,
     maxHeight: 400,
+    flexGrow: 0,
+    flexShrink: 0,
   },
   loadingText: {
     fontFamily: typography.fontFamily.regular,
