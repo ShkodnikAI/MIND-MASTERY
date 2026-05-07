@@ -17,7 +17,7 @@
  */
 
 import { useEffect, useRef, useCallback, useMemo } from 'react';
-import { useAudioPlayer } from 'expo-audio';
+import { useAudioPlayer, setAudioModeAsync, setIsAudioActiveAsync } from 'expo-audio';
 import * as Speech from 'expo-speech';
 import { AudioEngine } from '@/audio/AudioEngine';
 import type { EngineEvent } from '@/audio/types';
@@ -422,6 +422,7 @@ export function useAudioEngine(): AudioEngineControls {
       binauralFadeRef.current?.cancel();
       lastVoiceTextRef.current = null;
       resetAudioState();
+      setIsAudioActiveAsync(false).catch(() => {});
     };
   }, [handleEngineEvent, musicPlayer, binauralPlayer, resetAudioState]);
 
@@ -484,6 +485,20 @@ export function useAudioEngine(): AudioEngineControls {
     setTotalDuration(totalDurationMs);
     lastVoiceTextRef.current = null;
 
+    // Configure audio session: prevent TTS from stealing focus on Android
+    try {
+      await setAudioModeAsync({
+        playsInSilentMode: true,
+        interruptionMode: 'doNotMix',
+        interruptionModeAndroid: 'doNotMix',
+        shouldPlayInBackground: true,
+      });
+      await setIsAudioActiveAsync(true);
+      logger.info('[useAudioEngine]', 'Audio session configured: doNotMix');
+    } catch (err) {
+      logger.warn('[useAudioEngine]', 'Audio mode set failed', err);
+    }
+
     // Inject default music + binaural if practice doesn't define them
     const enrichedSegments = injectBackgroundLayers(segments, systemId);
 
@@ -525,17 +540,19 @@ export function useAudioEngine(): AudioEngineControls {
           setLayerState('voice', { status: 'idle' });
         }
       } else {
-        // Unmuting: restore volume
+        // Unmuting: ensure player is playing, then restore volume
         if (layer === 'music') {
           const vol = effectiveVolume(audio.masterVolume, audio.musicVolume);
+          try { if (musicPlayer.playing === false) musicPlayer.play(); } catch { /* noop */ }
           musicFadeRef.current = startFade({
-            fromVolume: 0, toVolume: vol * 0.3, durationMs: 1000, curve: 'exponential',
+            fromVolume: 0, toVolume: vol, durationMs: 1000, curve: 'exponential',
             onVolumeChange: (v) => { musicPlayer.volume = v; setLayerVolume('music', v); },
           });
         } else if (layer === 'binaural') {
           const vol = effectiveVolume(audio.masterVolume, audio.binauralVolume);
+          try { if (binauralPlayer.playing === false) binauralPlayer.play(); } catch { /* noop */ }
           binauralFadeRef.current = startFade({
-            fromVolume: 0, toVolume: vol * 0.5, durationMs: 1000, curve: 'exponential',
+            fromVolume: 0, toVolume: vol, durationMs: 1000, curve: 'exponential',
             onVolumeChange: (v) => { binauralPlayer.volume = v; setLayerVolume('binaural', v); },
           });
         } else if (layer === 'voice') {
