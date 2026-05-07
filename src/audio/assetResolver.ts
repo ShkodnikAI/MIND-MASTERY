@@ -126,7 +126,7 @@ export async function preloadAudioAssets(): Promise<void> {
   const allModules = [
     ...Object.values(musicModules),
     ...Object.values(binauralModules),
-    ...Object.values(voiceModules).flatMap(Object.values),
+    // Voice modules loaded on-demand via Asset.fromModule (591 MP3s would OOM)
   ];
   await Asset.loadAsync(allModules);
   // Invalidate cache so URIs are re-resolved with localUri
