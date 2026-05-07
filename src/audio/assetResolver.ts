@@ -9,6 +9,7 @@
  */
 
 import { Asset } from 'expo-asset';
+import voiceManifest from './voiceManifest';
 
 // ---------------------------------------------------------------------------
 // Static asset modules (Metro resolves these at bundle time)
@@ -37,6 +38,8 @@ const binauralModules: Record<string, ReturnType<typeof require>> = {
   '150hz-6hz': require('../../assets/audio/binaural/150hz-6hz.wav'),
   '150hz-4hz': require('../../assets/audio/binaural/150hz-4hz.wav'),
 };
+
+const voiceModules: Record<string, Record<string, ReturnType<typeof require>>> = voiceManifest;
 
 // ---------------------------------------------------------------------------
 // URI cache
@@ -88,6 +91,27 @@ export function resolveBinauralUri(trackId: string): string | null {
   return uri;
 }
 
+/**
+ * Resolve a pre-recorded voice MP3 URI for a given textKey.
+ * textKey format: practiceId.segmentName
+ */
+export function resolveVoiceUri(textKey: string): string | null {
+  const cacheKey = `voice:${'${textKey}'}`;
+  if (uriCache.has(cacheKey)) return uriCache.get(cacheKey)!;
+  const dotIndex = textKey.indexOf('.');
+  if (dotIndex === -1) return null;
+  const practiceId = textKey.substring(0, dotIndex);
+  const segmentName = textKey.substring(dotIndex + 1);
+  const practiceVoices = voiceModules[practiceId];
+  if (!practiceVoices) return null;
+  const mod = practiceVoices[segmentName];
+  if (!mod) return null;
+  const asset = Asset.fromModule(mod);
+  const uri = asset.localUri ?? asset.uri ?? null;
+  if (uri) uriCache.set(cacheKey, uri);
+  return uri;
+}
+
 /** All available music track IDs. */
 export const MUSIC_TRACKS = Object.keys(musicModules);
 
@@ -102,6 +126,7 @@ export async function preloadAudioAssets(): Promise<void> {
   const allModules = [
     ...Object.values(musicModules),
     ...Object.values(binauralModules),
+    ...Object.values(voiceModules).flatMap(Object.values),
   ];
   await Asset.loadAsync(allModules);
   // Invalidate cache so URIs are re-resolved with localUri

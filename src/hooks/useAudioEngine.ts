@@ -23,7 +23,7 @@ import { AudioEngine } from '@/audio/AudioEngine';
 import type { EngineEvent } from '@/audio/types';
 import { startFade, effectiveVolume } from '@/audio/FadeController';
 import type { FadeHandle } from '@/audio/FadeController';
-import { resolveMusicUri, resolveBinauralUri } from '@/audio/assetResolver';
+import { resolveMusicUri, resolveBinauralUri, resolveVoiceUri } from '@/audio/assetResolver';
 import { useAudioStateStore } from '@/store/audioStateStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useSessionStore } from '@/store/sessionStore';
@@ -78,6 +78,7 @@ export function useAudioEngine(): AudioEngineControls {
   // ── Audio players (stable refs, never recreated) ────────────────
   const musicPlayer = useAudioPlayer();
   const binauralPlayer = useAudioPlayer();
+  const voicePlayer = useAudioPlayer();
 
   // ── Store selectors ─────────────────────────────────────────────
   const setEngineState = useAudioStateStore((s) => s.setEngineState);
@@ -221,11 +222,25 @@ export function useAudioEngine(): AudioEngineControls {
             break;
           }
 
-          speakText(text);
+          const vm = useSettingsStore.getState().voice.mode;
+          if (vm === 'prerecorded') {
+            const vu = resolveVoiceUri(event.textKey);
+            if (vu) {
+              const vv = effectiveVolume(audio.masterVolume, audio.voiceVolume);
+              setLayerVolume('voice', vv);
+              try {
+                voicePlayer.replace({ uri: vu });
+                voicePlayer.volume = vv;
+                voicePlayer.play();
+              } catch(e) { speakText(text); }
+            } else { speakText(text); }
+          } else { speakText(text); }
           break;
         }
+
         case 'stopVoice': {
           Speech.stop();
+          try { voicePlayer.pause(); } catch { /* noop */ }
           lastVoiceTextRef.current = null;
           setLayerState('voice', { status: 'idle' });
           break;
@@ -418,13 +433,14 @@ export function useAudioEngine(): AudioEngineControls {
       Speech.stop();
       try { musicPlayer.pause(); } catch { /* noop */ }
       try { binauralPlayer.pause(); } catch { /* noop */ }
+      try { voicePlayer.pause(); } catch { /* noop */ }
       musicFadeRef.current?.cancel();
       binauralFadeRef.current?.cancel();
       lastVoiceTextRef.current = null;
       resetAudioState();
       setIsAudioActiveAsync(false).catch(() => {});
     };
-  }, [handleEngineEvent, musicPlayer, binauralPlayer, resetAudioState]);
+  }, [handleEngineEvent, musicPlayer, binauralPlayer, voicePlayer, resetAudioState]);
 
   // ── Inject default background layers if missing ────────────────
   const injectBackgroundLayers = useCallback(
@@ -537,6 +553,7 @@ export function useAudioEngine(): AudioEngineControls {
           setLayerVolume('binaural', 0);
         } else if (layer === 'voice') {
           Speech.stop();
+          try { voicePlayer.pause(); } catch { /* noop */ }
           setLayerState('voice', { status: 'idle' });
         }
       } else {
@@ -558,15 +575,15 @@ export function useAudioEngine(): AudioEngineControls {
         } else if (layer === 'voice') {
           // Voice un-mute: re-speak the last text if engine is still playing
           const engineState = useAudioStateStore.getState().engineState;
-          if (engineState === 'playing' && lastVoiceTextRef.current) {
-            logger.info('[useAudioEngine]', 'Voice un-muted — re-speaking last text');
-            setLayerState('voice', { status: 'playing' });
-            speakText(lastVoiceTextRef.current);
+          if (engineState === 'playing') {
+            if (useSettingsStore.getState().voice.mode === 'prerecorded') {
+              try { if(!voicePlayer.playing) voicePlayer.play(); setLayerState('voice',{status:'playing'}); } catch{}
+            } else if(lastVoiceTextRef.current){ setLayerState('voice',{status:'playing'}); speakText(lastVoiceTextRef.current); }
           }
         }
       }
     },
-    [musicPlayer, binauralPlayer, speakText, setLayerVolume, setLayerState],
+    [musicPlayer, binauralPlayer, voicePlayer, speakText, setLayerVolume, setLayerState],
   );
 
   // ── Computed state ─────────────────────────────────────────────

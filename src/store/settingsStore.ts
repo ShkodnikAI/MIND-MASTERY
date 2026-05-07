@@ -34,7 +34,7 @@ const DEFAULT_AUDIO: AudioSettings = {
 };
 
 const DEFAULT_VOICE: VoiceSettings = {
-  mode: 'system' as VoiceMode,
+  mode: 'prerecorded' as VoiceMode,
   language: 'ru',
   speed: 0.9,
   pitch: 1.0,
