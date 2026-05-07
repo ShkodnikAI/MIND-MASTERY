@@ -485,16 +485,16 @@ export function useAudioEngine(): AudioEngineControls {
     setTotalDuration(totalDurationMs);
     lastVoiceTextRef.current = null;
 
-    // Configure audio session: prevent TTS from stealing focus on Android
+    // Configure audio session: duckOthers allows music to play alongside TTS
     try {
       await setAudioModeAsync({
         playsInSilentMode: true,
-        interruptionMode: 'doNotMix',
-        interruptionModeAndroid: 'doNotMix',
+        interruptionMode: 'duckOthers',
+        interruptionModeAndroid: 'duckOthers',
         shouldPlayInBackground: true,
       });
       await setIsAudioActiveAsync(true);
-      logger.info('[useAudioEngine]', 'Audio session configured: doNotMix');
+      logger.info('[useAudioEngine]', 'Audio session configured: duckOthers');
     } catch (err) {
       logger.warn('[useAudioEngine]', 'Audio mode set failed', err);
     }

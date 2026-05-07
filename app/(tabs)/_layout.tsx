@@ -1,8 +1,7 @@
 /**
- * @file Tabs Layout — Bottom tab navigator for the 5 practice systems.
+ * @file Tabs Layout — Top tab navigator for the 6 practice systems.
  *
- * Each tab has its own brand colour. The active tab indicator uses the
- * system's signature colour while inactive tabs are grey.
+ * Tab bar is positioned at the top. Each tab has its own brand colour.
  *
  * INV-A3: All styles via StyleSheet.create.
  */
@@ -61,7 +60,6 @@ const TABS: readonly TabConfig[] = [
   },
 ] as const;
 
-// Find active tab color from config
 function getTabColor(routeName: string | undefined): string {
   if (!routeName) return colors.accent.primary;
   const tab = TABS.find((t) => t.name === routeName);
@@ -73,11 +71,11 @@ function getTabColor(routeName: string | undefined): string {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: colors.tabBar,
-    borderTopColor: colors.border,
-    borderTopWidth: 1,
-    height: Platform.select({ ios: 88, android: 68, default: 68 }),
-    paddingTop: spacing.sm,
-    paddingBottom: Platform.select({ ios: 28, default: 8 }),
+    borderBottomColor: colors.border,
+    borderBottomWidth: 1,
+    height: Platform.select({ ios: 50, android: 48, default: 48 }),
+    paddingTop: spacing.xs,
+    paddingBottom: spacing.xs,
   },
   tabItem: {
     alignItems: 'center',
@@ -96,6 +94,7 @@ const styles = StyleSheet.create({
 export default function TabsLayout() {
   return (
     <Tabs
+      tabBarPosition="top"
       screenOptions={({ route }) => {
         const activeColor = getTabColor(route.name);
 

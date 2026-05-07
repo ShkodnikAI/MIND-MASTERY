@@ -1,8 +1,7 @@
 /**
- * @file SystemTabContent — Shared content component for all 5 system tab screens.
+ * @file SystemTabContent — Shared content component for all system tab screens.
  *
- * Replaces duplicated placeholder code in each tab screen.
- * Reads real practices from contentStore and progress from progressStore.
+ * Layout: back button row → icon + title + count row → practice list.
  *
  * INV-A3: All styles via StyleSheet.create.
  */
@@ -35,25 +34,32 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+    paddingTop: spacing.sm,
   },
-  headerContainer: {
+  // Back button — standalone row
+  backButtonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  backButtonText: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.sm,
+    lineHeight: typography.lineHeights.sm,
+    color: colors.text.secondary,
+  },
+  // Icon + title + count — second row
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     marginBottom: spacing.lg,
   },
-  homeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: radii.sm,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   iconContainer: {
-    width: 48,
-    height: 48,
+    width: 44,
+    height: 44,
     borderRadius: radii.md,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     alignItems: 'center',
@@ -61,8 +67,8 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontFamily: typography.fontFamily.bold,
-    fontSize: typography.sizes.xxl,
-    lineHeight: typography.lineHeights.xxl,
+    fontSize: typography.sizes.xl,
+    lineHeight: typography.lineHeights.xl,
     color: colors.text.primary,
     flex: 1,
   },
@@ -106,18 +112,13 @@ const styles = StyleSheet.create({
 export function SystemTabContent({ systemId, title, icon, onPracticePress }: SystemTabContentProps) {
   const router = useRouter();
 
-  const handleHomePress = useCallback(() => {
+  const handleBack = useCallback(() => {
     router.back();
   }, [router]);
 
-  // Read raw practices count as a trigger + practicesLoaded flag
-  // NOTE: We check practicesLoaded, NOT loaded. The 'loaded' flag requires
-  // both practices AND texts to be loaded, but texts are loaded lazily.
-  // Practices can be displayed independently of texts.
   const practicesCount = useContentStore((s) => Object.keys(s.practices).length);
   const practicesLoaded = useContentStore((s) => s.practicesLoaded);
 
-  // Re-derive practices list from store (stable because useMemo depends on count)
   const practices = useMemo(() => {
     const raw = useContentStore.getState().practices;
     if (!raw || Object.keys(raw).length === 0) return [];
@@ -131,16 +132,12 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
 
   const systemTheme = getSystemTheme(systemId);
 
-  // Build system progress snapshot for unlock checking
   const systemProgressSnapshot = useMemo((): SystemProgressSnapshot | null => {
     if (!practicesLoaded) return null;
     const sysProgress = getSystemProgress(systemId);
-    // Get progression rules from content registry
     const system = useContentStore.getState().systems[systemId];
     if (!system) return null;
 
-    // We need the actual ProgressionRule[] from the System definition
-    // The contentStore only stores a subset; get rules from registry
     const allSystems = require('@/content/registry').getAllSystems();
     const fullSystem = allSystems.find((s: { id: string }) => s.id === systemId);
     const rules: ProgressionRule[] = fullSystem?.progression ?? [];
@@ -157,8 +154,6 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
       progressionRules: rules,
     };
   }, [practicesLoaded, systemId, practices, getSystemProgress, getPracticeProgress]);
-
-
 
   const renderItem = useCallback(
     ({ item }: { readonly item: Practice }) => {
@@ -184,17 +179,18 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
   if (!practicesLoaded) {
     return (
       <View style={styles.content}>
-        <View style={styles.headerContainer}>
-          <TouchableOpacity
-            style={styles.homeButton}
-            onPress={handleHomePress}
-            accessibilityLabel="На главную"
-            accessibilityRole="button"
-          >
-            <Ionicons name="arrow-back" size={22} color={colors.text.secondary} />
-          </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.backButtonRow}
+          onPress={handleBack}
+          accessibilityLabel="Назад"
+          accessibilityRole="button"
+        >
+          <Ionicons name="arrow-back" size={20} color={colors.text.secondary} />
+          <Text style={styles.backButtonText}>Назад</Text>
+        </TouchableOpacity>
+        <View style={styles.headerRow}>
           <View style={styles.iconContainer}>
-            <Ionicons name={icon as any} size={24} color={colors.text.primary} />
+            <Ionicons name={icon as any} size={22} color={colors.text.primary} />
           </View>
           <Text style={styles.titleText}>{title}</Text>
         </View>
@@ -207,17 +203,21 @@ export function SystemTabContent({ systemId, title, icon, onPracticePress }: Sys
 
   return (
     <View style={styles.content}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.homeButton}
-          onPress={handleHomePress}
-          accessibilityLabel="На главную"
-          accessibilityRole="button"
-        >
-          <Ionicons name="arrow-back" size={22} color={colors.text.secondary} />
-        </TouchableOpacity>
+      {/* Row 1: Back button */}
+      <TouchableOpacity
+        style={styles.backButtonRow}
+        onPress={handleBack}
+        accessibilityLabel="Назад"
+        accessibilityRole="button"
+      >
+        <Ionicons name="arrow-back" size={20} color={colors.text.secondary} />
+        <Text style={styles.backButtonText}>Назад</Text>
+      </TouchableOpacity>
+
+      {/* Row 2: Icon + Title + Count */}
+      <View style={styles.headerRow}>
         <View style={styles.iconContainer}>
-          <Ionicons name={icon as any} size={24} color={colors.text.primary} />
+          <Ionicons name={icon as any} size={22} color={colors.text.primary} />
         </View>
         <Text style={styles.titleText}>{title}</Text>
         <View style={styles.countBadge}>
