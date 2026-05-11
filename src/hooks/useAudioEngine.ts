@@ -420,7 +420,7 @@ export function useAudioEngine(): AudioEngineControls {
     [resolveText, speakText, setEngineState, setPhase, setProgress,
      setTotalDuration, setLayerState, setLayerVolume, setAudioError, setNarrationText,
      updateSessionStatus, updateSessionPhase, updateSessionProgress,
-     musicPlayer, binauralPlayer],
+     musicPlayer, binauralPlayer, voicePlayer],
   );
 
   // ── Engine lifecycle (subscribe once, stable) ───────────────────

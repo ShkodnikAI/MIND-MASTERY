@@ -96,7 +96,7 @@ export function resolveBinauralUri(trackId: string): string | null {
  * textKey format: practiceId.segmentName
  */
 export function resolveVoiceUri(textKey: string): string | null {
-  const cacheKey = `voice:${'${textKey}'}`;
+  const cacheKey = `voice:${textKey}`;
   if (uriCache.has(cacheKey)) return uriCache.get(cacheKey)!;
   const dotIndex = textKey.indexOf('.');
   if (dotIndex === -1) return null;

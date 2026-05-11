@@ -1,14 +1,11 @@
 /**
  * @file Settings -- Voice screen.
  *
- * System TTS (expo-speech) with advanced settings:
- * - Speed, pitch and volume sliders
- * - Voice test with selected voice
- * - Offline mode: browse and preview preloaded practice narration texts
+ * Two voice modes:
+ * 1. System TTS (expo-speech) — built-in device speech synthesis
+ * 2. Edge TTS (prerecorded) — pre-recorded Russian MP3 files (591 segments, 75 practices)
  *
  * Wired to settingsStore.voice.
- *
- * INV-A3: All styles via StyleSheet.create.
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -24,9 +21,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { useAudioPlayer } from 'expo-audio';
 import * as Speech from 'expo-speech';
 import { useSettingsStore } from '@/store/settingsStore';
-import { useContentStore } from '@/store/contentStore';
 import { SettingsSlider } from '@/ui/components/SettingsSlider';
 import { colors, typography, spacing, radii } from '@/ui/theme';
 import type { VoiceMode } from '@/types';
@@ -52,9 +49,9 @@ const VOICE_MODES: readonly VoiceModeOption[] = [
   },
   {
     id: 'prerecorded',
-    title: 'Предзагруженные тексты',
-    description: 'Просмотр и прослушивание текстов озвучки для каждой практики.',
-    icon: 'download-outline',
+    title: 'Edge TTS',
+    description: 'Профессиональная озвучка на русском языке (ru-RU-SvetlanaNeural). 75 практик, 591 сегмент.',
+    icon: 'mic-outline',
   },
 ];
 
@@ -155,6 +152,33 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
   },
 
+  // ── Stats card ──
+  statsRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: 'rgba(108, 92, 231, 0.08)',
+    borderRadius: radii.sm,
+    padding: spacing.sm,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontFamily: typography.fontFamily.bold,
+    fontSize: typography.sizes.lg,
+    lineHeight: typography.lineHeights.lg,
+    color: colors.accent.primary,
+  },
+  statLabel: {
+    fontFamily: typography.fontFamily.regular,
+    fontSize: typography.sizes.xs,
+    lineHeight: typography.lineHeights.xs,
+    color: colors.text.tertiary,
+    marginTop: 2,
+  },
+
   // ── Test button ──
   testSection: {
     marginTop: spacing.xl,
@@ -185,89 +209,6 @@ const styles = StyleSheet.create({
   testButtonActiveText: {
     color: colors.text.inverse,
   },
-
-  // ── Offline text browser ──
-  systemHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  systemName: {
-    fontFamily: typography.fontFamily.semibold,
-    fontSize: typography.sizes.md,
-    lineHeight: typography.lineHeights.md,
-    color: colors.accent.primary,
-  },
-  textItemCard: {
-    backgroundColor: colors.background.tertiary,
-    borderRadius: radii.sm,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.background.elevated,
-  },
-  textItemTitle: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  textItemPreview: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs + 2,
-    color: colors.text.tertiary,
-    marginBottom: spacing.sm,
-  },
-  textItemMeta: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    alignItems: 'center',
-  },
-  textSegmentCount: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs,
-    color: colors.text.tertiary,
-  },
-  listenButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radii.sm,
-    backgroundColor: 'rgba(108, 92, 231, 0.15)',
-  },
-  listenButtonText: {
-    fontFamily: typography.fontFamily.medium,
-    fontSize: typography.sizes.xs,
-    lineHeight: typography.lineHeights.xs,
-    color: colors.accent.primary,
-  },
-  listenButtonActive: {
-    backgroundColor: colors.accent.primary,
-  },
-  listenButtonActiveText: {
-    color: colors.text.inverse,
-  },
-  segmentsScrollView: {
-    paddingLeft: spacing.md,
-    maxHeight: 400,
-    flexGrow: 0,
-    flexShrink: 0,
-  },
-  loadingText: {
-    fontFamily: typography.fontFamily.regular,
-    fontSize: typography.sizes.sm,
-    lineHeight: typography.lineHeights.sm,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    paddingVertical: spacing.md,
-  },
 });
 
 // ─── Component ───────────────────────────────────────────────────
@@ -278,12 +219,12 @@ export default function VoiceSettingsScreen() {
   const audio = useSettingsStore((s) => s.audio);
   const updateAudio = useSettingsStore((s) => s.updateAudio);
   const [testingVoice, setTestingVoice] = useState(false);
-  const [listeningTextKey, setListeningTextKey] = useState<string | null>(null);
-  const [offlineExpanded, setOfflineExpanded] = useState<string | null>(null);
+  const [testingEdge, setTestingEdge] = useState(false);
 
-  const systems = useContentStore((s) => s.systems);
-  const allTexts = useContentStore((s) => s.getAllTexts());
-  const loaded = useContentStore((s) => s.loaded);
+  // Edge TTS test player — plays a sample prerecorded MP3
+  const edgePlayer = useAudioPlayer(
+    require('../../assets/audio/voice/breath_478/breath_478_preparation.mp3'),
+  );
 
   const handleSpeed = useCallback((v: number) => updateVoice({ speed: v }), [updateVoice]);
   const handlePitch = useCallback((v: number) => updateVoice({ pitch: v }), [updateVoice]);
@@ -294,9 +235,14 @@ export default function VoiceSettingsScreen() {
 
   const handleModeChange = useCallback(
     (mode: VoiceMode) => {
+      // Stop any playing audio when switching modes
+      Speech.stop();
+      try { edgePlayer.pause(); } catch { /* noop */ }
+      setTestingVoice(false);
+      setTestingEdge(false);
       updateVoice({ mode });
     },
-    [updateVoice],
+    [updateVoice, edgePlayer],
   );
 
   const handleTestVoice = useCallback(async () => {
@@ -329,60 +275,32 @@ export default function VoiceSettingsScreen() {
     }
   }, [testingVoice, voice.language, voice.speed, voice.pitch, voice.voiceId]);
 
-  // Listen to a practice text segment
-  const handleListenToText = useCallback(
-    (text: string, textKey: string) => {
-      if (listeningTextKey === textKey) {
-        Speech.stop();
-        setListeningTextKey(null);
-        return;
+  // Test Edge TTS: play/pause prerecorded sample
+  const handleTestEdge = useCallback(() => {
+    if (testingEdge) {
+      try { edgePlayer.pause(); } catch { /* noop */ }
+      setTestingEdge(false);
+      return;
+    }
+    edgePlayer.volume = audio.voiceVolume;
+    edgePlayer.replay();
+    setTestingEdge(true);
+    // Auto-reset when playback finishes
+    const checkDone = setInterval(() => {
+      if (!edgePlayer.playing) {
+        clearInterval(checkDone);
+        setTestingEdge(false);
       }
+    }, 500);
+  }, [testingEdge, edgePlayer, audio.voiceVolume]);
 
-      Speech.stop();
-      setListeningTextKey(textKey);
-      Speech.speak(text, {
-        language: voice.language,
-        rate: voice.speed,
-        pitch: voice.pitch,
-        ...(voice.voiceId ? { voiceId: voice.voiceId } : {}),
-        onDone: () => setListeningTextKey(null),
-        onError: () => setListeningTextKey(null),
-      });
-    },
-    [listeningTextKey, voice.language, voice.speed, voice.pitch, voice.voiceId],
-  );
-
-  // Stop all speech on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       Speech.stop();
+      try { edgePlayer.pause(); } catch { /* noop */ }
     };
-  }, []);
-
-  // Build offline text browser data
-  const offlineTexts = React.useMemo(() => {
-    if (!loaded) return [];
-    const entries: { practiceId: string; title: string; systemId: string; systemName: string; segmentCount: number; firstSegment: string; firstKey: string }[] = [];
-    for (const [practiceId, textData] of Object.entries(allTexts)) {
-      const segments = textData.segments;
-      const keys = Object.keys(segments);
-      if (keys.length === 0) continue;
-      const firstKey = keys[0];
-      const firstText = typeof segments[firstKey] === 'string' ? segments[firstKey] : '';
-      const sysId = textData.systemId || practiceId.split('_')[0];
-      const sysName = systems[sysId]?.name || sysId;
-      entries.push({
-        practiceId,
-        title: textData.title || practiceId,
-        systemId: sysId,
-        systemName: sysName,
-        segmentCount: keys.length,
-        firstSegment: firstText.substring(0, 120) + (firstText.length > 120 ? '...' : ''),
-        firstKey,
-      });
-    }
-    return entries;
-  }, [loaded, allTexts, systems]);
+  }, [edgePlayer]);
 
   return (
     <LinearGradient
@@ -432,10 +350,9 @@ export default function VoiceSettingsScreen() {
             })}
           </View>
 
-          {/* ── System TTS Settings (only in system mode) ── */}
+          {/* ── System TTS Settings ── */}
           {voice.mode === 'system' && (
             <>
-              {/* ── Speech Parameters ── */}
               <Text style={styles.sectionTitle}>Параметры речи</Text>
               <SettingsSlider
                 label="Скорость"
@@ -465,7 +382,6 @@ export default function VoiceSettingsScreen() {
                 onValueChange={handleVoiceVolume}
               />
 
-              {/* ── Test Voice ── */}
               <View style={styles.testSection}>
                 <TouchableOpacity
                   style={[styles.testButton, testingVoice && styles.testButtonActive]}
@@ -489,92 +405,76 @@ export default function VoiceSettingsScreen() {
                 </TouchableOpacity>
               </View>
 
-              {/* ── Info ── */}
               <View style={styles.infoCard}>
                 <Text style={styles.infoCardText}>
-                  Озвучка работает через системный TTS вашего устройства. Во время сессии вы можете включать и выключать голос кнопкой в плеере. Качество зависит от установленного голосового движка Android. Для лучшего результата установите качественный русский голос в настройках устройства (Настройки → Язык и ввод → Текст в речь).
+                  Озвучка работает через системный TTS вашего устройства. Во время сессии вы можете включать и выключать голос кнопкой в плеере. Качество зависит от установленного голосового движка Android. Для лучшего результата установите качественный русский голос в настройках устройства (Настройки — Язык и ввод — Текст в речь).
                 </Text>
               </View>
             </>
           )}
 
-          {/* ── Offline Mode: Preloaded Text Browser ── */}
+          {/* ── Edge TTS (Prerecorded) Mode ── */}
           {voice.mode === 'prerecorded' && (
             <>
+              <Text style={styles.sectionTitle}>Edge TTS</Text>
               <View style={styles.infoCard}>
                 <Text style={styles.infoCardText}>
-                  Здесь вы можете просмотреть и прослушать тексты озвучки для всех практик. Нажмите на практику, чтобы раскрыть список сегментов, затем на кнопку воспроизведения рядом с сегментом.
+                  Профессиональная озвучка всех практик нейросетевым голосом Svetlana (ru-RU-SvetlanaNeural) от Microsoft Edge TTS. Текст произносится непосредственно при запуске каждой сессии. Работает полностью офлайн — все аудиофайлы встроены в приложение.
                 </Text>
               </View>
 
-              {!loaded ? (
-                <Text style={styles.loadingText}>Загрузка текстов...</Text>
-              ) : (
-                offlineTexts.map((item) => {
-                  const isExpanded = offlineExpanded === item.practiceId;
+              <View style={styles.statsRow}>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>75</Text>
+                  <Text style={styles.statLabel}>Практик</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>591</Text>
+                  <Text style={styles.statLabel}>Сегментов</Text>
+                </View>
+                <View style={styles.statBox}>
+                  <Text style={styles.statValue}>153</Text>
+                  <Text style={styles.statLabel}>МБ</Text>
+                </View>
+              </View>
 
-                  return (
-                    <View key={item.practiceId}>
-                      <TouchableOpacity
-                        style={styles.textItemCard}
-                        onPress={() => setOfflineExpanded(isExpanded ? null : item.practiceId)}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={styles.textItemTitle}>{item.title}</Text>
-                        <Text style={styles.textItemMeta}>
-                          <Text style={styles.textSegmentCount}>{item.systemName} — {item.segmentCount} сегментов</Text>
-                        </Text>
-                        <Ionicons
-                          name={isExpanded ? 'chevron-up-outline' : 'chevron-down-outline'}
-                          size={16}
-                          color={colors.text.tertiary}
-                          style={{ alignSelf: 'flex-end', marginTop: spacing.xs }}
-                        />
-                      </TouchableOpacity>
+              <SettingsSlider
+                label="Громкость голоса"
+                value={audio.voiceVolume}
+                minimumValue={0}
+                maximumValue={1}
+                step={0.05}
+                displayValue={`${Math.round(audio.voiceVolume * 100)}%`}
+                onValueChange={handleVoiceVolume}
+              />
 
-                      {isExpanded && (
-                        <ScrollView
-                          style={styles.segmentsScrollView}
-                          showsVerticalScrollIndicator={true}
-                        >
-                          {Object.entries(allTexts[item.practiceId]?.segments ?? {}).map(([key, val]) => {
-                            const text = typeof val === 'string' ? val : '';
-                            return (
-                              <View key={key} style={[styles.textItemCard, key === item.firstKey && { borderLeftColor: colors.accent.primary }]}>
-                                <Text style={styles.textItemPreview}>{text}</Text>
-                                <View style={styles.textItemMeta}>
-                                  <TouchableOpacity
-                                    style={[
-                                      styles.listenButton,
-                                      listeningTextKey === key && styles.listenButtonActive,
-                                    ]}
-                                    onPress={() => handleListenToText(text, key)}
-                                    activeOpacity={0.7}
-                                  >
-                                    <Ionicons
-                                      name={listeningTextKey === key ? 'pause' : 'play'}
-                                      size={12}
-                                      color={listeningTextKey === key ? colors.text.inverse : colors.accent.primary}
-                                    />
-                                    <Text
-                                      style={[
-                                        styles.listenButtonText,
-                                        listeningTextKey === key && styles.listenButtonActiveText,
-                                      ]}
-                                    >
-                                      {listeningTextKey === key ? 'Стоп' : 'Слушать'}
-                                    </Text>
-                                  </TouchableOpacity>
-                                </View>
-                              </View>
-                            );
-                          })}
-                        </ScrollView>
-                      )}
-                    </View>
-                  );
-                })
-              )}
+              <View style={styles.testSection}>
+                <TouchableOpacity
+                  style={[styles.testButton, testingEdge && styles.testButtonActive]}
+                  onPress={handleTestEdge}
+                  activeOpacity={0.7}
+                >
+                  {testingEdge ? (
+                    <Ionicons name="pause-circle" size={20} color={colors.text.inverse} />
+                  ) : (
+                    <Ionicons name="play-circle" size={20} color={colors.text.secondary} />
+                  )}
+                  <Text
+                    style={[
+                      styles.testButtonText,
+                      testingEdge && styles.testButtonActiveText,
+                    ]}
+                  >
+                    {testingEdge ? 'Остановить' : 'Прослушать пример'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.infoCard}>
+                <Text style={styles.infoCardText}>
+                  Голос: Svetlana (Neural). Язык: Русский. Все тексты озвучены автоматически. Если вы заметили неправильные ударения или ошибки в произношении, вы можете переключиться на системный TTS.
+                </Text>
+              </View>
             </>
           )}
         </ScrollView>
