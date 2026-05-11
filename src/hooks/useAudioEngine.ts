@@ -271,8 +271,8 @@ export function useAudioEngine(): AudioEngineControls {
             const targetVol = mutedLayers.music ? 0 : musicVol * event.volume;
             setLayerState('music', { status: 'playing', currentTrackId: event.trackId, volume: 0 });
 
-            // Set looping BEFORE replace + play
-            musicPlayer.looping = !!event.loop;
+            // Set loop BEFORE replace + play
+            musicPlayer.loop = !!event.loop;
 
             musicPlayer.replace({ uri });
             musicPlayer.volume = 0;
@@ -285,15 +285,20 @@ export function useAudioEngine(): AudioEngineControls {
               musicPlayer.volume = targetVol;
               setLayerVolume('music', targetVol);
             }
-            // Delay play() to allow native player to load the source after replace()
-            setTimeout(() => {
+            // Wait for native player to be ready before playing
+            const musicCheck = setInterval(() => {
               try {
-                musicPlayer.play();
-                logger.info('[useAudioEngine]', 'Music play() called successfully');
-              } catch (playErr) {
-                logger.warn('[useAudioEngine]', 'Music play() failed after delay', playErr);
+                if ((musicPlayer as any).isLoaded) {
+                  clearInterval(musicCheck);
+                  musicPlayer.play();
+                  logger.info('[useAudioEngine]', 'Music playing');
+                }
+              } catch (e) {
+                clearInterval(musicCheck);
+                logger.warn('[useAudioEngine]', 'Music play() failed', e);
               }
-            }, 300);
+            }, 100);
+            setTimeout(() => { clearInterval(musicCheck); }, 5000);
           } catch (err) {
             logger.warn('[useAudioEngine]', 'Music start failed', err);
             setLayerState('music', { status: 'error' });
@@ -333,8 +338,8 @@ export function useAudioEngine(): AudioEngineControls {
             const targetVol = mutedLayers.binaural ? 0 : binVol * event.volume;
             setLayerState('binaural', { status: 'playing', currentTrackId: event.trackId, volume: 0 });
 
-            // Set looping BEFORE replace + play
-            binauralPlayer.looping = true;
+            // Set loop BEFORE replace + play
+            binauralPlayer.loop = true;
 
             binauralPlayer.replace({ uri });
             binauralPlayer.volume = 0;
@@ -347,15 +352,20 @@ export function useAudioEngine(): AudioEngineControls {
               binauralPlayer.volume = targetVol;
               setLayerVolume('binaural', targetVol);
             }
-            // Delay play() to allow native player to load the source after replace()
-            setTimeout(() => {
+            // Wait for native player to be ready before playing
+            const binCheck = setInterval(() => {
               try {
-                binauralPlayer.play();
-                logger.info('[useAudioEngine]', 'Binaural play() called successfully');
-              } catch (playErr) {
-                logger.warn('[useAudioEngine]', 'Binaural play() failed after delay', playErr);
+                if ((binauralPlayer as any).isLoaded) {
+                  clearInterval(binCheck);
+                  binauralPlayer.play();
+                  logger.info('[useAudioEngine]', 'Binaural playing');
+                }
+              } catch (e) {
+                clearInterval(binCheck);
+                logger.warn('[useAudioEngine]', 'Binaural play() failed', e);
               }
-            }, 300);
+            }, 100);
+            setTimeout(() => { clearInterval(binCheck); }, 5000);
           } catch (err) {
             logger.warn('[useAudioEngine]', 'Binaural start failed', err);
             setLayerState('binaural', { status: 'error' });
@@ -429,6 +439,8 @@ export function useAudioEngine(): AudioEngineControls {
     engineRef.current = engine;
     const unsubscribe = engine.subscribe(handleEngineEvent);
     return () => {
+      // CRITICAL: stop engine state machine to prevent stale session from emitting events
+      try { engine.stop(); } catch { /* noop */ }
       unsubscribe();
       Speech.stop();
       try { musicPlayer.pause(); } catch { /* noop */ }
@@ -501,7 +513,8 @@ export function useAudioEngine(): AudioEngineControls {
     setTotalDuration(totalDurationMs);
     lastVoiceTextRef.current = null;
 
-    // Stop any leftover audio from previous sessions
+    // CRITICAL: stop engine singleton — previous session may still be running
+    try { engine.stop(); } catch { /* noop */ }
     Speech.stop();
     try { musicPlayer.pause(); } catch { /* noop */ }
     try { binauralPlayer.pause(); } catch { /* noop */ }

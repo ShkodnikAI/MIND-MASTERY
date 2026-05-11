@@ -572,6 +572,21 @@ export default function PracticeDetailScreen() {
             </View>
           ) : null}
 
+          {/* Start button */}
+          <TouchableOpacity
+            style={[styles.startButton, !isUnlocked && styles.lockedButton]}
+            onPress={isUnlocked ? handleStart : undefined}
+            activeOpacity={isUnlocked ? 0.8 : 1}
+            accessibilityLabel={isUnlocked ? 'Начать практику' : 'Практика заблокирована'}
+            accessibilityRole="button"
+          >
+            <Text style={styles.startButtonText}>{isUnlocked ? 'Начать' : 'Заблокировано'}</Text>
+          </TouchableOpacity>
+
+          {!isUnlocked && lockReason ? (
+            <Text style={styles.lockReasonText}>{lockReason}</Text>
+          ) : null}
+
           {/* Session timeline */}
           {timelineSegments.length > 0 ? (
             <>
@@ -635,20 +650,6 @@ export default function PracticeDetailScreen() {
             })}
           </View>
 
-          {/* Start button */}
-          <TouchableOpacity
-            style={[styles.startButton, !isUnlocked && styles.lockedButton]}
-            onPress={isUnlocked ? handleStart : undefined}
-            activeOpacity={isUnlocked ? 0.8 : 1}
-            accessibilityLabel={isUnlocked ? 'Начать практику' : 'Практика заблокирована'}
-            accessibilityRole="button"
-          >
-            <Text style={styles.startButtonText}>{isUnlocked ? 'Начать' : 'Заблокировано'}</Text>
-          </TouchableOpacity>
-
-          {!isUnlocked && lockReason ? (
-            <Text style={styles.lockReasonText}>{lockReason}</Text>
-          ) : null}
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

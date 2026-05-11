@@ -149,10 +149,12 @@ export class AudioEngine {
    */
   async startSession(config: SessionConfig): Promise<void> {
     if (this.isActive()) {
-      logger.warn('[AudioEngine]', 'startSession called while active -- ignoring', {
+      logger.warn('[AudioEngine]', 'startSession called while active -- force-stopping previous session', {
         state: this.state,
       });
-      return;
+      this.stop();
+      // Brief yield to let stop() propagate state changes
+      await new Promise((r) => setTimeout(r, 0));
     }
 
     this.destroyed = false;
