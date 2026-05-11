@@ -501,6 +501,12 @@ export function useAudioEngine(): AudioEngineControls {
     setTotalDuration(totalDurationMs);
     lastVoiceTextRef.current = null;
 
+    // Stop any leftover audio from previous sessions
+    Speech.stop();
+    try { musicPlayer.pause(); } catch { /* noop */ }
+    try { binauralPlayer.pause(); } catch { /* noop */ }
+    try { voicePlayer.pause(); } catch { /* noop */ }
+
     // Configure audio session: duckOthers allows music to play alongside TTS
     try {
       await setAudioModeAsync({

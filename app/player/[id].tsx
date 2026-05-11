@@ -838,22 +838,9 @@ export default function PlayerScreen() {
             <NarrationMarquee text={currentNarrationText} />
           ) : null}
 
-          {/* ── Progress bar ─────────────────────────────────── */}
-          <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${Math.round(Math.min(100, progress * 100))}%`,
-                  backgroundColor: systemColor,
-                },
-              ]}
-            />
-          </View>
-
-          {/* ── Player controls ──────────────────────────────── */}
+          {/* ── Player controls (below narration, above progress) ── */}
           {isPreparing ? (
-            <View style={styles.loadingContainer}>
+            <View style={{ alignItems: 'center', marginVertical: spacing.lg }}>
               <Ionicons name="hourglass-outline" size={32} color={systemColor} />
               <Text style={styles.loadingText}>Подготовка сессии...</Text>
             </View>
@@ -889,6 +876,22 @@ export default function PlayerScreen() {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* ── Progress bar ─────────────────────────────────── */}
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${Math.round(Math.min(100, progress * 100))}%`,
+                  backgroundColor: systemColor,
+                },
+              ]}
+            />
+          </View>
+
+          {/* ── Spacer pushes remaining content to bottom ──── */}
+          <View style={{ flex: 1 }} />
 
           {/* ── Error display ────────────────────────────────── */}
           {audioError ? (
