@@ -613,12 +613,15 @@ export function useAudioEngine(): AudioEngineControls {
     const audio = useSettingsStore.getState().audio;
     const voice = useSettingsStore.getState().voice;
 
-    // ── CRITICAL: Reset the AudioEngine singleton ──
-    // This prevents stale plan/config from a previous session leaking in.
-    AudioEngine.resetInstance();
-
-    const engine = AudioEngine.getInstance();
-    engineRef.current = engine;
+    // ── CRITICAL: Use the engine created by useEffect — do NOT reset here! ──
+    // The useEffect manages the engine lifecycle (create, subscribe, destroy).
+    // Resetting here would destroy the engine and lose all subscribers,
+    // causing ALL events (playVoice, startMusic, startBinaural) to go nowhere.
+    const engine = engineRef.current;
+    if (!engine) {
+      logger.error('[useAudioEngine]', 'startSession called but engine is not initialized');
+      return;
+    }
 
     resetAudioState();
     setTotalDuration(totalDurationMs);
@@ -769,17 +772,15 @@ export function useAudioEngine(): AudioEngineControls {
           if (engineState === 'playing') {
             if (useSettingsStore.getState().voice.mode === 'prerecorded') {
               // For prerecorded: resume voicePlayer if it was paused
+              // Do NOT fall back to TTS in prerecorded mode — that causes overlap!
               try {
                 if (!voicePlayer.playing) {
                   voicePlayer.play();
                 }
                 setLayerState('voice', { status: 'playing' });
               } catch {
-                // fallback to TTS
-                if (lastVoiceTextRef.current) {
-                  setLayerState('voice', { status: 'playing' });
-                  speakText(lastVoiceTextRef.current);
-                }
+                logger.warn('[useAudioEngine]', 'Voice un-mute failed (prerecorded mode, no TTS fallback)');
+                setLayerState('voice', { status: 'idle' });
               }
             } else if (lastVoiceTextRef.current) {
               setLayerState('voice', { status: 'playing' });
