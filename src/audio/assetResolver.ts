@@ -3,9 +3,11 @@
  *
  * Music tracks: 'space', 'ocean', 'forest', 'fireplace', 'winter', 'meditation'
  * Binaural tracks: '200hz-10hz', '200hz-8hz', '200hz-6hz', '200hz-4hz', etc.
+ * Voice tracks: 'practiceId.segmentName' → MP3 file (591 files, 75 practices)
  *
  * INV: All require() calls are static (Metro bundler requirement).
- * Call preloadAudioAssets() once at app startup.
+ * Call preloadAudioAssets() once at app startup for music + binaural.
+ * Voice assets are loaded ON-DEMAND via Asset.loadAsync().
  */
 
 import { Asset } from 'expo-asset';
@@ -94,10 +96,58 @@ export function resolveBinauralUri(trackId: string): string | null {
 /**
  * Resolve a pre-recorded voice MP3 URI for a given textKey.
  * textKey format: practiceId.segmentName
+ *
+ * IMPORTANT: Voice assets are loaded on-demand (not preloaded).
+ * This function calls Asset.loadAsync() if localUri is not available.
+ */
+export async function resolveVoiceUriAsync(textKey: string): Promise<string | null> {
+  const cacheKey = `voice:${textKey}`;
+  if (uriCache.has(cacheKey)) return uriCache.get(cacheKey)!;
+  const dotIndex = textKey.indexOf('.');
+  if (dotIndex === -1) {
+    console.warn(`[assetResolver] Invalid voice textKey (no dot): ${textKey}`);
+    return null;
+  }
+  const practiceId = textKey.substring(0, dotIndex);
+  const segmentName = textKey.substring(dotIndex + 1);
+  const practiceVoices = voiceModules[practiceId];
+  if (!practiceVoices) {
+    console.warn(`[assetResolver] No voice module for practice: ${practiceId}`);
+    return null;
+  }
+  const mod = practiceVoices[segmentName];
+  if (!mod) {
+    console.warn(`[assetResolver] No voice segment '${segmentName}' in practice '${practiceId}'`);
+    return null;
+  }
+  const asset = Asset.fromModule(mod);
+  // If localUri is not available, load the asset first
+  if (!asset.localUri) {
+    console.log(`[assetResolver] Loading voice asset on-demand: ${practiceId}/${segmentName}`);
+    try {
+      const [loadedAsset] = await Asset.loadAsync(asset);
+      const uri = loadedAsset?.localUri ?? loadedAsset?.uri ?? null;
+      if (uri) uriCache.set(cacheKey, uri);
+      console.log(`[assetResolver] Voice asset loaded: ${uri?.substring(0, 80)}...`);
+      return uri;
+    } catch (err) {
+      console.error(`[assetResolver] Failed to load voice asset: ${practiceId}/${segmentName}`, err);
+      return null;
+    }
+  }
+  const uri = asset.localUri ?? asset.uri ?? null;
+  if (uri) uriCache.set(cacheKey, uri);
+  return uri;
+}
+
+/**
+ * Synchronous version — returns cached URI only.
+ * Returns null if asset hasn't been loaded yet.
  */
 export function resolveVoiceUri(textKey: string): string | null {
   const cacheKey = `voice:${textKey}`;
   if (uriCache.has(cacheKey)) return uriCache.get(cacheKey)!;
+  // Try to get URI without loading
   const dotIndex = textKey.indexOf('.');
   if (dotIndex === -1) return null;
   const practiceId = textKey.substring(0, dotIndex);
@@ -107,9 +157,7 @@ export function resolveVoiceUri(textKey: string): string | null {
   const mod = practiceVoices[segmentName];
   if (!mod) return null;
   const asset = Asset.fromModule(mod);
-  const uri = asset.localUri ?? asset.uri ?? null;
-  if (uri) uriCache.set(cacheKey, uri);
-  return uri;
+ return asset.localUri ?? asset.uri ?? null;
 }
 
 /** All available music track IDs. */

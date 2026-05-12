@@ -30,7 +30,7 @@ import { AudioEngine } from '@/audio/AudioEngine';
 import type { EngineEvent } from '@/audio/types';
 import { startFade, effectiveVolume } from '@/audio/FadeController';
 import type { FadeHandle } from '@/audio/FadeController';
-import { resolveMusicUri, resolveBinauralUri, resolveVoiceUri } from '@/audio/assetResolver';
+import { resolveMusicUri, resolveBinauralUri, resolveVoiceUriAsync } from '@/audio/assetResolver';
 import { useAudioStateStore } from '@/store/audioStateStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useSessionStore } from '@/store/sessionStore';
@@ -316,7 +316,7 @@ export function useAudioEngine(): AudioEngineControls {
           lastVoiceTextRef.current = text;
           setLayerState('voice', { status: 'playing' });
 
-          // Skip TTS if voice is muted — but remember text for re-speak on un-mute
+          // Skip if voice is muted — but remember text for re-speak on un-mute
           if (mutedLayers.voice) {
             logger.info('[useAudioEngine]', 'Voice muted — skipping (text remembered)');
             break;
@@ -324,30 +324,34 @@ export function useAudioEngine(): AudioEngineControls {
 
           const vm = useSettingsStore.getState().voice.mode;
           if (vm === 'prerecorded') {
-            const vu = resolveVoiceUri(event.textKey);
-            if (vu) {
-              const vv = effectiveVolume(audio.masterVolume, audio.voiceVolume);
-              setLayerVolume('voice', vv);
+            // Async: load asset on-demand, then play MP3.
+            // Do NOT fall back to TTS — only MP3 or nothing in prerecorded mode.
+            (async () => {
               try {
                 // Stop any current voice playback before replacing
                 try { voicePlayer.pause(); } catch { /* noop */ }
-                voicePlayer.replace({ uri: vu });
-                voicePlayer.volume = vv;
-                // Play with small delay to let replace() settle
-                setTimeout(() => {
+                Speech.stop(); // CRITICAL: stop system TTS to prevent overlap
+
+                const vu = await resolveVoiceUriAsync(event.textKey);
+                if (vu) {
+                  const vv = effectiveVolume(audio.masterVolume, audio.voiceVolume);
+                  setLayerVolume('voice', vv);
+                  voicePlayer.replace({ uri: vu });
+                  voicePlayer.volume = vv;
+                  // Play with delay to let replace() settle
+                  await new Promise((r) => setTimeout(r, 150));
                   try { voicePlayer.play(); } catch (e) {
-                    logger.warn('[useAudioEngine]', 'Voice play() failed, falling back to TTS', e);
-                    speakText(text);
+                    logger.warn('[useAudioEngine]', 'Voice play() failed after asset load', e);
                   }
-                }, 100);
-              } catch(e) {
-                logger.warn('[useAudioEngine]', 'Voice replace failed, falling back to TTS', e);
-                speakText(text);
+                } else {
+                  logger.warn('[useAudioEngine]', `Voice MP3 not found for "${event.textKey}" — silent (no TTS fallback in prerecorded mode)`);
+                }
+              } catch (e) {
+                logger.warn('[useAudioEngine]', 'Voice async error', e);
               }
-            } else {
-              speakText(text);
-            }
+            })();
           } else {
+            // System TTS mode — use expo-speech
             speakText(text);
           }
           break;
