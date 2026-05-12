@@ -200,8 +200,13 @@ export class AudioEngine {
    *
    * - Stops the progress timer.
    * - Records elapsed time at pause point.
-   * - Emits `stopVoice` and layer-pause commands.
+   * - Emits `stopVoice`.
    * - Transitions to `paused`.
+   *
+   * NOTE: Music and binaural layers are NOT paused or stopped.
+   * They continue playing independently in the background.
+   * The user can toggle them via the UI mute buttons at any time.
+   * Only voice is stopped (it's sequential and would overlap on resume).
    */
   pause(): void {
     if (this.state !== 'playing') {
@@ -215,10 +220,8 @@ export class AudioEngine {
     this.elapsedAtPauseMs = this.getElapsedMs();
     this.stopProgressTimer();
 
-    // Tell the hook to pause all audio
+    // Only stop voice narration — music/binaural continue independently
     this.emit({ type: 'stopVoice' });
-    this.emit({ type: 'setLayerVolume', layer: 'music', volume: 0 });
-    this.emit({ type: 'setLayerVolume', layer: 'binaural', volume: 0 });
 
     this.setState('paused');
     logger.info('[AudioEngine]', 'Session paused at', {
@@ -231,9 +234,13 @@ export class AudioEngine {
    * Resume a paused session.
    *
    * - Restarts the progress timer.
-   * - Emits layer-resume commands.
    * - Transitions back to `playing`.
    * - Continues timeline from where it was paused.
+   *
+   * NOTE: Background layers (music, binaural) are NOT re-started.
+   * They continue playing independently. The hook layer handles
+   * mute/unmute and volume restoration. Re-emitting startMusic/
+   * startBinaural would replace() the player and break toggle.
    */
   async resume(): Promise<void> {
     if (this.state !== 'paused') {
@@ -246,9 +253,6 @@ export class AudioEngine {
     this.setState('playing');
     this.sessionStartRealMs = Date.now();
     this.startProgressTimer();
-
-    // Tell the hook to resume background layers
-    this.emitBackgroundStartCommands(this.plan?.layers ?? []);
 
     // Continue timeline from current index
     await this.advanceTimeline();
