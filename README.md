@@ -52,11 +52,11 @@ MIND MASTERY — это мобильное приложение для ежед�
 
 | Категория | Технология |
 |-----------|-----------|
-| Фреймворк | React Native 0.79 + Expo SDK 53 |
-| Роутинг | expo-router v4 (file-based) |
+| Фреймворк | React Native 0.83 + Expo SDK 55 |
+| Роутинг | expo-router v5 (file-based) |
 | Состояние | Zustand v5 (in-memory cache, SQLite write-through) |
-| БД | expo-sqlite v15 (WAL mode) |
-| Аудио | expo-audio v0.3, expo-speech |
+| БД | expo-sqlite ~15 (WAL mode) |
+| Аудио | expo-audio ~0.3, expo-speech |
 | Уведомления | expo-notifications |
 | Анимации | react-native-reanimated, Lottie |
 | Графика | @shopify/react-native-skia, react-native-svg |
@@ -229,7 +229,7 @@ npm run validate-schema  # Валидация TypeScript-схемы контен
 
 ## Решения по архитектуре (ADR)
 
-- [ADR-001](docs/adr/ADR-001-expo-sdk-53.md) — Expo SDK 53 как целевая платформа
+- [ADR-001](docs/adr/ADR-001-expo-sdk-53.md) — Expo SDK 55 как целевая платформа
 - [ADR-002](docs/adr/ADR-002-zustand-state.md) — Zustand для управления состоянием
 - [ADR-003](docs/adr/ADR-003-expo-audio.md) — expo-audio для аудиосистемы
 - [ADR-004](docs/adr/ADR-004-sqlite-no-orm.md) — SQLite без ORM, typed queries
