@@ -22,10 +22,12 @@
     },
     "production": {
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "minSdkVersion": 26
       },
       "ios": {
-        "distribution": "internal"
+        "distribution": "internal",
+        "simulator": false
       }
     }
   },

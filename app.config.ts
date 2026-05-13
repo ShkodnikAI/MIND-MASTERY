@@ -50,7 +50,7 @@ export default (): ExpoConfig => ({
       'RECEIVE_BOOT_COMPLETED',
       'ACCESS_NOTIFICATION_POLICY',
     ],
-    // minSdkVersion: 26, // Set in eas.json instead
+    minSdkVersion: 26,
   },
   web: {},
   scheme: 'mindmastery',
@@ -75,6 +75,8 @@ export default (): ExpoConfig => ({
         enableFTS: true,
       },
     ],
+    'expo-localization',
+    'expo-secure-store',
   ],
   updates: {
     url: 'https://u.expo.dev/mindmastery',
