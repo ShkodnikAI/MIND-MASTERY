@@ -154,6 +154,9 @@ export function useAudioEngine(): AudioEngineControls {
   const lastBinauralUriRef = useRef<string | null>(null);
   const lastBinauralVolumeRef = useRef<number>(0);
 
+  // ── Session guard: incremented on each startSession to cancel stale async voice resolves ──
+  const voiceSessionGuardRef = useRef<number>(0);
+
   // ── Text resolver (reads from store at call time, not via closure) ──
   const resolveText = useCallback(
     (textKey: string): string | null => {
@@ -326,6 +329,8 @@ export function useAudioEngine(): AudioEngineControls {
           if (vm === 'prerecorded') {
             // Async: load asset on-demand, then play MP3.
             // Do NOT fall back to TTS — only MP3 or nothing in prerecorded mode.
+            // Capture the session guard to detect stale resolves (race condition fix).
+            const guard = voiceSessionGuardRef.current;
             (async () => {
               try {
                 // Stop any current voice playback before replacing
@@ -333,6 +338,15 @@ export function useAudioEngine(): AudioEngineControls {
                 Speech.stop(); // CRITICAL: stop system TTS to prevent overlap
 
                 const vu = await resolveVoiceUriAsync(event.textKey);
+
+                // ── RACE CONDITION GUARD ──
+                // If a new session started while we were loading, discard this result.
+                // Without this, session A's async resolve could overwrite session B's audio.
+                if (voiceSessionGuardRef.current !== guard) {
+                  logger.info('[useAudioEngine]', `Voice resolve stale (guard ${guard} != ${voiceSessionGuardRef.current}) — discarding`);
+                  return;
+                }
+
                 if (vu) {
                   const vv = effectiveVolume(audio.masterVolume, audio.voiceVolume);
                   setLayerVolume('voice', vv);
@@ -340,6 +354,13 @@ export function useAudioEngine(): AudioEngineControls {
                   voicePlayer.volume = vv;
                   // Play with delay to let replace() settle
                   await new Promise((r) => setTimeout(r, 150));
+
+                  // Check guard again after await — session may have changed
+                  if (voiceSessionGuardRef.current !== guard) {
+                    logger.info('[useAudioEngine]', `Voice play stale after replace (guard ${guard}) — discarding`);
+                    return;
+                  }
+
                   try { voicePlayer.play(); } catch (e) {
                     logger.warn('[useAudioEngine]', 'Voice play() failed after asset load', e);
                   }
@@ -352,6 +373,7 @@ export function useAudioEngine(): AudioEngineControls {
             })();
           } else {
             // System TTS mode — use expo-speech
+            Speech.stop(); // CRITICAL: stop any lingering prerecorded voice before TTS
             speakText(text);
           }
           break;
@@ -390,9 +412,10 @@ export function useAudioEngine(): AudioEngineControls {
             const musicVol = effectiveVolume(audio.masterVolume, audio.musicVolume);
             const targetVol = mutedLayers.music ? 0 : musicVol * event.volume;
 
-            // Remember for toggle un-mute
+            // Remember for toggle un-mute (ALWAYS store the real volume, even if muted)
+            // BUG FIX: previously if mutedLayers was true, targetVol was 0 and unmute would fail
             lastMusicUriRef.current = uri;
-            lastMusicVolumeRef.current = targetVol;
+            lastMusicVolumeRef.current = musicVol * event.volume;
             lastMusicLoopRef.current = !!event.loop;
 
             setLayerState('music', { status: 'playing', currentTrackId: event.trackId, volume: 0 });
@@ -446,9 +469,10 @@ export function useAudioEngine(): AudioEngineControls {
             const binVol = effectiveVolume(audio.masterVolume, audio.binauralVolume);
             const targetVol = mutedLayers.binaural ? 0 : binVol * event.volume;
 
-            // Remember for toggle un-mute
+            // Remember for toggle un-mute (ALWAYS store the real volume, even if muted)
+            // BUG FIX: previously if mutedLayers was true, targetVol was 0 and unmute would fail
             lastBinauralUriRef.current = uri;
-            lastBinauralVolumeRef.current = targetVol;
+            lastBinauralVolumeRef.current = binVol * event.volume;
 
             setLayerState('binaural', { status: 'playing', currentTrackId: event.trackId, volume: 0 });
 
@@ -628,6 +652,9 @@ export function useAudioEngine(): AudioEngineControls {
     lastVoiceTextRef.current = null;
     lastMusicUriRef.current = null;
     lastBinauralUriRef.current = null;
+
+    // ── Increment session guard to cancel any in-flight voice resolves ──
+    voiceSessionGuardRef.current++;
 
     // Stop all players completely
     Speech.stop();

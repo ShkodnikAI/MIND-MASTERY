@@ -572,7 +572,34 @@ export default function PracticeDetailScreen() {
             </View>
           ) : null}
 
-          {/* Start button */}
+          {/* Length presets — BEFORE Start button so user selects duration first */}
+          <Text style={styles.sectionTitle}>Длительность</Text>
+          <View style={styles.metaRow}>
+            {practice.includeIn.map((length) => {
+              const isSelected = length === effectiveLength;
+              return (
+                <TouchableOpacity
+                  key={length}
+                  style={[
+                    styles.badge,
+                    isSelected && {
+                      backgroundColor: `${systemColor}33`,
+                      borderWidth: 1,
+                      borderColor: systemColor,
+                    },
+                  ]}
+                  onPress={() => setSelectedLength(length)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.badgeText, isSelected && { color: systemColor }]}>
+                    {length === 'short' ? 'Короткая' : length === 'medium' ? 'Средняя' : 'Полная'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Start button — prominent, after duration selection */}
           <TouchableOpacity
             style={[styles.startButton, !isUnlocked && styles.lockedButton]}
             onPress={isUnlocked ? handleStart : undefined}
@@ -622,33 +649,6 @@ export default function PracticeDetailScreen() {
               })}
             </>
           ) : null}
-
-          {/* Length presets */}
-          <Text style={styles.sectionTitle}>Длительность</Text>
-          <View style={styles.metaRow}>
-            {practice.includeIn.map((length) => {
-              const isSelected = length === effectiveLength;
-              return (
-                <TouchableOpacity
-                  key={length}
-                  style={[
-                    styles.badge,
-                    isSelected && {
-                      backgroundColor: `${systemColor}33`,
-                      borderWidth: 1,
-                      borderColor: systemColor,
-                    },
-                  ]}
-                  onPress={() => setSelectedLength(length)}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.badgeText, isSelected && { color: systemColor }]}>
-                    {length === 'short' ? 'Короткая' : length === 'medium' ? 'Средняя' : 'Полная'}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
 
         </ScrollView>
       </SafeAreaView>

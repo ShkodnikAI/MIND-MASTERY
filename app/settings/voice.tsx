@@ -49,8 +49,8 @@ const VOICE_MODES: readonly VoiceModeOption[] = [
   },
   {
     id: 'prerecorded',
-    title: 'Edge TTS',
-    description: 'Профессиональная озвучка на русском языке (ru-RU-SvetlanaNeural). 75 практик, 591 сегмент.',
+    title: 'Записанный голос',
+    description: 'Профессиональная озвучка на русском языке. 75 практик, 591 сегмент.',
     icon: 'mic-outline',
   },
 ];
@@ -413,13 +413,13 @@ export default function VoiceSettingsScreen() {
             </>
           )}
 
-          {/* ── Edge TTS (Prerecorded) Mode ── */}
+          {/* ── Prerecorded Voice Mode ── */}
           {voice.mode === 'prerecorded' && (
             <>
-              <Text style={styles.sectionTitle}>Edge TTS</Text>
+              <Text style={styles.sectionTitle}>Записанный голос</Text>
               <View style={styles.infoCard}>
                 <Text style={styles.infoCardText}>
-                  Профессиональная озвучка всех практик нейросетевым голосом Svetlana (ru-RU-SvetlanaNeural) от Microsoft Edge TTS. Текст произносится непосредственно при запуске каждой сессии. Работает полностью офлайн — все аудиофайлы встроены в приложение.
+                  Профессиональная озвучка всех практик нейросетевым голосом. Текст произносится непосредственно при запуске каждой сессии. Работает полностью офлайн — все аудиофайлы встроены в приложение.
                 </Text>
               </View>
 
@@ -472,7 +472,7 @@ export default function VoiceSettingsScreen() {
 
               <View style={styles.infoCard}>
                 <Text style={styles.infoCardText}>
-                  Голос: Svetlana (Neural). Язык: Русский. Все тексты озвучены автоматически. Если вы заметили неправильные ударения или ошибки в произношении, вы можете переключиться на системный TTS.
+                  Все тексты озвучены автоматически. Если вы заметили неправильные ударения или ошибки в произношении, вы можете переключиться на системный TTS.
                 </Text>
               </View>
             </>
