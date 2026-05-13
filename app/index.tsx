@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { HubCard } from '@/ui/components/HubCard';
+import { AboutSection } from '@/ui/components/AboutSection';
 import { useContentStore } from '@/store/contentStore';
 import { useProgressStore } from '@/store/progressStore';
 import { colors, typography, spacing, radii } from '@/ui/theme';
@@ -270,6 +271,9 @@ export default function HubScreen() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* About / Presentation Section */}
+          <AboutSection />
 
           {/* Global stats */}
           <View style={styles.statsRow}>
