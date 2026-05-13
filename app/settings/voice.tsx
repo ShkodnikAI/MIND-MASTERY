@@ -283,7 +283,8 @@ export default function VoiceSettingsScreen() {
       return;
     }
     edgePlayer.volume = audio.voiceVolume;
-    edgePlayer.replay();
+    try { edgePlayer.seekTo(0); } catch { /* seekTo may not be available */ }
+    edgePlayer.play();
     setTestingEdge(true);
     // Auto-reset when playback finishes
     const checkDone = setInterval(() => {
